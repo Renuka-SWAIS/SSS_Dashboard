@@ -22,8 +22,8 @@ const roles = [
     icon: "🧑‍🏫",
   },
   {
-    value: "principle",
-    title: "Principle",
+    value: "principal",
+    title: "Principal",
     description: "Oversee school operations, staff, and academic performance.",
     icon: "🏫",
   },

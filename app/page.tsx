@@ -15,6 +15,14 @@ function getErrorMessage(error?: string) {
     return "Only verified @gmail.com accounts are allowed to sign in.";
   }
 
+  if (error === "StudentAccessDenied") {
+    return "This Google account is not allowed to access the student dashboard.";
+  }
+
+  if (error === "StudentValidationFailed") {
+    return "Google sign-in worked, but student validation failed. Please try again or contact support.";
+  }
+
   return null;
 }
 

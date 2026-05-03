@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { logout } from "@/app/actions";
-import { isStudentEmailAllowed } from "@/lib/student-access";
+import { auth, signOut } from "@/auth";
+import { getStudentAccessRecord } from "@/lib/student-access";
+import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { DashboardHeader } from "@/components/dashboard/header";
+import { DashboardMainCards } from "@/components/dashboard/main-cards";
+import { DashboardProgressOverview } from "@/components/dashboard/progress-overview";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -30,83 +33,78 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
   const roleLabel = formatRole(params.role);
   const selectedRole = params.role?.toLowerCase();
-  const email = session.user?.email ?? "";
+  const email = session.user.email ?? "";
 
-  let accessDeniedMessage: string | null = null;
+  let studentRecord = null;
 
   if (selectedRole === "student") {
     try {
-      const isAllowed = await isStudentEmailAllowed(email);
+      studentRecord = await getStudentAccessRecord(email);
 
-      if (!isAllowed) {
-        accessDeniedMessage =
-          "This Google account is either missing from sgs_local.student_master.student_email or the matching record is not active.";
+      if (!studentRecord || studentRecord.isActive !== true) {
+        await signOut({
+          redirectTo: "/?error=StudentAccessDenied",
+        });
       }
     } catch {
-      accessDeniedMessage =
-        "Google sign-in worked, but the student validation against your local Postgres database failed.";
+      await signOut({
+        redirectTo: "/?error=StudentValidationFailed",
+      });
     }
   }
 
-  if (accessDeniedMessage) {
-    return (
-      <main className="dashboard-screen">
-        <section className="dashboard-card">
-          <p className="dashboard-kicker">Access Restricted</p>
-          <h1>Student Access Not Allowed</h1>
-          <p className="dashboard-copy">
-            Signed in as <strong>{email}</strong> for the <strong>{roleLabel}</strong> role.
-          </p>
-          <p className="auth-error dashboard-error">{accessDeniedMessage}</p>
-
-          <div className="dashboard-meta">
-            <div>
-              <span>Role</span>
-              <strong>{roleLabel}</strong>
-            </div>
-            <div>
-              <span>Validation</span>
-              <strong>student_master.student_email</strong>
-            </div>
-          </div>
-
-          <form action={logout}>
-            <button type="submit" className="signout-button">
-              Sign out
-            </button>
-          </form>
-        </section>
-      </main>
-    );
-  }
+  const displayRole = selectedRole === "student" ? "Student" : roleLabel;
+  const displayName = "Aarav Sharma";
+  const displayAdmissionNo = "ADM001";
+  const displayClassName = "9";
+  const displayRollNo = "25";
+  const displaySection = "B";
 
   return (
-    <main className="dashboard-screen">
-      <section className="dashboard-card">
-        <p className="dashboard-kicker">Authenticated Successfully</p>
-        <h1>Welcome, {session.user?.name ?? "User"}</h1>
-        <p className="dashboard-copy">
-          You signed in with <strong>{email}</strong> and selected the{" "}
-          <strong>{roleLabel}</strong> role.
-        </p>
+    <div className="dashboard-shell">
+      <DashboardSidebar activeItem="Dashboard" />
 
-        <div className="dashboard-meta">
-          <div>
-            <span>Role</span>
-            <strong>{roleLabel}</strong>
-          </div>
-          <div>
-            <span>Provider</span>
-            <strong>Google OAuth</strong>
-          </div>
+      <main className="dashboard-main-content">
+        <div className="dashboard-main-wrap">
+          <DashboardHeader
+            name={displayName}
+            role={displayRole}
+            admissionNo={displayAdmissionNo}
+            className={displayClassName}
+            section={displaySection}
+            rollNo={displayRollNo}
+          />
+
+          <section className="dashboard-hero">
+            <div className="dashboard-hero-decor dashboard-hero-decor-book" aria-hidden="true">
+              📖
+            </div>
+            <div
+              className="dashboard-hero-decor dashboard-hero-decor-microscope"
+              aria-hidden="true"
+            >
+              🔬
+            </div>
+            <div className="dashboard-hero-decor dashboard-hero-decor-brain" aria-hidden="true">
+              🧠
+            </div>
+            <div className="dashboard-hero-stars" aria-hidden="true">
+              ✦ ✧ ✦ ✧ ✦
+            </div>
+
+            <h1 className="dashboard-hero-title">
+              Welcome back, {displayName}! <span aria-hidden="true">👋</span>
+            </h1>
+            <p className="dashboard-hero-copy">Choose what you want to study today.</p>
+
+            <DashboardMainCards />
+          </section>
+
+          <section className="dashboard-progress-block">
+            <DashboardProgressOverview />
+          </section>
         </div>
-
-        <form action={logout}>
-          <button type="submit" className="signout-button">
-            Sign out
-          </button>
-        </form>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }
