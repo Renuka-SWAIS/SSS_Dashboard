@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "SWAIS Dashboard",
+  title: "Student Dashboard",
   description: "Student dashboard"
 };
 

@@ -1105,7 +1105,14 @@ button {
 .data-table tbody tr:last-child td {
   border-bottom: 0;
 }
-
+.brand-logo {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: transparent;
+  display: block;
+}
 .highlight-row {
   background: #fffaf5;
 }

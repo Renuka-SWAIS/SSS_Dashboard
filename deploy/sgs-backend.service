@@ -1,5 +1,5 @@
 [Unit]
-Description=SGS FastAPI backend
+Description=sss FastAPI backend
 After=network.target
 
 [Service]

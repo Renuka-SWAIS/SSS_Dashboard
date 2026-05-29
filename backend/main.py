@@ -15,11 +15,19 @@ from ai_learning_path_service import classify_reader, get_learning_path_generato
 
 LESSON_TO_CHAPTER_ID = {
     "Lesson 1": 1,
+    "Lesson 2": 2,
+    "Lesson 3": 3,
+    "Lesson 4": 4,
+    "Lesson 5": 5,
+    "Lesson 6": 6,
+    "Lesson 7": 7,
+    "Lesson 8": 8,
+    "Lesson 9": 9,
+    "Lesson 10": 10,
 }
-
 load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 
-app = FastAPI(title="SGS Chapter Content API")
+app = FastAPI(title="sss Chapter Content API")
 
 
 def get_cors_origins() -> list[str]:
@@ -139,7 +147,7 @@ def get_chapter_content(
 
     query = """
         SELECT content_title, full_text_content
-        FROM sgs_chapter_content
+        FROM sss_chapter_content
         WHERE chapter_id = %s
         LIMIT 1;
     """
@@ -152,7 +160,7 @@ def get_chapter_content(
     except psycopg.errors.UndefinedTable as error:
         raise HTTPException(
             status_code=500,
-            detail="Chapter content table is missing. Create sgs_chapter_content in PostgreSQL.",
+            detail="Chapter content table is missing. Create sss_chapter_content in PostgreSQL.",
         ) from error
     except psycopg.Error as error:
         raise HTTPException(
@@ -192,7 +200,7 @@ def save_student_learning_profile(profile: LearningProfileInput):
     classification, path = build_learning_profile_payload(profile)
 
     query = """
-        INSERT INTO sgs_student_learning_profiles (
+        INSERT INTO sss_student_learning_profiles (
             student_id,
             chapter_id,
             chapter_title,
@@ -260,7 +268,7 @@ def get_student_learning_profile(
 ):
     query = """
         SELECT *
-        FROM sgs_student_learning_profiles
+        FROM sss_student_learning_profiles
         WHERE student_id = %s AND chapter_id = %s
         LIMIT 1;
     """

@@ -1,4 +1,4 @@
-# SGS EC2 Deployment
+# sss EC2 Deployment
 
 This guide deploys the Next.js frontend, FastAPI backend, Nginx reverse proxy, and AWS RDS PostgreSQL database.
 
@@ -54,7 +54,7 @@ nano .env
 Set `DATABASE_URL` to your AWS RDS endpoint:
 
 ```env
-DATABASE_URL=postgresql://sgs_app_user:your_password@your-rds-endpoint.ap-south-1.rds.amazonaws.com:5432/sgs_db
+DATABASE_URL=postgresql://sss_app_user:your_password@your-rds-endpoint.ap-south-1.rds.amazonaws.com:5432/sss_db
 CORS_ALLOW_ORIGINS=http://your-ec2-public-ip:84
 AI_PROVIDER=mock
 ```
@@ -85,19 +85,19 @@ psql "$DATABASE_URL" -f backend/migrations/001_ai_learning_path.sql
 If your shell does not know `DATABASE_URL`, run:
 
 ```bash
-export DATABASE_URL="postgresql://sgs_app_user:your_password@your-rds-endpoint.ap-south-1.rds.amazonaws.com:5432/sgs_db"
+export DATABASE_URL="postgresql://sss_app_user:your_password@your-rds-endpoint.ap-south-1.rds.amazonaws.com:5432/sss_db"
 ```
 
 The chapter endpoint reads from:
 
 ```text
-sgs_chapter_content
+sss_chapter_content
 ```
 
 The learning profile endpoint reads and writes:
 
 ```text
-sgs_student_learning_profiles
+sss_student_learning_profiles
 ```
 
 ## 6. Configure Frontend Environment
@@ -130,28 +130,28 @@ When `NEXT_PUBLIC_API_BASE_URL` changes, run `npm run build` again because this 
 
 ```bash
 cd /home/ubuntu/swathi
-sudo cp deploy/sgs-backend.service /etc/systemd/system/sgs-backend.service
-sudo cp deploy/sgs-frontend.service /etc/systemd/system/sgs-frontend.service
+sudo cp deploy/sss-backend.service /etc/systemd/system/sss-backend.service
+sudo cp deploy/sss-frontend.service /etc/systemd/system/sss-frontend.service
 sudo systemctl daemon-reload
-sudo systemctl enable sgs-backend sgs-frontend
-sudo systemctl restart sgs-backend sgs-frontend
+sudo systemctl enable sss-backend sss-frontend
+sudo systemctl restart sss-backend sss-frontend
 ```
 
 Check logs:
 
 ```bash
-sudo systemctl status sgs-backend
-sudo systemctl status sgs-frontend
-journalctl -u sgs-backend -f
-journalctl -u sgs-frontend -f
+sudo systemctl status sss-backend
+sudo systemctl status sss-frontend
+journalctl -u sss-backend -f
+journalctl -u sss-frontend -f
 ```
 
 ## 8. Configure Nginx
 
 ```bash
 cd /home/ubuntu/swathi
-sudo cp deploy/nginx-sgs.conf /etc/nginx/sites-available/sgs
-sudo ln -sf /etc/nginx/sites-available/sgs /etc/nginx/sites-enabled/sgs
+sudo cp deploy/nginx-sss.conf /etc/nginx/sites-available/sss
+sudo ln -sf /etc/nginx/sites-available/sss /etc/nginx/sites-enabled/sss
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx
@@ -188,6 +188,6 @@ npm ci
 npm run build
 source backend/venv/bin/activate
 pip install -r backend/requirements.txt
-sudo systemctl restart sgs-backend sgs-frontend
+sudo systemctl restart sss-backend sss-frontend
 sudo systemctl reload nginx
 ```

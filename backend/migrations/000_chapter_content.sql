@@ -1,7 +1,7 @@
 -- Chapter content table used by GET /chapter-content.
 -- Run this once against PostgreSQL before loading chapter text.
 
-CREATE TABLE IF NOT EXISTS sgs_chapter_content (
+CREATE TABLE IF NOT EXISTS sss_chapter_content (
     id BIGSERIAL PRIMARY KEY,
     chapter_id INTEGER NOT NULL UNIQUE,
     subject VARCHAR(120) NOT NULL DEFAULT 'Social Science',
@@ -12,11 +12,11 @@ CREATE TABLE IF NOT EXISTS sgs_chapter_content (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_sgs_chapter_content_subject_lesson
-    ON sgs_chapter_content (subject, lesson);
+CREATE INDEX IF NOT EXISTS idx_sss_chapter_content_subject_lesson
+    ON sss_chapter_content (subject, lesson);
 
 -- Replace this sample row with production chapter text.
-INSERT INTO sgs_chapter_content (
+INSERT INTO sss_chapter_content (
     chapter_id,
     subject,
     lesson,

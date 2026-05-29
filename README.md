@@ -1,4 +1,4 @@
-# SGS Project
+# sss Project
 
 Student dashboard with a FastAPI backend and PostgreSQL content storage.
 
@@ -40,7 +40,7 @@ uvicorn main:app --host 0.0.0.0 --port 8004
 Create `backend/.env`:
 
 ```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/sgs_db
+DATABASE_URL=postgresql://postgres:password@localhost:5432/sss_db
 ```
 
 Optional frontend variable:
@@ -98,7 +98,7 @@ Do not run migrations automatically. Apply the AI Learning Path migration manual
 psql "$DATABASE_URL" -f backend/migrations/001_ai_learning_path.sql
 ```
 
-The migration creates `sgs_student_learning_profiles` and includes sample rows for students `23`, `24`, and `25`.
+The migration creates `sss_student_learning_profiles` and includes sample rows for students `23`, `24`, and `25`.
 
 ## Learning Profile APIs
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getApiBaseUrl } from "./api-base-url";
 
 const chapterSubjects = ["Social Science", "Maths", "Hindi", "Telugu"];
-const chapterLessons = ["Lesson 1", "Lesson 2", "Lesson 3", "Lesson 5", "Lesson 6", "Lesson 7", "Lesson 8", "Lesson 9", "Lesson 10"];
+const chapterLessons = ["Lesson 1", "Lesson 2", "Lesson 3", "Lesson 4","Lesson 5", "Lesson 6", "Lesson 7", "Lesson 8", "Lesson 9", "Lesson 10"];
 const API_BASE_URL = getApiBaseUrl();
 
 export default function ChapterSelector({ showReader = false }) {
@@ -119,7 +119,9 @@ export default function ChapterSelector({ showReader = false }) {
         subject: selectedSubject,
         lesson: selectedLesson
       });
-      const response = await fetch(`${API_BASE_URL}/chapter-content?${params.toString()}`);
+      const API_BASE_URL = "http://127.0.0.1:8000";
+     
+      const response = await fetch(`${API_BASE_URL}/chapter-content/?${params.toString()}`);
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {

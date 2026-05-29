@@ -1,5 +1,5 @@
 [Unit]
-Description=SGS Next.js frontend
+Description=sss Next.js frontend
 After=network.target
 
 [Service]
