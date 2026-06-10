@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # sss Project
 
 Student dashboard with a FastAPI backend and PostgreSQL content storage.
@@ -119,3 +120,6 @@ Sample payload:
   "comprehension_score": 72
 }
 ```
+=======
+# SSS_Dashboard
+>>>>>>> f3bd4f66c99ed172deb4de5b6054d18af41c36cc
