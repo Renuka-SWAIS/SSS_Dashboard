@@ -202,11 +202,6 @@ button {
   font-weight: 600;
 }
 
-.top-actions {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
 
 .language-select {
   display: inline-flex;
@@ -2291,5 +2286,22 @@ button {
 
   .accent-line {
     width: 45%;
+ 
   }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 54px;
+  margin-left: auto;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  position: relative;
+  left: 50px;
+  color: red !important;
+}
 }

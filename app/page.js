@@ -145,6 +145,11 @@ export default function DashboardPage() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
+           <img
+      src="/SSS_logo.jpeg"
+      alt="SSS Logo"
+      className="brand-logo"
+    />
           
           <div>
             <div className="brand-title">SSS</div>

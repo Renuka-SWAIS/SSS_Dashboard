@@ -62,8 +62,10 @@ export default function DashboardShell({ children }) {
 />   
           <div>
             <div className="brand-title">SSS</div>
-            <div className="brand-subtitle">Shiva Satya Sai Educational Society</div>
+            <div className="brand-subtitle">Shiva Satya Sai School</div>
+        
           </div>
+             
         </div>
 
         <nav className="nav-list" aria-label="Student navigation">
@@ -111,7 +113,12 @@ export default function DashboardShell({ children }) {
           </div>
 
           <div className="top-actions">
+
+ <h2 className="page-title">Student Dashboard</h2>
+ 
             <label className="language-select">
+
+              
               <span>Language</span>
               <select defaultValue="English" aria-label="Select language">
                 <option>English</option>
@@ -123,6 +130,7 @@ export default function DashboardShell({ children }) {
               <span className="bell-icon" aria-hidden="true" />
               <span className="badge">3</span>
             </button>
+
             <button className="top-logout" type="button">
               <span className="exit-icon" aria-hidden="true" />
               <span>Logout</span>
