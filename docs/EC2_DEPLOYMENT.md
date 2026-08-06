@@ -114,6 +114,7 @@ Use:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=/api
+NEXT_PUBLIC_LOGIN_URL=https://staging.sss.swais.in
 PORT=3004
 ```
 
@@ -124,7 +125,7 @@ npm ci
 npm run build
 ```
 
-When `NEXT_PUBLIC_API_BASE_URL` changes, run `npm run build` again because this value is compiled into the browser bundle.
+Set `NEXT_PUBLIC_LOGIN_URL` to the deployed SSS login-page origin. Logout clears the dashboard session, signs out through that service, and redirects back to this URL. When either `NEXT_PUBLIC_API_BASE_URL` or `NEXT_PUBLIC_LOGIN_URL` changes, run `npm run build` again because these values are compiled into the browser bundle.
 
 ## 7. Install systemd Services
 

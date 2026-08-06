@@ -21,7 +21,7 @@ const settingsItems = [
 ];
 
 const API_BASE_URL = getApiBaseUrl();
-const loginServiceUrl = process.env.NEXT_PUBLIC_LOGIN_URL || "https://staging.sgs.swais.in";
+const loginServiceUrl = process.env.NEXT_PUBLIC_LOGIN_URL || "https://staging.sss.swais.in";
 const loginServiceSignOutUrl = process.env.NEXT_PUBLIC_LOGIN_SIGNOUT_URL ||
   `${loginServiceUrl}/api/auth/signout?callbackUrl=${encodeURIComponent(loginServiceUrl)}`;
 
