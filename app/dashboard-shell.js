@@ -1,10 +1,15 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getApiBaseUrl } from "./api-base-url";
+import NotificationBell from "./notification-bell";
 
 const navItems = [
   ["home", "Dashboard", "/"],
   ["book-open", "Core Study", "/chapters"],
+  ["document", "AI Translator", "/ai-translator"],
   ["clipboard", "Assignments", "/assignments"],
   ["target", "Assessments", "/assessments"],
   ["chart", "My Progress", "/progress"]
@@ -14,6 +19,47 @@ const settingsItems = [
   ["settings", "Settings", "/settings"],
   ["help", "Help & Support", "/help"]
 ];
+
+const API_BASE_URL = getApiBaseUrl();
+const loginServiceUrl = process.env.NEXT_PUBLIC_LOGIN_URL || "https://staging.sss.swais.in";
+const loginServiceSignOutUrl = process.env.NEXT_PUBLIC_LOGIN_SIGNOUT_URL ||
+  `${loginServiceUrl}/api/auth/signout?callbackUrl=${encodeURIComponent(loginServiceUrl)}`;
+
+async function handleLogout(event) {
+  event.preventDefault();
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+
+  try {
+    const csrfResponse = await fetch(`${loginServiceUrl}/api/auth/csrf`, { credentials: "include" });
+    if (!csrfResponse.ok) throw new Error("Unable to start logout.");
+    const { csrfToken } = await csrfResponse.json();
+    const response = await fetch(`${loginServiceUrl}/api/auth/signout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ callbackUrl: loginServiceUrl, csrfToken, json: "true" }),
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Unable to complete logout.");
+    const data = await response.json();
+    window.location.assign(data.url || loginServiceUrl);
+  } catch {
+    window.location.assign(loginServiceSignOutUrl);
+  }
+}
+
+function useCurrentStudent() {
+  const [student, setStudent] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE_URL}/students/current`, { credentials: "include" })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data) => { if (!cancelled) setStudent(data.student || null); })
+      .catch(() => { if (!cancelled) setStudent(null); });
+    return () => { cancelled = true; };
+  }, []);
+  return student;
+}
 
 function Icon({ name, className = "" }) {
   return <span className={`icon ${name} ${className}`} aria-hidden="true" />;
@@ -42,14 +88,7 @@ function Avatar() {
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    router.push("/login");
-  };
+  const student = useCurrentStudent();
 
   function isActive(href) {
     if (href === "/") {
@@ -78,10 +117,10 @@ export default function DashboardShell({ children }) {
 
         <nav className="nav-list" aria-label="Student navigation">
           {navItems.map(([icon, label, href]) => (
-            <a className={`nav-item ${isActive(href) ? "active" : ""}`} href={href} key={label}>
+            <Link className={`nav-item ${isActive(href) ? "active" : ""}`} href={href} key={label}>
               <Icon name={icon} />
               <span>{label}</span>
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -89,18 +128,18 @@ export default function DashboardShell({ children }) {
 
         <nav className="nav-list compact" aria-label="Settings navigation">
           {settingsItems.map(([icon, label, href]) => (
-            <a className={`nav-item ${isActive(href) ? "active" : ""}`} href={href} key={label}>
+            <Link className={`nav-item ${isActive(href) ? "active" : ""}`} href={href} key={label}>
               <Icon name={icon} />
               <span>{label}</span>
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div className="nav-divider" />
-<button className="nav-item logout-link" onClick={handleLogout}>
+<a className="nav-item logout-link" href={loginServiceUrl} onClick={handleLogout}>
   <Icon name="power" />
   <span>Logout</span>
-</button>
+</a>
       </aside>
 
       <section className="workspace">
@@ -109,12 +148,12 @@ export default function DashboardShell({ children }) {
             <Avatar />
             <div className="student-info">
               <p>Welcome back,</p>
-              <h1>Aarav</h1>
+              <h1>{student?.full_name || "Student"}</h1>
               <div className="chips">
-                <span>Roll No.: 23</span>
-                <span>Admission No.: 2024/08/0156</span>
-                <span>Class: Class 9</span>
-                <span>Section: A</span>
+                <span>Roll No.: {student?.roll_no || "-"}</span>
+                <span>Admission No.: {student?.admission_no || "-"}</span>
+                <span>Class: {student?.class_name || "-"}</span>
+                <span>Section: {student?.section || "-"}</span>
               </div>
             </div>
           </div>
@@ -133,19 +172,7 @@ export default function DashboardShell({ children }) {
                 <option>Telugu</option>
               </select>
             </label>
-            <button className="bell-button" aria-label="Notifications">
-              <span className="bell-icon" aria-hidden="true" />
-              <span className="badge">3</span>
-            </button>
-
-            <button 
-  className="top-logout" 
-  type="button"
-  onClick={handleLogout}
->
-              <span className="exit-icon" aria-hidden="true" />
-              <span>Logout</span>
-            </button>
+            <NotificationBell />
           </div>
         </header>
 

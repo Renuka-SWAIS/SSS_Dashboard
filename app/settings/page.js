@@ -3,51 +3,11 @@
 import { useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import {
-  translateText,
   voiceToText,
   audioTranslator,
 } from "../../services/studentApi";
 
 export default function SettingsPage() {
-  /* -------------------------------------------------------
-     TRANSLATE
-  ------------------------------------------------------- */
-
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleTranslate() {
-    try {
-      setLoading(true);
-
-      const response = await translateText({
-        text: "Welcome to SSS School",
-        target_language: "Telugu",
-        user_email: "student@example.com",
-        client_name: "SSS",
-      });
-
-      console.log("Translate Response:", response);
-
-      if (response?.status === "success") {
-        setResult(
-          response.translated_text ||
-            response.translation ||
-            "Translation received"
-        );
-      } else {
-        setResult("Translation failed");
-      }
-    } catch (error) {
-      console.log("Translation Error:", error);
-      console.log("Backend Response:", error.response?.data);
-
-      alert("Translation Failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   /* -------------------------------------------------------
      VOICE TO TEXT
   ------------------------------------------------------- */
@@ -210,36 +170,6 @@ export default function SettingsPage() {
       <section className="module-page">
 
         <div className="module-content-area">
-
-          {/* ------------------------------------------------
-              TRANSLATE
-          ------------------------------------------------ */}
-
-          <article className="module-card blue-module">
-
-            <h2>Translate</h2>
-
-            <button
-              className="primary-button"
-              type="button"
-              onClick={handleTranslate}
-              disabled={loading}
-            >
-              {loading
-                ? "Translating..."
-                : "Translate"}
-            </button>
-
-            {result && (
-              <>
-                <h3>Translated Text</h3>
-
-                <p>{result}</p>
-              </>
-            )}
-
-          </article>
-
 
           {/* ------------------------------------------------
               VOICE TO TEXT

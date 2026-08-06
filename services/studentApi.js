@@ -1,4 +1,5 @@
 import api from "./api";
+import { getApiBaseUrl } from "../app/api-base-url";
 
 /* -------------------------------------------------------
    CONTENT GENERATION
@@ -18,12 +19,12 @@ export const generateContent = async (data) => {
 ------------------------------------------------------- */
 
 export const generateQuiz = async (data) => {
-  const response = await api.post(
-    "/quiz/generate",
-    data
-  );
-
-  return response.data;
+  const response = await fetch(`${getApiBaseUrl()}/quiz/generate`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.detail || "Quiz generation failed.");
+  return result;
 };
 
 /* -------------------------------------------------------
@@ -31,12 +32,14 @@ export const generateQuiz = async (data) => {
 ------------------------------------------------------- */
 
 export const translateText = async (data) => {
-  const response = await api.post(
-    "/translate",
-    data
-  );
-
-  return response.data;
+  const response = await fetch(`${getApiBaseUrl()}/translate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.detail || "Translation failed.");
+  return result;
 };
 
 /* -------------------------------------------------------
@@ -44,12 +47,12 @@ export const translateText = async (data) => {
 ------------------------------------------------------- */
 
 export const evaluateQuiz = async (data) => {
-  const response = await api.post(
-    "/quiz/evaluate",
-    data
-  );
-
-  return response.data;
+  const response = await fetch(`${getApiBaseUrl()}/quiz/evaluate`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.detail || "Quiz evaluation failed.");
+  return result;
 };
 
 /* -------------------------------------------------------

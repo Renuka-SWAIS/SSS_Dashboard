@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 import { useSearchParams } from "next/navigation";
+import { getApiBaseUrl } from "../api-base-url";
 
 import {
   selfAssessment,
@@ -20,6 +21,7 @@ const unitTest = {
   studentAnswer:
     "Elections are important because people can choose their leaders. If leaders do not work properly, citizens can vote for another leader in the next election.",
 };
+const API_BASE_URL = getApiBaseUrl();
 
 /* -------------------------------------------------------
    CHART COMPONENTS
@@ -277,7 +279,7 @@ function TeacherRemarkView() {
    MAIN COMPONENT
 ------------------------------------------------------- */
 
-export default function AssessmentsPage() {
+function AssessmentsContent() {
   const searchParams = useSearchParams();
 
   const tabFromUrl =
@@ -309,6 +311,17 @@ export default function AssessmentsPage() {
 
   const [mockEvaluation, setMockEvaluation] =
     useState(null);
+  const [quizChapters, setQuizChapters] = useState([]);
+  const [selectedMockChapter, setSelectedMockChapter] = useState("");
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/quiz-chapters`, { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => { const rows = data.chapters || []; setQuizChapters(rows); if (rows.length) setSelectedMockChapter(String(rows[0].chapter_id)); })
+      .catch(() => setQuizChapters([]));
+  }, []);
+
+  const currentMockChapter = quizChapters.find((item) => String(item.chapter_id) === selectedMockChapter);
 
   /* -------------------------------------------------------
      UNIT TEST TAB
@@ -373,7 +386,7 @@ export default function AssessmentsPage() {
       setMockLoading(true);
 
       const response = await generateQuiz({
-        topic: "Democratic India",
+        topic: currentMockChapter?.chapter_title || "Democratic India",
         difficulty: "easy",
         num_questions: 5,
         user_email: "student@example.com",
@@ -521,12 +534,9 @@ export default function AssessmentsPage() {
                   : ""
               }`}
               type="button"
-              onClick={handleMockTest}
-              disabled={mockLoading}
+              onClick={() => setActiveOption("mock-test")}
             >
-              {mockLoading
-                ? "Generating..."
-                : "Mock Test"}
+              Mock Test
             </button>
 
             <button
@@ -757,11 +767,11 @@ export default function AssessmentsPage() {
                 <div className="meta-row">
 
                   <span>
-                    Social Science
+                    {currentMockChapter?.subject || "Subject"}
                   </span>
 
                   <span>
-                    Democratic India
+                    {currentMockChapter?.chapter_title || "Select a chapter"}
                   </span>
 
                   <span>
@@ -775,6 +785,13 @@ export default function AssessmentsPage() {
 
                 </div>
 
+                <label className="assignment-field">
+                  <span>Mock-test chapter</span>
+                  <select value={selectedMockChapter} onChange={(event) => { setSelectedMockChapter(event.target.value); resetMockTest(); }}>
+                    {quizChapters.map((chapter) => <option value={chapter.chapter_id} key={chapter.chapter_id}>{chapter.subject} - {chapter.chapter_title}</option>)}
+                  </select>
+                </label>
+
                 {/* NO QUESTIONS */}
 
                 {mockQuestions.length === 0 ? (
@@ -787,7 +804,7 @@ export default function AssessmentsPage() {
                       onClick={
                         handleMockTest
                       }
-                      disabled={mockLoading}
+                      disabled={mockLoading || !selectedMockChapter}
                     >
                       {mockLoading
                         ? "Generating..."
@@ -968,7 +985,7 @@ export default function AssessmentsPage() {
                     </span>
 
                     <strong>
-                      Democratic India
+                      {currentMockChapter?.chapter_title || "-"}
                     </strong>
                   </div>
 
@@ -1066,4 +1083,8 @@ export default function AssessmentsPage() {
       </section>
     </DashboardShell>
   );
+}
+
+export default function AssessmentsPage() {
+  return <Suspense fallback={<div className="module-page">Loading assessments...</div>}><AssessmentsContent /></Suspense>;
 }

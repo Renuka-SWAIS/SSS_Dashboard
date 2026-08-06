@@ -2,26 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translateText } from "../services/studentApi";
-
-const chapterSubjects = [
-  "Social Science",
-  "Maths",
-  "Hindi",
-  "Telugu",
-];
-
-const chapterLessons = [
-  "Lesson 1",
-  "Lesson 2",
-  "Lesson 3",
-  "Lesson 4",
-  "Lesson 5",
-  "Lesson 6",
-  "Lesson 7",
-  "Lesson 8",
-  "Lesson 9",
-  "Lesson 10",
-];
+import { getApiBaseUrl } from "./api-base-url";
 
 const languages = [
   "English",
@@ -29,13 +10,15 @@ const languages = [
   "Hindi",
 ];
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_CHAPTER_API ||
-  "http://localhost:2084";
+const API_BASE_URL = getApiBaseUrl();
 
 export default function ChapterSelector({
   showReader = false,
 }) {
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [selectedClass, setSelectedClass] = useState("");
   const [selectedSubject, setSelectedSubject] =
     useState("");
 
@@ -50,6 +33,46 @@ export default function ChapterSelector({
 
   const [error, setError] =
     useState("");
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/classes`, { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Unable to load classes.");
+        const rows = Array.isArray(data.classes) ? data.classes : [];
+        setClasses(rows);
+        if (rows.length) setSelectedClass(String(rows[0].class_id));
+      })
+      .catch((loadError) => setError(loadError.message));
+  }, []);
+
+  useEffect(() => {
+    setSubjects([]); setChapters([]); setSelectedSubject(""); setSelectedLesson("");
+    if (!selectedClass) return;
+    fetch(`${API_BASE_URL}/subjects?class_id=${encodeURIComponent(selectedClass)}`, { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Unable to load subjects.");
+        const rows = Array.isArray(data.subjects) ? data.subjects : [];
+        setSubjects(rows);
+        if (rows.length) setSelectedSubject(String(rows[0].subject_id));
+      })
+      .catch((loadError) => setError(loadError.message));
+  }, [selectedClass]);
+
+  useEffect(() => {
+    setChapters([]); setSelectedLesson("");
+    if (!selectedSubject) return;
+    fetch(`${API_BASE_URL}/chapters?subject_id=${encodeURIComponent(selectedSubject)}`, { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Unable to load chapters.");
+        const rows = Array.isArray(data.chapters) ? data.chapters : [];
+        setChapters(rows);
+        if (rows.length) setSelectedLesson(String(rows[0].chapter_id));
+      })
+      .catch((loadError) => setError(loadError.message));
+  }, [selectedSubject]);
 
   /* -------------------------------------------------------
      TRANSLATION
@@ -305,11 +328,11 @@ export default function ChapterSelector({
     event.preventDefault();
 
     if (
-      !selectedSubject ||
+      !selectedClass || !selectedSubject ||
       !selectedLesson
     ) {
       setError(
-        "Please select a subject and lesson."
+        "Please select a class, subject and chapter."
       );
 
       setChapterContent(null);
@@ -328,10 +351,7 @@ export default function ChapterSelector({
 
     handleStopReading();
 
-    const params = new URLSearchParams({
-      subject: selectedSubject,
-      lesson: selectedLesson,
-    });
+    const params = new URLSearchParams({ chapter_id: selectedLesson });
 
     const url =
       `${API_BASE_URL}/chapter-content?${params.toString()}`;
@@ -561,13 +581,23 @@ export default function ChapterSelector({
         onSubmit={handleSubmit}
       >
         <select
+          value={selectedClass}
+          aria-label="Select class"
+          onChange={(event) => setSelectedClass(event.target.value)}
+        >
+          <option value="" disabled>Select Class...</option>
+          {classes.map((item) => (
+            <option value={item.class_id} key={item.class_id}>
+              {item.class_name}{item.section_name ? ` - ${item.section_name}` : ""}
+            </option>
+          ))}
+        </select>
+
+        <select
           value={selectedSubject}
           aria-label="Select subject"
-          onChange={(event) =>
-            setSelectedSubject(
-              event.target.value
-            )
-          }
+          onChange={(event) => setSelectedSubject(event.target.value)}
+          disabled={!selectedClass}
         >
           <option
             value=""
@@ -576,13 +606,13 @@ export default function ChapterSelector({
             Select Subject...
           </option>
 
-          {chapterSubjects.map(
+          {subjects.map(
             (subject) => (
               <option
-                value={subject}
-                key={subject}
+                value={subject.subject_id}
+                key={subject.subject_id}
               >
-                {subject}
+                {subject.subject_name}
               </option>
             )
           )}
@@ -590,27 +620,28 @@ export default function ChapterSelector({
 
         <select
           value={selectedLesson}
-          aria-label="Select lesson"
+          aria-label="Select chapter"
           onChange={(event) =>
             setSelectedLesson(
               event.target.value
             )
           }
+          disabled={!selectedSubject}
         >
           <option
             value=""
             disabled
           >
-            Select Book Title...
+            Select Chapter...
           </option>
 
-          {chapterLessons.map(
+          {chapters.map(
             (lesson) => (
               <option
-                value={lesson}
-                key={lesson}
+                value={lesson.chapter_id}
+                key={lesson.chapter_id}
               >
-                {lesson}
+                {lesson.chapter_name}
               </option>
             )
           )}

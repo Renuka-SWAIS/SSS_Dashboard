@@ -5,7 +5,7 @@ import { getApiBaseUrl } from "../api-base-url";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_AI_API;
+const API_BASE_URL = getApiBaseUrl();
 const STUDENT_ID = 23;
 
 const chapters = [
@@ -104,6 +104,8 @@ export default function AiLearningPathPage() {
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingSaved, setLoadingSaved] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState(null);
+  const [generatingContent, setGeneratingContent] = useState(false);
 
   const selectedChapter = useMemo(() => chapters.find((chapter) => chapter.id === Number(chapterId)) || chapters[0], [chapterId]);
   const localClassification = useMemo(() => classifyReader(metrics), [metrics]);
@@ -165,6 +167,25 @@ export default function AiLearningPathPage() {
       setNotice(generateError.name === "AbortError" ? "Backend is not responding, so the local mock AI path was used." : `${generateError.message} Showing local mock AI path.`);
       setStatus("Local mock learning path generated. See the personalized path below.");
     }
+  }
+
+  async function handleGenerateContent() {
+    setGeneratingContent(true);
+    setError(""); setNotice(""); setStatus("Generating personalized AI study content...");
+    try {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/ai/generate-study-content`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: STUDENT_ID, chapter_id: selectedChapter.id, classification: learningPath?.classification || localClassification })
+      }, 45000);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "Unable to generate study content.");
+      setGeneratedContent(data);
+      setStatus("Personalized AI study content generated.");
+    } catch (contentError) {
+      setError(contentError.name === "AbortError" ? "Study content generation timed out. Please try again." : contentError.message);
+      setStatus("");
+    } finally { setGeneratingContent(false); }
   }
 
   async function handleSave() {
@@ -286,6 +307,9 @@ export default function AiLearningPathPage() {
 
             <div className="quiz-submit-row">
               <button className="primary-button" type="button" onClick={handleGenerate}>Generate Path</button>
+              <button className="primary-button" type="button" onClick={handleGenerateContent} disabled={generatingContent}>
+                {generatingContent ? "Generating Content..." : "Generate Content"}
+              </button>
               <button className="soft-button" type="button" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Profile"}</button>
               <button className="soft-button" type="button" onClick={handleFetchSaved} disabled={loadingSaved}>{loadingSaved ? "Loading..." : "Fetch Saved"}</button>
             </div>
@@ -319,6 +343,19 @@ export default function AiLearningPathPage() {
                   <span key={material}>{material}</span>
                 ))}
               </div>
+            </article>
+          )}
+
+          {generatedContent && (
+            <article className="module-card generated-path-card">
+              <div className="card-title-row"><div><h2>Personalized Study Content</h2><p>{generatedContent.chapter_title} · {generatedContent.classification}</p></div><span className="status-pill completed">Gemini AI</span></div>
+              <div className="learning-focus-box"><strong>Quick Recap</strong><p>{generatedContent.generated_content.recap}</p></div>
+              <h3>Simple Notes</h3>
+              <ul className="learning-step-list">{(generatedContent.generated_content.simple_notes || []).map((note) => <li key={note}>{note}</li>)}</ul>
+              <h3>Key Terms</h3>
+              <div className="recommended-materials">{(generatedContent.generated_content.key_terms || []).map((item) => <span key={item.term}><strong>{item.term}:</strong> {item.meaning}</span>)}</div>
+              <h3>Practice Questions</h3>
+              <ol className="learning-step-list">{(generatedContent.generated_content.practice_questions || []).map((question) => <li key={question}>{question}</li>)}</ol>
             </article>
           )}
         </div>

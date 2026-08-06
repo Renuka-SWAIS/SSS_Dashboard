@@ -1,19 +1,32 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 import { generateQuiz, evaluateQuiz } from "../../services/studentApi";
+import { getApiBaseUrl } from "../api-base-url";
 
-const chapterTitle = "Democratic India";
+const API_BASE_URL = getApiBaseUrl();
 
 export default function QuizzesPage() {
+  const [chapters, setChapters] = useState([]);
+  const [selectedChapter, setSelectedChapter] = useState("");
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [quizRequested, setQuizRequested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/quiz-chapters`, { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => { const rows = data.chapters || []; setChapters(rows); if (rows.length) setSelectedChapter(String(rows[0].chapter_id)); })
+      .catch(() => setChapters([]));
+  }, []);
+
+  const currentChapter = chapters.find((item) => String(item.chapter_id) === selectedChapter);
+  const chapterTitle = currentChapter?.chapter_title || "Select a chapter";
 
   const score = useMemo(() => {
     return questions.reduce((total, question, index) => {
@@ -40,7 +53,7 @@ export default function QuizzesPage() {
       setLoading(true);
 
       const response = await generateQuiz({
-  topic: "Democratic India",
+  topic: chapterTitle,
   difficulty: "easy",
   num_questions: 5,
   user_email: "student@example.com",
@@ -130,12 +143,20 @@ export default function QuizzesPage() {
                 <span>Duration: 30 mins</span>
               </div>
 
+              <label className="assignment-field">
+                <span>Chapter</span>
+                <select value={selectedChapter} onChange={(event) => { setSelectedChapter(event.target.value); handleReset(); }}>
+                  {chapters.map((chapter) => <option value={chapter.chapter_id} key={chapter.chapter_id}>{chapter.subject} - {chapter.chapter_title}</option>)}
+                </select>
+              </label>
+
               {!quizRequested && (
                 <div className="quiz-submit-row">
                   <button
                     className="primary-button"
                     type="button"
                     onClick={handleAskAi}
+                    disabled={loading || !selectedChapter}
                   >
                     {loading ? "Generating..." : "Ask AI"}
                   </button>
