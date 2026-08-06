@@ -1,6 +1,10 @@
 import os
+import base64
+import binascii
 from contextlib import contextmanager
 from pathlib import Path
+
+
 
 import psycopg
 from dotenv import load_dotenv
@@ -10,7 +14,11 @@ from pydantic import BaseModel, Field
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-from ai_learning_path_service import classify_reader, get_learning_path_generator
+from ai_learning_path_service import (
+    MockLearningPathLLM,
+    classify_reader,
+    get_learning_path_generator,
+)
 
 
 LESSON_TO_CHAPTER_ID = {
@@ -29,31 +37,18 @@ load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
 
 app = FastAPI(title="sss Chapter Content API")
 
-
-def get_cors_origins() -> list[str]:
-    configured_origins = os.getenv("CORS_ALLOW_ORIGINS", "")
-    if configured_origins:
-        return [
-            origin.strip().rstrip("/")
-            for origin in configured_origins.split(",")
-            if origin.strip()
-        ]
-
-    return [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:3004",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://127.0.0.1:3004",
-    ]
-
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=get_cors_origins(),
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://localhost:3004",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:3004",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -66,6 +61,17 @@ class LearningProfileInput(BaseModel):
     quiz_score: int = Field(..., ge=0, le=100)
     retry_count: int = Field(..., ge=0, le=50)
     comprehension_score: int = Field(..., ge=0, le=100)
+
+
+class AssignmentSubmissionInput(BaseModel):
+    student_id: int = Field(..., ge=1)
+    assignment_id: int = Field(..., ge=1)
+    assignment_title: str = Field(..., min_length=1, max_length=180)
+    typed_answer: str | None = Field(default=None, max_length=20000)
+    file_name: str | None = Field(default=None, max_length=255)
+    file_type: str | None = Field(default=None, max_length=120)
+    file_size: int | None = Field(default=None, ge=0, le=10 * 1024 * 1024)
+    file_content_base64: str | None = None    
 
 
 def get_database_url() -> str:
@@ -101,6 +107,48 @@ def database_health_check():
 
     return {"status": "ok", "database": "connected"}
 
+@app.get("/students/current")
+def get_current_student():
+    query = """
+        SELECT
+            student.student_id,
+            student.full_name,
+            student.roll_no,
+            student.admission_no,
+            COALESCE(class.class_name, student.class_id::text) AS class_name,
+            COALESCE(student.section, class.section_name) AS section
+        FROM sss_student_master student
+        LEFT JOIN sss_class_master class
+          ON class.class_id = student.class_id
+        WHERE COALESCE(student.record_status, 'Active') = 'Active'
+          AND COALESCE(student.is_active, true) = true
+        ORDER BY
+            CASE WHEN student.admission_no IS NULL THEN 1 ELSE 0 END,
+            student.student_id
+        LIMIT 1;
+    """
+
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query)
+                student = cursor.fetchone()
+    except psycopg.errors.UndefinedTable as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Student master table is missing. Create sss_student_master in PostgreSQL.",
+        ) from error
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch student details.",
+        ) from error
+
+    if student is None:
+        raise HTTPException(status_code=404, detail="No active student found.")
+
+    return {"student": student}
+
 
 def build_learning_profile_payload(profile: LearningProfileInput):
     classification = classify_reader(
@@ -122,10 +170,161 @@ def build_learning_profile_payload(profile: LearningProfileInput):
             metrics,
         )
     except RuntimeError as error:
-        raise HTTPException(status_code=502, detail=str(error)) from error
+        path = MockLearningPathLLM().generate_path(
+            profile.chapter_title,
+            classification,
+            metrics,
+        )
+        path["provider_error"] = str(error)
 
     return classification, path
 
+
+def decode_submission_file(submission: AssignmentSubmissionInput) -> bytes | None:
+    if not submission.file_content_base64:
+        return None
+
+    try:
+        file_content = base64.b64decode(
+            submission.file_content_base64,
+            validate=True,
+        )
+    except (binascii.Error, ValueError) as error:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file content is invalid.",
+        ) from error
+
+    if len(file_content) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=413,
+            detail="Uploaded file must be 10 MB or smaller.",
+        )
+
+    return file_content
+
+
+@app.post("/assignment-submissions")
+def submit_assignment(submission: AssignmentSubmissionInput):
+    typed_answer = (submission.typed_answer or "").strip()
+    file_content = decode_submission_file(submission)
+
+    if not typed_answer and file_content is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Type an answer or upload a file before submitting.",
+        )
+
+    if file_content is not None and not submission.file_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file name is required.",
+        )
+
+    query = """
+        INSERT INTO sss_assignment_submissions (
+            student_id,
+            assignment_id,
+            assignment_title,
+            typed_answer,
+            file_name,
+            file_type,
+            file_size,
+            file_content,
+            status
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Submitted')
+        RETURNING
+            id,
+            student_id,
+            assignment_id,
+            assignment_title,
+            typed_answer,
+            file_name,
+            file_type,
+            file_size,
+            status,
+            submitted_at;
+    """
+
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(
+                    query,
+                    (
+                        submission.student_id,
+                        submission.assignment_id,
+                        submission.assignment_title,
+                        typed_answer or None,
+                        submission.file_name,
+                        submission.file_type,
+                        len(file_content) if file_content is not None else None,
+                        file_content,
+                    ),
+                )
+                saved_submission = cursor.fetchone()
+                connection.commit()
+    except psycopg.errors.UndefinedTable as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Assignment submission table is missing. Create sss_assignment_submissions in PostgreSQL.",
+        ) from error
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to save assignment submission.",
+        ) from error
+
+    return {"submission": saved_submission}
+
+@app.get("/assignment-submissions")
+def get_assignment_submission(
+    student_id: int = Query(..., ge=1),
+    assignment_id: int = Query(..., ge=1),
+):
+    query = """
+        SELECT
+            id,
+            student_id,
+            assignment_id,
+            assignment_title,
+            typed_answer,
+            file_name,
+            file_type,
+            file_size,
+            status,
+            submitted_at
+        FROM sss_assignment_submissions
+        WHERE student_id = %s
+          AND assignment_id = %s
+        ORDER BY submitted_at DESC
+        LIMIT 1;
+    """
+
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, (student_id, assignment_id))
+                submission = cursor.fetchone()
+    except psycopg.errors.UndefinedTable as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Assignment submission table is missing. Create sss_assignment_submissions in PostgreSQL.",
+        ) from error
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch assignment submission.",
+        ) from error
+
+    if submission is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No assignment submission found.",
+        )
+
+    return {"submission": submission}
 
 @app.get("/chapter-content")
 def get_chapter_content(

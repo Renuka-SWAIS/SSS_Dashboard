@@ -5,7 +5,7 @@ import { getApiBaseUrl } from "../api-base-url";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = process.env.NEXT_PUBLIC_AI_API;
 const STUDENT_ID = 23;
 
 const chapters = [

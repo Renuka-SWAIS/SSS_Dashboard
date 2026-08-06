@@ -13,9 +13,10 @@ const studyTabs = [
       ["1) Chapters", "/chapters"],
       ["2) Study Material", "/study-material"],
       ["3) Quizzes", "/quizzes"],
-      ["4) AI Learning Path", "/ai-learning-path"]
-    ]
+      ["4) AI Learning Path", "/ai-learning-path"],
+    ],
   },
+
   {
     tone: "orange",
     icon: "clipboard",
@@ -24,22 +25,23 @@ const studyTabs = [
     rows: [
       ["1) My Assignments", "/assignments"],
       ["2) Submit Assignment", "/assignments"],
-      ["3) Feedback & Marks", "/assignments"]
-    ]
+      ["3) Feedback & Marks", "/assignments"],
+    ],
   },
+
   {
     tone: "purple",
     icon: "target",
     title: "Study C: Assessment",
     href: "/assessments",
     rows: [
-      ["1) Unit Test", "/assessments"],
-      ["2) Mock Test", "/assessments"],
-      ["3) Feedback & Marks", "/assessments"],
-      ["4) Student Analysis", "/assessments"],
-      ["5) Teacher Remark", "/assessments"]
-    ]
-  }
+      ["1) Unit Test", "/assessments?tab=unit-test"],
+      ["2) Mock Test", "/assessments?tab=mock-test"],
+      ["3) Feedback & Marks", "/assessments?tab=feedback"],
+      ["4) Student Analysis", "/assessments?tab=student-analysis"],
+      ["5) Teacher Remark", "/assessments?tab=teacher-remark"],
+    ],
+  },
 ];
 
 function PanelIcon({ name }) {
@@ -47,7 +49,7 @@ function PanelIcon({ name }) {
     return (
       <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
         <path d="M4.5 7.4c4.1-.9 7.7-.2 10.8 2.1v16.1c-3.1-2.3-6.7-3-10.8-2.1z" />
-        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c3.1-2.3 6.7-3 10.8-2.1z" />
+        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c3.1-2.3-6.7-3-10.8-2.1z" />
         <path d="M8.2 11.3c1.9-.2 3.6.2 5.1 1.1M8.2 15.1c1.9-.2 3.6.2 5.1 1.1M8.2 18.9c1.9-.2 3.6.2 5.1 1.1M23.8 11.3c-1.9-.2-3.6.2-5.1 1.1M23.8 15.1c-1.9-.2-3.6.2-5.1 1.1M23.8 18.9c-1.9-.2-3.6.2-5.1 1.1" />
       </svg>
     );
@@ -75,22 +77,62 @@ function PanelIcon({ name }) {
 
 export default function StudyTabs() {
   const pathname = usePathname();
-  const activeIndex = studyTabs.findIndex((tab) => tab.rows.some(([, href]) => pathname === href || pathname.startsWith(`${href}/`)));
-  const [openPanel, setOpenPanel] = useState(activeIndex >= 0 ? activeIndex : null);
+
+  const activeIndex = studyTabs.findIndex(
+    (tab) =>
+      pathname === tab.href ||
+      pathname.startsWith(`${tab.href}/`)
+  );
+
+  const [openPanel, setOpenPanel] = useState(
+    activeIndex >= 0 ? activeIndex : null
+  );
 
   return (
-    <section className="content-grid study-tab-strip" aria-label="Study modules">
+    <section
+      className="content-grid study-tab-strip"
+      aria-label="Study modules"
+    >
       {studyTabs.map((tab, index) => (
-        <article className={`study-panel ${tab.tone} ${openPanel === index ? "" : "collapsed"} ${activeIndex === index ? "active-tab" : ""}`} key={tab.title}>
-          <button className="panel-head" type="button" aria-expanded={openPanel === index} onClick={() => setOpenPanel((current) => (current === index ? null : index))}>
+        <article
+          className={`study-panel ${tab.tone} ${
+            openPanel === index ? "" : "collapsed"
+          } ${
+            activeIndex === index ? "active-tab" : ""
+          }`}
+          key={tab.title}
+        >
+          <button
+            className="panel-head"
+            type="button"
+            aria-expanded={openPanel === index}
+            onClick={() =>
+              setOpenPanel((current) =>
+                current === index ? null : index
+              )
+            }
+          >
             <PanelIcon name={tab.icon} />
-            <span className="panel-title">{tab.title}</span>
-            <span className="chevron" aria-hidden="true" />
+
+            <span className="panel-title">
+              {tab.title}
+            </span>
+
+            <span
+              className="chevron"
+              aria-hidden="true"
+            />
           </button>
+
           <div className="accent-line" />
+
           <div className="panel-body">
             {tab.rows.map(([label, href]) => (
-              <a className="study-row" href={href} key={label}>
+              <a
+                className="study-row"
+                href={href}
+                key={label}
+              >
                 <span>{label}</span>
               </a>
             ))}

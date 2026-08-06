@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   ["home", "Dashboard", "/"],
@@ -42,6 +42,14 @@ function Avatar() {
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    router.push("/login");
+  };
 
   function isActive(href) {
     if (href === "/") {
@@ -89,11 +97,10 @@ export default function DashboardShell({ children }) {
         </nav>
 
         <div className="nav-divider" />
-
-        <a className="nav-item logout-link" href="#">
-          <Icon name="power" />
-          <span>Logout</span>
-        </a>
+<button className="nav-item logout-link" onClick={handleLogout}>
+  <Icon name="power" />
+  <span>Logout</span>
+</button>
       </aside>
 
       <section className="workspace">
@@ -131,7 +138,11 @@ export default function DashboardShell({ children }) {
               <span className="badge">3</span>
             </button>
 
-            <button className="top-logout" type="button">
+            <button 
+  className="top-logout" 
+  type="button"
+  onClick={handleLogout}
+>
               <span className="exit-icon" aria-hidden="true" />
               <span>Logout</span>
             </button>
