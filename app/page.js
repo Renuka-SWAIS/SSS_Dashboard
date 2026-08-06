@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import DashboardShell from "./dashboard-shell";
 
 const navItems = [
   ["home", "Dashboard", "/", true],
@@ -24,7 +25,8 @@ const panels = [
       ["book-open", "1) Chapters"],
       ["document", "2) Study Material"],
       ["question", "3) Quizzes"],
-      ["chart", "4) AI Learning Path"]
+      ["chart", "4) AI Learning Path"],
+      ["document", "5) AI Translator"]
     ]
   },
   {
@@ -123,7 +125,8 @@ function StudyPanel({ panel, open, onToggle }) {
             "1) Chapters": "/chapters",
             "2) Study Material": "/study-material",
             "3) Quizzes": "/quizzes",
-            "4) AI Learning Path": "/ai-learning-path"
+            "4) AI Learning Path": "/ai-learning-path",
+            "5) AI Translator": "/ai-translator"
           };
           const rowHref = isCoreMaterial ? coreLinks[label] : panel.tone === "orange" ? "/assignments" : panel.tone === "purple" ? "/assessments" : "#";
 
@@ -142,85 +145,7 @@ export default function DashboardPage() {
   const [openPanel, setOpenPanel] = useState(null);
 
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-           <img
-      src="/SSS_logo.jpeg"
-      alt="SSS Logo"
-      className="brand-logo"
-    />
-          
-          <div>
-            <div className="brand-title">SSS</div>
-            <div className="brand-subtitle">Shiva Satya Sai Educational Society</div>
-          </div>
-        </div>
-
-        <nav className="nav-list" aria-label="Student navigation">
-          {navItems.map(([icon, label, href, active]) => (
-            <a className={`nav-item ${active ? "active" : ""}`} href={href} key={label}>
-              <Icon name={icon} />
-              <span>{label}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="nav-divider" />
-
-        <nav className="nav-list compact" aria-label="Settings navigation">
-          {settingsItems.map(([icon, label, href]) => (
-            <a className="nav-item" href={href} key={label}>
-              <Icon name={icon} />
-              <span>{label}</span>
-            </a>
-          ))}
-        </nav>
-
-        <div className="nav-divider" />
-
-        <a className="nav-item logout-link" href="#">
-          <Icon name="power" />
-          <span>Logout</span>
-        </a>
-      </aside>
-
-      <section className="workspace">
-        <header className="topbar">
-          <div className="student-card">
-            <Avatar />
-            <div className="student-info">
-              <p>Welcome back,</p>
-              <h1>Aarav</h1>
-              <div className="chips">
-                <span>Roll No.: 23</span>
-                <span>Admission No.: 2024/08/0156</span>
-                <span>Class: Class 9</span>
-                <span>Section: A</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="top-actions">
-            <label className="language-select">
-              <span>Language</span>
-              <select defaultValue="English" aria-label="Select language">
-                <option>English</option>
-                <option>Hindi</option>
-                <option>Telugu</option>
-              </select>
-            </label>
-            <button className="bell-button" aria-label="Notifications">
-              <span className="bell-icon" aria-hidden="true" />
-              <span className="badge">3</span>
-            </button>
-            <button className="top-logout" type="button">
-              <span className="exit-icon" aria-hidden="true" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </header>
-
+    <DashboardShell>
         <section className="content-grid" aria-label="Study modules">
           {panels.map((panel, index) => (
             <StudyPanel
@@ -231,7 +156,6 @@ export default function DashboardPage() {
             />
           ))}
         </section>
-      </section>
-    </main>
+    </DashboardShell>
   );
 }

@@ -1,25 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 import { generateAlert } from "../../services/studentApi";
+import { getApiBaseUrl } from "../api-base-url";
 
-const assignments = [
-  ["1", "AI Ethics Case Study", "20 May 2024", "Submitted", "View"],
-  ["2", "Data Privacy Analysis", "28 May 2024", "In Progress", "Continue"],
-  ["3", "Logistics Problem Set", "05 Jun 2024", "Not Started", "Start"],
-  ["4", "Algorithm Bias Report", "12 Jun 2024", "Not Started", "Start"],
-  ["5", "Sustainable Supply Chain", "20 Jun 2024", "Not Started", "Start"],
-];
+const API_BASE_URL = getApiBaseUrl();
+
+function formatDate(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit", month: "short", year: "numeric",
+  }).format(new Date(value));
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || "").split(",").pop());
+    reader.onerror = () => reject(new Error("Unable to read selected file."));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function AssignmentsPage() {
+  const [assignments, setAssignments] = useState([]);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [studentId, setStudentId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [showAiSummary, setShowAiSummary] = useState(false);
 
   const [alertLoading, setAlertLoading] = useState(false);
   const [alertResponse, setAlertResponse] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
+
+  async function loadAssignments(preferredId = null) {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const localBackend = typeof window === "undefined"
+        ? "http://localhost:8000"
+        : `${window.location.protocol}//${window.location.hostname}:8000`;
+      const apiCandidates = [...new Set([API_BASE_URL, localBackend])];
+      let data = null;
+      let lastError = null;
+
+      for (const apiUrl of apiCandidates) {
+        try {
+          const response = await fetch(`${apiUrl}/assignments/current`, { cache: "no-store" });
+          const responseData = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(responseData.detail || `Unable to load assignments (${response.status}).`);
+          data = responseData;
+          break;
+        } catch (requestError) {
+          lastError = requestError;
+        }
+      }
+
+      if (!data) throw lastError || new Error("Unable to load assignments.");
+      const rows = Array.isArray(data.assignments) ? data.assignments : [];
+      setAssignments(rows);
+      setStudentId(data.student_id || null);
+      setSelectedAssignment((current) =>
+        rows.find((item) => item.assignment_id === (preferredId || current?.assignment_id)) || rows[0] || null
+      );
+    } catch (error) {
+      setAssignments([]);
+      setSelectedAssignment(null);
+      setLoadError(error.message || "Unable to load assignments.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { loadAssignments(); }, []);
 
   /* -------------------------------------------------------
      AI ALERT
@@ -31,8 +88,8 @@ export default function AssignmentsPage() {
       setAlertResponse(null);
 
       const response = await generateAlert({
-        assignment_name: "Data Privacy Analysis",
-        due_date: "2024-05-28",
+        assignment_name: selectedAssignment?.assignment_title || "Assignment",
+        due_date: selectedAssignment?.due_date || "",
         user_email: "student@example.com",
         client_name: "SSS",
       });
@@ -127,25 +184,39 @@ export default function AssignmentsPage() {
      SUBMIT ASSIGNMENT
   ------------------------------------------------------- */
 
-  function handleSubmitAssignment() {
+  async function handleSubmitAssignment() {
     if (!selectedFile) {
       alert("Please select a file first.");
       return;
     }
 
-    console.log(
-      "Ready to submit:",
-      selectedFile
-    );
+    if (!selectedAssignment || !studentId) {
+      alert("Please select an assignment first.");
+      return;
+    }
 
-    /*
-      Backend submission API will be connected here
-      after confirming the Swagger request-body fields.
-    */
-
-    alert(
-      `${selectedFile.name} is ready for submission.`
-    );
+    try {
+      const response = await fetch(`${API_BASE_URL}/assignment-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          student_id: studentId,
+          assignment_id: selectedAssignment.assignment_id,
+          assignment_title: selectedAssignment.assignment_title,
+          file_name: selectedFile.name,
+          file_type: selectedFile.type,
+          file_size: selectedFile.size,
+          file_content_base64: await fileToBase64(selectedFile),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "Unable to submit assignment.");
+      alert(`${selectedFile.name} submitted successfully.`);
+      setSelectedFile(null);
+      await loadAssignments(selectedAssignment.assignment_id);
+    } catch (error) {
+      alert(error.message || "Assignment submission failed.");
+    }
   }
 
   return (
@@ -172,8 +243,10 @@ export default function AssignmentsPage() {
                 <button
                   className="soft-button"
                   type="button"
+                  onClick={() => loadAssignments()}
+                  disabled={loading}
                 >
-                  View All
+                  {loading ? "Loading..." : "Refresh"}
                 </button>
 
               </div>
@@ -200,48 +273,36 @@ export default function AssignmentsPage() {
 
                 <tbody>
 
-                  {assignments.map(
-                    ([
-                      number,
-                      title,
-                      dueDate,
-                      status,
-                      action,
-                    ]) => (
+                  {assignments.map((assignment) => (
 
                       <tr
-                        className={
-                          status ===
-                          "In Progress"
-                            ? "highlight-row"
-                            : ""
-                        }
-                        key={number}
+                        className={selectedAssignment?.assignment_id === assignment.assignment_id ? "highlight-row" : ""}
+                        key={assignment.assignment_id}
                       >
 
                         <td>
-                          {number}
+                          {assignment.number}
                         </td>
 
                         <td>
-                          {title}
+                          {assignment.assignment_title}
                         </td>
 
                         <td>
-                          {dueDate}
+                          {formatDate(assignment.due_date)}
                         </td>
 
                         <td>
 
                           <span
-                            className={`status-pill ${status
+                            className={`status-pill ${(assignment.status || "Not Started")
                               .toLowerCase()
                               .replaceAll(
                                 " ",
                                 "-"
                               )}`}
                           >
-                            {status}
+                            {assignment.status || "Not Started"}
                           </span>
 
                         </td>
@@ -251,8 +312,13 @@ export default function AssignmentsPage() {
                           <button
                             className="table-action"
                             type="button"
+                            onClick={() => {
+                              setSelectedAssignment(assignment);
+                              setSelectedFile(null);
+                              setShowAiSummary(false);
+                            }}
                           >
-                            {action}
+                            {assignment.action || "Start"}
                           </button>
 
                         </td>
@@ -260,6 +326,10 @@ export default function AssignmentsPage() {
                       </tr>
 
                     )
+                  )}
+
+                  {!loading && assignments.length === 0 && (
+                    <tr><td colSpan="5">{loadError || "No assignments available."}</td></tr>
                   )}
 
                 </tbody>
@@ -283,12 +353,11 @@ export default function AssignmentsPage() {
               <div className="card-title-row">
 
                 <h2>
-                  Assignment 2:
-                  Data Privacy Analysis
+                  {selectedAssignment?.assignment_title || "Select an assignment"}
                 </h2>
 
-                <span className="status-pill in-progress">
-                  In Progress
+                <span className={`status-pill ${(selectedAssignment?.status || "not-started").toLowerCase().replaceAll(" ", "-")}`}>
+                  {selectedAssignment?.status || "Not Started"}
                 </span>
 
               </div>
@@ -296,19 +365,17 @@ export default function AssignmentsPage() {
               <div className="meta-row">
 
                 <span>
-                  Due Date: 28 May 2024
+                  Due Date: {formatDate(selectedAssignment?.due_date)}
                 </span>
 
                 <span>
-                  Max Marks: 25
+                  {selectedAssignment?.subject_name || selectedAssignment?.chapter_name || "Assignment"}
                 </span>
 
               </div>
 
               <p>
-                Analyze a real-world data privacy
-                scenario and identify potential risks.
-                Suggest proper mitigation strategies.
+                {selectedAssignment?.assignment_text || "Select an assignment to view its instructions."}
               </p>
 
               {/* -------------------------------------------------------
@@ -321,7 +388,7 @@ export default function AssignmentsPage() {
                   className="primary-button"
                   type="button"
                   onClick={handleAskAi}
-                  disabled={alertLoading}
+                  disabled={alertLoading || !selectedAssignment}
                 >
                   {alertLoading
                     ? "Generating..."
@@ -339,13 +406,7 @@ export default function AssignmentsPage() {
                   </strong>
 
                   <p>
-                    Data Privacy Analysis asks you
-                    to study how personal data can be
-                    exposed or misused, identify privacy
-                    risks, and recommend practical
-                    safeguards such as consent, access
-                    control, encryption, and responsible
-                    data handling.
+                    {selectedAssignment?.assignment_text || "Read the assignment instructions carefully and submit before the due date."}
                   </p>
 
                   {alertResponse && (
@@ -393,11 +454,12 @@ export default function AssignmentsPage() {
 
                 {/* Hidden File Input */}
 
-                <input
-                  id="assignment-file"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
+                  <input
+                    id="assignment-file"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleFileChange}
+                    disabled={!selectedAssignment}
                   style={{
                     display: "none",
                   }}
@@ -411,6 +473,8 @@ export default function AssignmentsPage() {
                   style={{
                     cursor: "pointer",
                     display: "inline-block",
+                    opacity: selectedAssignment ? 1 : 0.55,
+                    pointerEvents: selectedAssignment ? "auto" : "none",
                   }}
                 >
                   Browse Files
@@ -514,7 +578,7 @@ export default function AssignmentsPage() {
                   onClick={
                     handleSubmitAssignment
                   }
-                  disabled={!selectedFile}
+                  disabled={!selectedFile || !selectedAssignment || !studentId}
                 >
                   Submit Assignment
                 </button>

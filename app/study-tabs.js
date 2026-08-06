@@ -14,6 +14,7 @@ const studyTabs = [
       ["2) Study Material", "/study-material"],
       ["3) Quizzes", "/quizzes"],
       ["4) AI Learning Path", "/ai-learning-path"],
+      ["5) AI Translator", "/ai-translator"],
     ],
   },
 
