@@ -32,14 +32,43 @@ function handleLogout(event) {
 
 function useCurrentStudent() {
   const [student, setStudent] = useState(null);
+
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_BASE_URL}/students/current`, { credentials: "include" })
-      .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((data) => { if (!cancelled) setStudent(data.student || null); })
-      .catch(() => { if (!cancelled) setStudent(null); });
+
+    async function loadStudent() {
+      try {
+        const sessionResponse = await fetch(`${loginServiceUrl}/api/auth/session`, {
+          credentials: "include"
+        });
+        const session = await sessionResponse.json().catch(() => ({}));
+        const email = session?.user?.email?.trim();
+
+        if (!sessionResponse.ok || !email) {
+          throw new Error("Logged-in student email is unavailable.");
+        }
+
+        const params = new URLSearchParams({ email });
+        const response = await fetch(`${API_BASE_URL}/students/current?${params.toString()}`, {
+          credentials: "include"
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setStudent(data.student || null);
+        }
+      } catch {
+        if (!cancelled) {
+          setStudent(null);
+        }
+      }
+    }
+
+    loadStudent();
+
     return () => { cancelled = true; };
   }, []);
+
   return student;
 }
 
