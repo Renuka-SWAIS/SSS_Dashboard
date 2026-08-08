@@ -38,13 +38,23 @@ function useCurrentStudent() {
 
     async function loadStudent() {
       try {
-        const sessionResponse = await fetch(`${loginServiceUrl}/api/auth/session`, {
-          credentials: "include"
-        });
-        const session = await sessionResponse.json().catch(() => ({}));
-        const email = session?.user?.email?.trim();
+        const storedSession =
+          window.sessionStorage.getItem("sssUserSession") ||
+          window.localStorage.getItem("sssUserSession");
+        let session = storedSession ? JSON.parse(storedSession) : null;
 
-        if (!sessionResponse.ok || !email) {
+        if (!session?.email) {
+          const sessionResponse = await fetch(`${loginServiceUrl}/api/auth/session`, {
+            credentials: "include"
+          });
+          session = sessionResponse.ok
+            ? await sessionResponse.json().catch(() => null)
+            : null;
+        }
+
+        const email = (session?.email || session?.user?.email || "").trim();
+
+        if (!email) {
           throw new Error("Logged-in student email is unavailable.");
         }
 
