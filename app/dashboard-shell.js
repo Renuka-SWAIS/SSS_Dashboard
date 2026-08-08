@@ -22,42 +22,53 @@ const settingsItems = [
 
 const API_BASE_URL = getApiBaseUrl();
 const loginServiceUrl = process.env.NEXT_PUBLIC_LOGIN_URL || "https://staging.sss.swais.in";
-const loginServiceSignOutUrl = process.env.NEXT_PUBLIC_LOGIN_SIGNOUT_URL ||
-  `${loginServiceUrl}/api/auth/signout?callbackUrl=${encodeURIComponent(loginServiceUrl)}`;
 
-async function handleLogout(event) {
+function handleLogout(event) {
   event.preventDefault();
   window.localStorage.clear();
   window.sessionStorage.clear();
-
-  try {
-    const csrfResponse = await fetch(`${loginServiceUrl}/api/auth/csrf`, { credentials: "include" });
-    if (!csrfResponse.ok) throw new Error("Unable to start logout.");
-    const { csrfToken } = await csrfResponse.json();
-    const response = await fetch(`${loginServiceUrl}/api/auth/signout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ callbackUrl: loginServiceUrl, csrfToken, json: "true" }),
-      credentials: "include"
-    });
-    if (!response.ok) throw new Error("Unable to complete logout.");
-    const data = await response.json();
-    window.location.assign(data.url || loginServiceUrl);
-  } catch {
-    window.location.assign(loginServiceSignOutUrl);
-  }
+  window.location.replace(loginServiceUrl);
 }
 
 function useCurrentStudent() {
   const [student, setStudent] = useState(null);
+
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_BASE_URL}/students/current`, { credentials: "include" })
-      .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((data) => { if (!cancelled) setStudent(data.student || null); })
-      .catch(() => { if (!cancelled) setStudent(null); });
+
+    async function loadStudent() {
+      try {
+        const sessionResponse = await fetch(`${loginServiceUrl}/api/auth/session`, {
+          credentials: "include"
+        });
+        const session = await sessionResponse.json().catch(() => ({}));
+        const email = session?.user?.email?.trim();
+
+        if (!sessionResponse.ok || !email) {
+          throw new Error("Logged-in student email is unavailable.");
+        }
+
+        const params = new URLSearchParams({ email });
+        const response = await fetch(`${API_BASE_URL}/students/current?${params.toString()}`, {
+          credentials: "include"
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setStudent(data.student || null);
+        }
+      } catch {
+        if (!cancelled) {
+          setStudent(null);
+        }
+      }
+    }
+
+    loadStudent();
+
     return () => { cancelled = true; };
   }, []);
+
   return student;
 }
 

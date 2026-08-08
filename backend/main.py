@@ -225,7 +225,9 @@ def database_health_check():
     return {"status": "ok", "database": "connected"}
 
 @app.get("/students/current")
-def get_current_student():
+def get_current_student(
+    email: str = Query(..., min_length=3, max_length=150),
+):
     query = """
         SELECT
             student.student_id,
@@ -239,6 +241,7 @@ def get_current_student():
           ON class.class_id = student.class_id
         WHERE COALESCE(student.record_status, 'Active') = 'Active'
           AND COALESCE(student.is_active, true) = true
+          AND LOWER(BTRIM(student.student_email)) = LOWER(BTRIM(%s))
         ORDER BY
             CASE WHEN student.admission_no IS NULL THEN 1 ELSE 0 END,
             student.student_id
@@ -248,7 +251,7 @@ def get_current_student():
     try:
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, (email,))
                 student = cursor.fetchone()
     except psycopg.errors.UndefinedTable as error:
         raise HTTPException(
@@ -262,7 +265,7 @@ def get_current_student():
         ) from error
 
     if student is None:
-        raise HTTPException(status_code=404, detail="No active student found.")
+        raise HTTPException(status_code=404, detail="No active student found for the logged-in email.")
 
     return {"student": student}
 
