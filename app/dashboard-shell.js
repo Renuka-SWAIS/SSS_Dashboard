@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getApiBaseUrl } from "./api-base-url";
 import NotificationBell from "./notification-bell";
+import VoiceTextTools from './voice-text-tools';
 
 const navItems = [
   ["home", "Dashboard", "/"],
@@ -179,22 +180,22 @@ export default function DashboardShell({ children }) {
             </div>
           </div>
 
-          <div className="top-actions">
+          <div className='top-actions'>
+  <h2 className='page-title'>Student Dashboard</h2>
 
- <h2 className="page-title">Student Dashboard</h2>
- 
-            <label className="language-select">
+  <label className='language-select'>
+    <span>Language</span>
+    <select defaultValue='English' aria-label='Select language'>
+      <option>English</option>
+      <option>Hindi</option>
+      <option>Telugu</option>
+    </select>
+  </label>
 
-              
-              <span>Language</span>
-              <select defaultValue="English" aria-label="Select language">
-                <option>English</option>
-                <option>Hindi</option>
-                <option>Telugu</option>
-              </select>
-            </label>
-            <NotificationBell />
-          </div>
+  <VoiceTextTools />
+
+  <NotificationBell />
+</div>
         </header>
 
         {children}
