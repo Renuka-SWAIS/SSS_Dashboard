@@ -2568,3 +2568,164 @@ button {
   background: #fff8c8 !important;
   transition: background 0.2s ease, outline 0.2s ease;
 }
+
+
+/* ===== SGS STYLE TOPBAR ===== */
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:24px;
+  padding:28px 36px;
+  background:linear-gradient(90deg,#021428 0%,#032246 55%,#021428 100%);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.student-card{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex:1;
+}
+
+.student-info h1{
+  font-size:3rem;
+  line-height:1;
+  margin:6px 0 14px;
+  color:#ffffff;
+  font-weight:800;
+}
+
+.student-info p{
+  margin:0;
+  color:#ffffff;
+  font-size:1rem;
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.chips span{
+  padding:12px 18px;
+  border:1px solid #0b5fd7;
+  border-radius:14px;
+  background:#061a33;
+  color:#ffffff;
+  font-weight:700;
+  min-width:120px;
+  text-align:center;
+}
+
+.top-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:16px;
+  min-width:430px;
+}
+
+.page-title{
+  margin:0;
+  color:#ffffff;
+  font-size:2.2rem;
+  font-weight:800;
+  text-align:right;
+}
+
+.top-controls{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+}
+
+.language-select{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#ffffff;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.language-select select{
+  min-width:140px;
+  height:46px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:#0b1730;
+  color:#ffffff;
+  font-size:1rem;
+  font-weight:700;
+  padding:0 14px;
+  outline:none;
+}
+
+.language-select select:focus{
+  border-color:#2d7ff9;
+  box-shadow:0 0 0 3px rgba(45,127,249,0.18);
+}
+
+.top-controls .voice-tools,
+.top-controls .notification-bell{
+  flex-shrink:0;
+}
+
+.top-controls .voice-tools{
+  width:320px;
+}
+
+.top-controls .voice-tools input{
+  width:100%;
+}
+
+.top-controls .notification-bell button,
+.top-controls .notification-bell .bell-button{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:#0b1730;
+  border:1px solid rgba(255,255,255,0.12);
+  color:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.top-controls .notification-bell button:hover,
+.top-controls .notification-bell .bell-button:hover{
+  background:#102244;
+}
+
+@media (max-width: 1200px){
+  .topbar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .top-actions{
+    align-items:flex-start;
+    min-width:0;
+  }
+
+  .page-title{
+    text-align:left;
+  }
+
+  .top-controls{
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .top-controls .voice-tools{
+    width:100%;
+  }
+}
+
+

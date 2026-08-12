@@ -38,9 +38,9 @@ const studyTabs = [
     rows: [
       ["1) Unit Test", "/assessments?tab=unit-test"],
       ["2) Mock Test", "/assessments?tab=mock-test"],
-      ["3) Feedback & Marks", "/assessments?tab=feedback"],
-      ["4) Student Analysis", "/assessments?tab=student-analysis"],
-      ["5) Teacher Remark", "/assessments?tab=teacher-remark"],
+      
+      ["3) Student Analysis", "/assessments?tab=student-analysis"],
+      ["4) Teacher Remark", "/assessments?tab=teacher-remark"],
     ],
   },
 ];
