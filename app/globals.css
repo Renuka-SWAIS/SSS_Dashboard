@@ -136,23 +136,16 @@ button {
   box-shadow: inset 8px 0 18px rgba(9, 25, 42, 0.08);
 }
 
-.topbar {
-  min-height: 178px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 28px 19px;
-  color: #fff;
-  background:
-    radial-gradient(circle at 54% -20%, rgba(17, 91, 151, 0.45), transparent 42%),
-    linear-gradient(180deg, #061a2e, #06182b);
-}
+
+
+
 
 .student-card {
   display: flex;
   align-items: center;
-  gap: 19px;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
 }
 
 .avatar {
@@ -168,21 +161,18 @@ button {
 }
 
 .student-info p {
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 500;
+  margin: 0 0 3px;
 }
 
 .student-info h1 {
-  margin: 0 0 14px;
-  font-size: 31px;
-  line-height: 1;
+  margin: 0 0 8px;
 }
 
 .chips {
   display: flex;
+  align-items: center;
+  gap: 7px;
   flex-wrap: wrap;
-  gap: 18px;
 }
 
 .chips span,
@@ -2234,29 +2224,24 @@ button {
     font-size: 15px;
   }
 
-  .topbar {
-    min-height: auto;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 22px 18px;
-  }
+ 
+ 
 
+
+ 
   .chapter-screen {
     min-height: auto;
   }
 
-  .student-card {
-    align-items: flex-start;
-  }
+  
 
   .avatar {
     width: 78px;
     height: 88px;
   }
 
-  .chips {
-    gap: 8px;
-  }
+  
+
 
   .chips span {
     min-height: 36px;
@@ -2577,9 +2562,8 @@ button {
   justify-content:space-between;
   align-items:center;
   gap:24px;
-  padding:28px 36px;
-  background:linear-gradient(90deg,#021428 0%,#032246 55%,#021428 100%);
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:18px 24px;
+  background:linear-gradient(135deg,#031326 0%,#042548 100%);
 }
 
 .student-card{
@@ -2624,8 +2608,9 @@ button {
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:16px;
-  min-width:430px;
+  gap:12px;
+  width:460px;
+  min-width:460px;
 }
 
 .page-title{
@@ -2639,18 +2624,15 @@ button {
 .top-controls{
   display:flex;
   align-items:center;
-  gap:14px;
-  width:100%;
   justify-content:flex-end;
-  flex-wrap:nowrap;
+  gap:12px;
+  width:100%;
 }
 
 .language-select{
   display:flex;
   align-items:center;
-  gap:10px;
-  color:#ffffff;
-  font-weight:700;
+  gap:8px;
   white-space:nowrap;
 }
 
@@ -2677,8 +2659,10 @@ button {
   flex-shrink:0;
 }
 
+
 .top-controls .voice-tools{
-  width:320px;
+  width:280px;
+  max-width:280px;
 }
 
 .top-controls .voice-tools input{
@@ -2729,3 +2713,292 @@ button {
 }
 
 
+/* =========================================================
+   PROFESSIONAL STUDENT DASHBOARD TOPBAR
+   ========================================================= */
+
+.topbar {
+  width: 100%;
+  min-height: 86px;
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   LEFT SIDE - STUDENT
+   ========================================================= */
+
+.student-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.student-info {
+  min-width: 0;
+}
+
+.student-info > p {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-info h1 {
+  margin: 0 0 7px;
+  font-size: 28px;
+  line-height: 1.05;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+/* Avatar */
+
+.avatar {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+}
+
+/* Student information chips */
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chips span {
+  min-height: 28px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+/* =========================================================
+   RIGHT SIDE
+   ========================================================= */
+
+.top-actions {
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding-top: 0;
+}
+
+/* Student Dashboard */
+
+.page-title {
+  margin: 0;
+  text-align: right;
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Language + Search + Audio + Mic + Notification */
+
+.top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: auto;
+}
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+.language-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.language-select > span {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.language-select select {
+  min-width: 95px;
+  width: 95px;
+  height: 36px;
+  padding: 0 28px 0 10px;
+  border-radius: 9px;
+  box-sizing: border-box;
+  font-size: 12px;
+}
+
+/* Prevent controls from stretching */
+
+.top-controls > * {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   SEARCH / VOICE BAR
+   ========================================================= */
+
+.top-controls .voice-search-bar {
+  width: 210px;
+  height: 36px;
+  min-height: 36px;
+}
+
+/* =========================================================
+   TOOL BUTTONS
+   ========================================================= */
+
+.top-controls .round-tool-button {
+  width: 32px;
+  height: 32px;
+}
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
+.workspace {
+  min-width: 0;
+  width: 100%;
+}
+
+.workspace > .topbar {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1250px) {
+
+  .topbar {
+    padding: 12px 18px;
+    gap: 14px;
+  }
+
+  .student-info h1 {
+    font-size: 25px;
+  }
+
+  .avatar {
+    width: 62px;
+    height: 62px;
+    flex-basis: 62px;
+  }
+
+  .top-controls {
+    gap: 6px;
+  }
+
+  .top-controls .voice-search-bar {
+    width: 180px;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+  .topbar {
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-card {
+    width: 100%;
+  }
+
+  .top-actions {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .page-title {
+    text-align: left;
+  }
+
+  .top-controls {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .topbar {
+    padding: 14px;
+  }
+
+  .student-card {
+    align-items: flex-start;
+  }
+
+  .avatar {
+    width: 55px;
+    height: 55px;
+    flex-basis: 55px;
+  }
+
+  .student-info h1 {
+    font-size: 22px;
+  }
+
+  .chips {
+    gap: 4px;
+  }
+
+  .chips span {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+
+  .top-controls {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .language-select {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .language-select select {
+    width: 120px;
+    min-width: 120px;
+  }
+
+  .top-controls .voice-search-bar {
+    width: 100%;
+  }
+}
