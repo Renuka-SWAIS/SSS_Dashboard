@@ -147,11 +147,11 @@ export default function DashboardShell({ children }) {
     <main className='app-shell'>
       <aside className='sidebar'>
         <div className='brand'>
-          <img
-            src='/SSS_logo.jpeg'
-            alt='SSS Logo'
-            className='brand-logo'
-          />
+       <img
+  src='/student/SSS_logo.jpeg'
+  alt='SSS Logo'
+  className='brand-logo'
+/>
           <div>
             <div className='brand-title'>SSS</div>
             <div className='brand-subtitle'>
