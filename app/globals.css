@@ -2391,3 +2391,6 @@ button {
 .translator-output { min-height: 240px; padding: 14px; border: 1px solid #ccd9e8; border-radius: 7px; background: #fff; color: #07133c; font-size: 17px; line-height: 1.65; white-space: pre-wrap; }
 .translator-panel.output { background: #fffaf0; }
 @media (max-width: 900px) { .translator-grid { grid-template-columns: 1fr; } }
+.chapter-pdf-viewer { display: grid; gap: 12px; margin-top: 18px; }
+.chapter-pdf-viewer iframe { width: 100%; min-height: 720px; border: 1px solid #ccd9e8; border-radius: 8px; background: #fff; }
+.chapter-pdf-viewer a { width: fit-content; color: #075ee5; font-weight: 800; }
