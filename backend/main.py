@@ -1,8 +1,6 @@
 import os
 import base64
 import binascii
-import re
-import uuid
 from contextlib import contextmanager
 from datetime import date, timedelta
 from pathlib import Path
@@ -10,12 +8,8 @@ from pathlib import Path
 
 
 import psycopg
-import boto3
-from botocore.config import Config
-from botocore.exceptions import BotoCoreError, ClientError
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from psycopg.rows import dict_row
@@ -108,180 +102,6 @@ class StudyContentGenerationInput(BaseModel):
     student_id: int = Field(..., ge=1)
     chapter_id: int = Field(..., ge=1)
     classification: str = Field(..., min_length=3, max_length=40)
-
-
-class ChapterPdfInput(BaseModel):
-    chapter_id: int = Field(..., ge=1)
-    file_name: str = Field(..., min_length=5, max_length=255)
-    file_content_base64: str = Field(..., min_length=20)
-
-
-def get_s3_client():
-    region = (os.getenv("AWS_REGION") or "ap-south-2").strip()
-    return boto3.client(
-        "s3",
-        region_name=region,
-        endpoint_url=f"https://s3.{region}.amazonaws.com",
-        config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}),
-    )
-
-
-def parse_s3_url(file_url: str) -> tuple[str, str]:
-    if not file_url.startswith("s3://"):
-        raise ValueError("Chapter PDF URL must use the s3://bucket/key format.")
-    bucket_and_key = file_url[5:].split("/", 1)
-    if len(bucket_and_key) != 2 or not all(bucket_and_key):
-        raise ValueError("Chapter PDF S3 URL is incomplete.")
-    return bucket_and_key[0], bucket_and_key[1]
-
-
-def safe_s3_file_name(file_name: str) -> str:
-    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", Path(file_name).name).strip("-.")
-    return stem or "chapter.pdf"
-
-
-@app.post("/chapter-pdf")
-def upload_chapter_pdf(payload: ChapterPdfInput):
-    if not payload.file_name.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
-    try:
-        file_content = base64.b64decode(payload.file_content_base64, validate=True)
-    except (binascii.Error, ValueError) as error:
-        raise HTTPException(status_code=400, detail="Invalid PDF content.") from error
-    if not file_content.startswith(b"%PDF-"):
-        raise HTTPException(status_code=400, detail="Selected file is not a valid PDF.")
-    if len(file_content) > 25 * 1024 * 1024:
-        raise HTTPException(status_code=413, detail="PDF must be 25 MB or smaller.")
-    bucket = (os.getenv("AWS_S3_BUCKET_NAME") or "").strip()
-    if not bucket:
-        raise HTTPException(status_code=500, detail="AWS_S3_BUCKET_NAME is not configured.")
-
-    object_key = None
-    try:
-        with get_connection() as connection:
-            with connection.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(
-                    """
-                    SELECT chapter.chapter_id, chapter.chapter_no, chapter.chapter_name,
-                           subject.subject_id, subject.subject_name, subject.class_id
-                    FROM sss_chapter_master chapter
-                    JOIN sss_subject_master subject ON subject.subject_id = chapter.subject_id
-                    WHERE chapter.chapter_id = %s
-                    """,
-                    (payload.chapter_id,),
-                )
-                chapter = cursor.fetchone()
-                if chapter is None:
-                    raise HTTPException(status_code=404, detail="Chapter not found.")
-
-                object_key = (
-                    f"chapters/class-{chapter['class_id']}/subject-{chapter['subject_id']}/"
-                    f"chapter-{chapter['chapter_id']}/{uuid.uuid4().hex[:12]}-{safe_s3_file_name(payload.file_name)}"
-                )
-                get_s3_client().put_object(
-                    Bucket=bucket,
-                    Key=object_key,
-                    Body=file_content,
-                    ContentType="application/pdf",
-                )
-                s3_url = f"s3://{bucket}/{object_key}"
-
-                cursor.execute(
-                    """
-                    UPDATE sss_chapter_content
-                    SET pdf_url = %s,
-                        content_title = COALESCE(NULLIF(BTRIM(content_title), ''), %s),
-                        subject = COALESCE(NULLIF(BTRIM(subject), ''), %s),
-                        lesson = COALESCE(NULLIF(BTRIM(lesson), ''), %s)
-                    WHERE id = (
-                        SELECT id FROM sss_chapter_content
-                        WHERE chapter_id = %s ORDER BY id LIMIT 1
-                    )
-                    RETURNING id;
-                    """,
-                    (
-                        s3_url,
-                        chapter["chapter_name"],
-                        chapter["subject_name"],
-                        f"Lesson {chapter['chapter_no'] or chapter['chapter_id']}",
-                        payload.chapter_id,
-                    ),
-                )
-                content_row = cursor.fetchone()
-                if content_row is None:
-                    cursor.execute(
-                        """
-                        INSERT INTO sss_chapter_content
-                            (chapter_id, subject, lesson, content_title, full_text_content, pdf_url)
-                        VALUES (%s, %s, %s, %s, '', %s)
-                        RETURNING id;
-                        """,
-                        (
-                            payload.chapter_id,
-                            chapter["subject_name"],
-                            f"Lesson {chapter['chapter_no'] or chapter['chapter_id']}",
-                            chapter["chapter_name"],
-                            s3_url,
-                        ),
-                    )
-                    content_row = cursor.fetchone()
-                connection.commit()
-    except HTTPException:
-        raise
-    except (BotoCoreError, ClientError) as error:
-        raise HTTPException(status_code=502, detail="Unable to upload chapter PDF to S3.") from error
-    except psycopg.Error as error:
-        if object_key:
-            try:
-                get_s3_client().delete_object(Bucket=bucket, Key=object_key)
-            except (BotoCoreError, ClientError):
-                pass
-        raise HTTPException(status_code=500, detail="Unable to save the chapter PDF URL.") from error
-    return {
-        "status": "success",
-        "chapter_id": payload.chapter_id,
-        "content_id": content_row["id"],
-        "file_name": payload.file_name,
-        "file_size": len(file_content),
-    }
-
-
-@app.get("/chapter-pdf/{chapter_id}")
-def view_chapter_pdf(chapter_id: int):
-    try:
-        with get_connection() as connection:
-            with connection.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(
-                    """
-                    SELECT pdf_url
-                    FROM sss_chapter_content
-                    WHERE chapter_id = %s AND NULLIF(BTRIM(pdf_url), '') IS NOT NULL
-                    ORDER BY id LIMIT 1
-                    """,
-                    (chapter_id,),
-                )
-                document = cursor.fetchone()
-    except psycopg.Error as error:
-        raise HTTPException(status_code=500, detail="Unable to fetch chapter PDF.") from error
-    if document is None:
-        raise HTTPException(status_code=404, detail="No PDF uploaded for this chapter.")
-    try:
-        bucket, object_key = parse_s3_url(document["pdf_url"])
-        view_url = get_s3_client().generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": bucket,
-                "Key": object_key,
-                "ResponseContentType": "application/pdf",
-                "ResponseContentDisposition": "inline",
-            },
-            ExpiresIn=3600,
-        )
-    except ValueError as error:
-        raise HTTPException(status_code=500, detail=str(error)) from error
-    except (BotoCoreError, ClientError) as error:
-        raise HTTPException(status_code=502, detail="Unable to open chapter PDF from S3.") from error
-    return RedirectResponse(view_url, status_code=307)
 
 
 @app.post("/ai/generate-study-content")
@@ -913,12 +733,9 @@ def get_chapters(subject_id: int = Query(..., ge=1)):
 def get_chapter_content(chapter_id: int = Query(..., ge=1)):
 
     query = """
-        SELECT chapter.chapter_name,
-               COALESCE(content.content_title, chapter.chapter_name) AS content_title,
-               content.full_text_content, content.pdf_url
-        FROM sss_chapter_master chapter
-        LEFT JOIN sss_chapter_content content ON content.chapter_id = chapter.chapter_id
-        WHERE chapter.chapter_id = %s
+        SELECT content_title, full_text_content
+        FROM sss_chapter_content
+        WHERE chapter_id = %s
         LIMIT 1;
     """
 
@@ -947,8 +764,7 @@ def get_chapter_content(chapter_id: int = Query(..., ge=1)):
     return {
         "chapter_id": chapter_id,
         "content_title": row["content_title"],
-        "full_text_content": row["full_text_content"] or "",
-        "pdf_url": f"/chapter-pdf/{chapter_id}" if row.get("pdf_url") else None,
+        "full_text_content": row["full_text_content"],
     }
 
 

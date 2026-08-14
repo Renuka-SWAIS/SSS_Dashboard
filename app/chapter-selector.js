@@ -818,19 +818,7 @@ export default function ChapterSelector({
 
                 {/* CONTENT */}
 
-                {chapterContent.pdf_url && (
-                  <div className="chapter-pdf-viewer">
-                    <iframe
-                      src={`${API_BASE_URL}${chapterContent.pdf_url}`}
-                      title={`${chapterContent.content_title} PDF`}
-                    />
-                    <a href={`${API_BASE_URL}${chapterContent.pdf_url}`} target="_blank" rel="noreferrer">
-                      Open PDF in new tab
-                    </a>
-                  </div>
-                )}
-
-                {!chapterContent.pdf_url && <div className="chapter-text">
+                <div className="chapter-text">
 
                   {paragraphs.length >
                   0 ? (
@@ -856,7 +844,7 @@ export default function ChapterSelector({
                     </p>
                   )}
 
-                </div>}
+                </div>
 
               </article>
             )}
