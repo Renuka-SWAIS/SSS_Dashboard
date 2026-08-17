@@ -36,11 +36,11 @@ const studyTabs = [
     title: "Study C: Assessment",
     href: "/student/assessments",
     rows: [
-      ["1) Unit Test", "/assessments?tab=unit-test"],
-      ["2) Mock Test", "/assessments?tab=mock-test"],
+      ["1) Unit Test", "/student/assessments?tab=unit-test"],
+      ["2) Mock Test", "/student/assessments?tab=mock-test"],
       
-      ["3) Student Analysis", "/assessments?tab=student-analysis"],
-      ["4) Teacher Remark", "/assessments?tab=teacher-remark"],
+      ["3) Student Analysis", "/student/assessments?tab=student-analysis"],
+      ["4) Teacher Remark", "/student/assessments?tab=teacher-remark"],
     ],
   },
 ];

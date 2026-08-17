@@ -8,7 +8,7 @@ import NotificationBell from './notification-bell';
 import VoiceTextTools from './voice-text-tools';
 
 const navItems = [
-  ['home', 'Dashboard', '/'],
+  ['home', 'Dashboard','/' ],
   ['book-open', 'Core Study', '/chapters'],
   ['document', 'AI Translator', '/ai-translator'],
   ['clipboard', 'Assignments', '/assignments'],

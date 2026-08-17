@@ -12,8 +12,8 @@ const navItems = [
 ];
 
 const settingsItems = [
-  ["settings", "Settings", "/student/settings"],
-  ["help", "Help & Support", "/student/help"],
+  ["settings", "Settings", "/settings"],
+  ["help", "Help & Support", "student/help"],
 ];
 
 const panels = [
