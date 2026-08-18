@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const studyTabs = [
@@ -8,13 +9,13 @@ const studyTabs = [
     tone: "green",
     icon: "book-open",
     title: "Study A: Core Material",
-    href: "/student/chapters",
+    href: "/chapters",
     rows: [
-      ["1) Chapters", "/student/chapters"],
-      ["2) Study Material", "/student/study-material"],
-      ["3) Quizzes", "/student/quizzes"],
-      ["4) AI Learning Path", "/student/ai-learning-path"],
-      ["5) AI Translator", "/student/ai-translator"],
+      ["1) Chapters", "/chapters"],
+      ["2) Study Material", "/study-material"],
+      ["3) Quizzes", "/quizzes"],
+      ["4) AI Learning Path", "/ai-learning-path"],
+      ["5) AI Translator", "/ai-translator"],
     ],
   },
 
@@ -22,11 +23,11 @@ const studyTabs = [
     tone: "orange",
     icon: "clipboard",
     title: "Study B: Assignment",
-    href: "/student/assignments",
+    href: "/assignments",
     rows: [
-      ["1) My Assignments", "/student/assignments"],
-      ["2) Submit Assignment", "/student/assignments"],
-      ["3) Feedback & Marks", "/student/assignments"],
+      ["1) My Assignments", "/assignments"],
+      ["2) Submit Assignment", "/assignments"],
+      ["3) Feedback & Marks", "/assignments"],
     ],
   },
 
@@ -34,13 +35,13 @@ const studyTabs = [
     tone: "purple",
     icon: "target",
     title: "Study C: Assessment",
-    href: "/student/assessments",
+    href: "/assessments",
     rows: [
-      ["1) Unit Test", "/student/assessments?tab=unit-test"],
-      ["2) Mock Test", "/student/assessments?tab=mock-test"],
+      ["1) Unit Test", "/assessments?tab=unit-test"],
+      ["2) Mock Test", "/assessments?tab=mock-test"],
       
-      ["3) Student Analysis", "/student/assessments?tab=student-analysis"],
-      ["4) Teacher Remark", "/student/assessments?tab=teacher-remark"],
+      ["3) Student Analysis", "/assessments?tab=student-analysis"],
+      ["4) Teacher Remark", "/assessments?tab=teacher-remark"],
     ],
   },
 ];
@@ -129,13 +130,13 @@ export default function StudyTabs() {
 
           <div className="panel-body">
             {tab.rows.map(([label, href]) => (
-              <a
+              <Link
                 className="study-row"
                 href={href}
                 key={label}
               >
                 <span>{label}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </article>

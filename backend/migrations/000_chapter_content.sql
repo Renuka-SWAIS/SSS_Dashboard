@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS sss_chapter_content (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE sss_chapter_content
+ADD COLUMN IF NOT EXISTS pdf_url TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_sss_chapter_content_subject_lesson
     ON sss_chapter_content (subject, lesson);
 
