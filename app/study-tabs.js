@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const studyTabs = [
@@ -129,13 +130,13 @@ export default function StudyTabs() {
 
           <div className="panel-body">
             {tab.rows.map(([label, href]) => (
-              <a
+              <Link
                 className="study-row"
                 href={href}
                 key={label}
               >
                 <span>{label}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </article>

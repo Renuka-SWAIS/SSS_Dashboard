@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import DashboardShell from "./dashboard-shell";
 
 const navItems = [
@@ -131,9 +132,9 @@ function StudyPanel({ panel, open, onToggle }) {
           const rowHref = isCoreMaterial ? coreLinks[label] : panel.tone === "orange" ? "/assignments" : panel.tone === "purple" ? "/assessments" : "#";
 
           return (
-            <a className="study-row" href={rowHref} key={label}>
+            <Link className="study-row" href={rowHref} key={label}>
               <span>{label}</span>
-            </a>
+            </Link>
           );
         })}
       </div>

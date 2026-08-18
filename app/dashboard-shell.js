@@ -125,7 +125,7 @@ export default function DashboardShell({ children }) {
       <aside className="sidebar">
         <div className="brand">
          <img
-  src="/SSS_logo.jpeg"
+  src="/student/SSS_logo.jpeg"
   alt="SSS Logo"
   className="brand-logo"
 />   
