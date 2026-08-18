@@ -1,20 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import DashboardShell from "./dashboard-shell";
 
 const navItems = [
-  ["home", "Dashboard", "/", true],
-  ["book-open", "Core Study", "/chapters"],
-  ["clipboard", "Assignments", "/assignments"],
-  ["target", "Assessments", "/assessments"],
-  ["chart", "My Progress", "/progress"]
+  ["home", "Dashboard", "/student/"],
+  ["book-open", "Core Study", "/student/chapters"],
+  ["clipboard", "Assignments", "/student/assignments"],
+  ["target", "Assessments", "/student/assessments"],
+  ["chart", "My Progress", "/student/progress"],
 ];
 
 const settingsItems = [
   ["settings", "Settings", "/settings"],
-  ["help", "Help & Support", "/help"]
+  ["help", "Help & Support", "student/help"],
 ];
 
 const panels = [
@@ -27,8 +26,8 @@ const panels = [
       ["document", "2) Study Material"],
       ["question", "3) Quizzes"],
       ["chart", "4) AI Learning Path"],
-      ["document", "5) AI Translator"]
-    ]
+      ["document", "5) AI Translator"],
+    ],
   },
   {
     tone: "orange",
@@ -37,8 +36,8 @@ const panels = [
     rows: [
       ["clipboard", "1) My Assignments"],
       ["upload", "2) Submit Assignment"],
-      ["star", "3) Feedback & Marks"]
-    ]
+      ["star", "3) Feedback & Marks"],
+    ],
   },
   {
     tone: "purple",
@@ -47,31 +46,43 @@ const panels = [
     rows: [
       ["checklist", "1) Unit Test"],
       ["monitor", "2) Mock Test"],
-      ["star", "3) Feedback & Marks"],
-      ["chart", "4) Student Analysis"],
-      ["note", "5) Teacher Remark"]
-    ]
-  }
+      ["chart", "3) Student Analysis"],
+      ["note", "4) Teacher Remark"],
+    ],
+  },
 ];
 
 function Icon({ name, className = "" }) {
-  return <span className={`icon ${name} ${className}`} aria-hidden="true" />;
+  return (
+    <span
+      className={`icon ${name} ${className}`}
+      aria-hidden="true"
+    />
+  );
 }
 
 function PanelIcon({ name }) {
   if (name === "book-open") {
     return (
-      <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+      <svg
+        className="panel-svg"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+      >
         <path d="M4.5 7.4c4.1-.9 7.7-.2 10.8 2.1v16.1c-3.1-2.3-6.7-3-10.8-2.1z" />
-        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c3.1-2.3 6.7-3 10.8-2.1z" />
-        <path d="M8.2 11.3c1.9-.2 3.6.2 5.1 1.1M8.2 15.1c1.9-.2 3.6.2 5.1 1.1M8.2 18.9c1.9-.2 3.6.2 5.1 1.1M23.8 11.3c-1.9-.2-3.6.2-5.1 1.1M23.8 15.1c-1.9-.2-3.6.2-5.1 1.1M23.8 18.9c-1.9-.2-3.6.2-5.1 1.1" />
+        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c3.1-2.3-6.7-3-10.8-2.1z" />
+        <path d="M8.2 11.3c1.9-.2 3.6.2 5.1 1.1M8.2 15.1c1.9-.2 3.6.2 5.1 1.1M8.2 18.9c1.9-.2 3.6-.2 5.1 1.1M23.8 11.3c-1.9-.2-3.6.2-5.1 1.1M23.8 15.1c-1.9-.2-3.6-.2-5.1 1.1M23.8 18.9c-1.9-.2-3.6-.2-5.1 1.1" />
       </svg>
     );
   }
 
   if (name === "clipboard") {
     return (
-      <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+      <svg
+        className="panel-svg"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+      >
         <path d="M10.2 6.8H8.5a2.3 2.3 0 0 0-2.3 2.3v17.1a2.3 2.3 0 0 0 2.3 2.3h15a2.3 2.3 0 0 0 2.3-2.3V9.1a2.3 2.3 0 0 0-2.3-2.3h-1.7" />
         <path d="M12.1 8.8h7.8V5.9h-2.1a2 2 0 0 0-3.6 0h-2.1z" />
         <path d="m11.1 14.2 1.7 1.7 3.1-3.2M18.5 15h4.2M11.1 20.2l1.7 1.7 3.1-3.2M18.5 21h4.2" />
@@ -80,7 +91,11 @@ function PanelIcon({ name }) {
   }
 
   return (
-    <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+    <svg
+      className="panel-svg"
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+    >
       <circle cx="14.3" cy="17.7" r="9.8" />
       <circle cx="14.3" cy="17.7" r="5.2" />
       <circle cx="14.3" cy="17.7" r="1.8" />
@@ -89,52 +104,140 @@ function PanelIcon({ name }) {
   );
 }
 
-
 function Avatar() {
   return (
     <div className="avatar" aria-hidden="true">
       <svg viewBox="0 0 120 120" role="img">
-        <circle cx="60" cy="60" r="58" fill="#f4f5f7" />
-        <circle cx="60" cy="42" r="29" fill="#3b291f" />
-        <path d="M24 113c7-25 24-39 36-39s29 14 36 39" fill="#fff" stroke="#07192c" strokeWidth="3" />
-        <path d="M52 79h16l-3 35H55z" fill="#1a62a3" />
-        <path d="M38 40c1-19 11-28 23-28 13 0 22 10 22 28v11c0 18-11 32-22 32-12 0-23-14-23-32z" fill="#ffd2a3" stroke="#07192c" strokeWidth="3" />
-        <circle cx="49" cy="50" r="3.2" fill="#07192c" />
-        <circle cx="72" cy="50" r="3.2" fill="#07192c" />
-        <path d="M53 64c5 5 12 5 17 0" fill="none" stroke="#07192c" strokeWidth="3" strokeLinecap="round" />
-        <path d="M33 49c3-18 12-27 28-28 15 1 25 12 27 29-11-1-22-7-29-17-5 10-15 15-26 16z" fill="#2d2018" />
-        <path d="M45 82l15 11 15-11" fill="none" stroke="#07192c" strokeWidth="3" strokeLinejoin="round" />
+        <circle
+          cx="60"
+          cy="60"
+          r="58"
+          fill="#f4f5f7"
+        />
+
+        <circle
+          cx="60"
+          cy="42"
+          r="29"
+          fill="#3b291f"
+        />
+
+        <path
+          d="M24 113c7-25 24-39 36-39s29 14 36 39"
+          fill="#fff"
+          stroke="#07192c"
+          strokeWidth="3"
+        />
+
+        <path
+          d="M52 79h16l-3 35H55z"
+          fill="#1a62a3"
+        />
+
+        <path
+          d="M38 40c1-19 11-28 23-28 13 0 22 10 22 28v11c0 18-11 32-22 32-12 0-23-14-23-32z"
+          fill="#ffd2a3"
+          stroke="#07192c"
+          strokeWidth="3"
+        />
+
+        <circle
+          cx="49"
+          cy="50"
+          r="3.2"
+          fill="#07192c"
+        />
+
+        <circle
+          cx="72"
+          cy="50"
+          r="3.2"
+          fill="#07192c"
+        />
+
+        <path
+          d="M53 64c5 5 12 5 17 0"
+          fill="none"
+          stroke="#07192c"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        <path
+          d="M33 49c3-18 12-27 28-28 15 1 25 12 27 29-11-1-22-7-29-17-5 10-15 15-26 16z"
+          fill="#2d2018"
+        />
+
+        <path
+          d="M45 82l15 11 15-11"
+          fill="none"
+          stroke="#07192c"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
       </svg>
     </div>
   );
 }
 
 function StudyPanel({ panel, open, onToggle }) {
-  const isCoreMaterial = panel.title === "Study A: Core Material";
+  const isCoreMaterial =
+    panel.title === "Study A: Core Material";
+
+  const coreLinks = {
+    "1) Chapters": "/student/chapters",
+    "2) Study Material": "/student/study-material",
+    "3) Quizzes": "/student/quizzes",
+    "4) AI Learning Path": "/student/ai-learning-path",
+    "5) AI Translator": "/student/ai-translator",
+  };
 
   return (
-    <article className={`study-panel ${panel.tone} ${open ? "" : "collapsed"}`}>
-      <button className="panel-head" type="button" aria-expanded={open} onClick={onToggle}>
+    <article
+      className={`study-panel ${panel.tone} ${
+        open ? "" : "collapsed"
+      }`}
+    >
+      <button
+        className="panel-head"
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+      >
         <PanelIcon name={panel.icon} />
-        <span className="panel-title">{panel.title}</span>
-        <span className="chevron" aria-hidden="true" />
+
+        <span className="panel-title">
+          {panel.title}
+        </span>
+
+        <span
+          className="chevron"
+          aria-hidden="true"
+        />
       </button>
+
       <div className="accent-line" />
+
       <div className="panel-body">
         {panel.rows.map(([icon, label]) => {
-          const coreLinks = {
-            "1) Chapters": "/chapters",
-            "2) Study Material": "/study-material",
-            "3) Quizzes": "/quizzes",
-            "4) AI Learning Path": "/ai-learning-path",
-            "5) AI Translator": "/ai-translator"
-          };
-          const rowHref = isCoreMaterial ? coreLinks[label] : panel.tone === "orange" ? "/assignments" : panel.tone === "purple" ? "/assessments" : "#";
+          let rowHref = "#";
+
+          if (isCoreMaterial) {
+            rowHref = coreLinks[label] || "#";
+          } else if (panel.tone === "orange") {
+            rowHref = "/student/assignments";
+          } else if (panel.tone === "purple") {
+            rowHref = "/student/assessments";
+          }
 
           return (
-            <Link className="study-row" href={rowHref} key={label}>
+            <a
+              className="study-row"
+              href={rowHref}
+              key={label}
+            >
               <span>{label}</span>
-            </Link>
+            </a>
           );
         })}
       </div>
@@ -147,16 +250,25 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell>
-        <section className="content-grid" aria-label="Study modules">
-          {panels.map((panel, index) => (
-            <StudyPanel
-              panel={panel}
-              open={openPanel === index}
-              onToggle={() => setOpenPanel((current) => (current === index ? null : index))}
-              key={panel.title}
-            />
-          ))}
-        </section>
+      <section
+        className="content-grid"
+        aria-label="Study modules"
+      >
+        {panels.map((panel, index) => (
+          <StudyPanel
+            key={panel.title}
+            panel={panel}
+            open={openPanel === index}
+            onToggle={() =>
+              setOpenPanel((current) =>
+                current === index
+                  ? null
+                  : index
+              )
+            }
+          />
+        ))}
+      </section>
     </DashboardShell>
   );
 }

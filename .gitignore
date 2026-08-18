@@ -6,3 +6,8 @@ out/
 *.log
 __pycache__/
 *.py[cod]
+
+.env.local
+.env
+.env.*
+!.env.example
