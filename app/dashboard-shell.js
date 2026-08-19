@@ -18,7 +18,6 @@ const navItems = [
 
 const settingsItems = [
   ['settings', 'Settings', '/settings'],
-  ['upload', 'Chapter PDF Upload', '/chapter-upload'],
   ['help', 'Help & Support', '/help'],
 ];
 
