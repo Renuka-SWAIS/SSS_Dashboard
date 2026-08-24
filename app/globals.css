@@ -1530,14 +1530,18 @@ button {
   border-radius: 8px;
   background: #fff;
 }
+.quiz-question {
+  color: #ffffff !important;
+  background: transparent !important;
+}
 
 .quiz-question legend {
   padding: 0 6px;
-  color: #07133c;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   font-size: 18px;
   font-weight: 800;
 }
-
 .quiz-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(180px, 1fr));
@@ -3022,3 +3026,2517 @@ button {
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   SSS STUDENT DASHBOARD - DARK THEME
+   Final theme override
+   ========================================================= */
+
+:root {
+  --sss-sidebar: #061d32;
+  --sss-sidebar-dark: #041526;
+  --sss-header: #061b35;
+  --sss-main: #17183d;
+  --sss-main-deep: #12132f;
+  --sss-card: #1b1d45;
+  --sss-card-light: #222552;
+  --sss-border: #28466f;
+  --sss-blue: #1264c7;
+  --sss-blue-light: #1677e8;
+  --sss-text: #ffffff;
+  --sss-muted: #c7c9dc;
+}
+
+
+/* =========================================================
+   PAGE / BODY
+   ========================================================= */
+
+html,
+body {
+  background: var(--sss-main) !important;
+  color: var(--sss-text) !important;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at 70% 10%,
+      rgba(48, 52, 125, 0.22),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #11122f 0%,
+      #17183d 55%,
+      #141535 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   MAIN APP
+   ========================================================= */
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--sss-main) !important;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(13, 78, 126, 0.25),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      #03192c 0%,
+      #06243a 48%,
+      #041a2d 100%
+    ) !important;
+
+  border-right: 1px solid #185083 !important;
+
+  color: #ffffff !important;
+}
+
+
+/* Brand */
+
+.brand-title {
+  color: #ffffff !important;
+}
+
+.brand-subtitle {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SIDEBAR NAVIGATION
+   ========================================================= */
+
+.nav-item {
+  color: #ffffff !important;
+  background: transparent;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.nav-item:hover {
+  background: rgba(26, 92, 145, 0.35) !important;
+}
+
+.nav-item.active {
+  background:
+    linear-gradient(
+      135deg,
+      #155e99 0%,
+      #104f82 100%
+    ) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(73, 158, 230, 0.25),
+    0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.nav-divider {
+  background: #17649d !important;
+}
+
+.logout-link {
+  color: #ff625b !important;
+}
+
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
+.workspace {
+  min-width: 0;
+  width: 100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #151638 0%,
+      #181940 55%,
+      #141535 100%
+    ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow: none !important;
+}
+
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.topbar {
+  width: 100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #031a31 0%,
+      #062442 50%,
+      #071d38 100%
+    ) !important;
+
+  border-bottom: 1px solid #183d65 !important;
+
+  color: #ffffff !important;
+}
+
+
+/* Student information */
+
+.student-info {
+  color: #ffffff !important;
+}
+
+.student-info > p {
+  color: #ffffff !important;
+}
+
+.student-info h1 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   STUDENT CHIPS
+   ========================================================= */
+
+.chips span {
+  background:
+    rgba(7, 30, 55, 0.95) !important;
+
+  border: 1px solid #0963bb !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(48, 125, 210, 0.12);
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.page-title {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+.language-select {
+  color: #ffffff !important;
+}
+
+.language-select > span {
+  color: #ffffff !important;
+}
+
+.language-select select {
+  background: #101c35 !important;
+  border: 1px solid #2c456a !important;
+  color: #ffffff !important;
+}
+
+.language-select select:focus {
+  border-color: #247ee6 !important;
+  box-shadow:
+    0 0 0 3px rgba(36, 126, 230, 0.18) !important;
+}
+
+.language-select option {
+  background: #101c35 !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SEARCH / VOICE BAR
+   ========================================================= */
+
+.voice-search-bar {
+  background:
+    #f7f7f9 !important;
+
+  border: 1px solid #345273 !important;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.28) !important;
+}
+
+.voice-search-bar input {
+  background: transparent !important;
+  color: #18213a !important;
+}
+
+.voice-search-bar input::placeholder {
+  color: #778197 !important;
+}
+
+
+/* =========================================================
+   VOICE / TOOL BUTTONS
+   ========================================================= */
+
+.round-tool-button {
+  background: #0d1d38 !important;
+  border-color: #315175 !important;
+  color: #ffffff !important;
+}
+
+.round-tool-button:hover {
+  background: #14315b !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION
+   ========================================================= */
+
+.top-controls .notification-bell button,
+.top-controls .notification-bell .bell-button {
+  background: #0d1d38 !important;
+  border: 1px solid #315175 !important;
+  color: #ffffff !important;
+}
+
+.top-controls .notification-bell button:hover,
+.top-controls .notification-bell .bell-button:hover {
+  background: #14315b !important;
+}
+
+
+/* =========================================================
+   DASHBOARD CONTENT
+   ========================================================= */
+
+.content-grid {
+  background: transparent !important;
+}
+
+
+/* =========================================================
+   STUDY PANELS
+   ========================================================= */
+
+.study-panel {
+  background: #1b1d45 !important;
+
+  border-color: #344878 !important;
+
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* Green */
+
+.study-panel.green {
+  --panel-color: #21c875;
+
+  border-color: rgba(33, 200, 117, 0.55) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #183b3b,
+      #172e3c 55%,
+      #182a3c
+    ) !important;
+}
+
+
+/* Orange */
+
+.study-panel.orange {
+  --panel-color: #ff812d;
+
+  border-color: rgba(255, 129, 45, 0.55) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #3d2b29,
+      #302333 55%,
+      #28203a
+    ) !important;
+}
+
+
+/* Purple */
+
+.study-panel.purple {
+  --panel-color: #8b5cf6;
+
+  border-color: rgba(139, 92, 246, 0.6) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #30264d,
+      #252345 55%,
+      #211f3e
+    ) !important;
+}
+
+
+/* =========================================================
+   STUDY PANEL HEADERS
+   ========================================================= */
+
+.panel-head {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.green .panel-head {
+  background: rgba(33, 200, 117, 0.13) !important;
+}
+
+.orange .panel-head {
+  background: rgba(255, 129, 45, 0.13) !important;
+}
+
+.purple .panel-head {
+  background: rgba(139, 92, 246, 0.14) !important;
+}
+
+.panel-title {
+  color: #ffffff !important;
+}
+
+.study-row {
+  color: #ffffff !important;
+}
+
+.study-panel.active-tab {
+  box-shadow:
+    inset 0 0 0 2px var(--panel-color),
+    0 12px 28px rgba(0, 0, 0, 0.25) !important;
+}
+
+
+/* =========================================================
+   CHAPTER / MODULE / ASSESSMENT PAGES
+   ========================================================= */
+
+.chapter-screen,
+.module-page,
+.assessment-page {
+  background: var(--sss-main) !important;
+  color: #ffffff !important;
+}
+
+.chapter-content-card,
+.chapter-message-card,
+.module-card {
+  background: #1b1d45 !important;
+  border-color: #344878 !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.22) !important;
+}
+
+.module-card h2,
+.chapter-content-card h2 {
+  color: #ffffff !important;
+}
+
+.module-card p,
+.chapter-content-card p {
+  color: #c7c9dc !important;
+}
+
+
+/* =========================================================
+   GENERAL DARK CARDS
+   ========================================================= */
+
+.analysis-card,
+.learning-track,
+.quiz-score-card,
+.assessment-dashboard,
+.assessment-card {
+  background: #1b1d45 !important;
+  border-color: #344878 !important;
+  color: #ffffff !important;
+}
+
+.analysis-card h3,
+.learning-track h3,
+.recommended-materials h3 {
+  color: #ffffff !important;
+}
+
+.analysis-card p,
+.learning-track p {
+  color: #c7c9dc !important;
+}
+
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+input,
+textarea,
+select {
+  background: #101c35;
+  color: #ffffff;
+  border-color: #344878;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8d94aa;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #247ee6;
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(36, 126, 230, 0.15);
+}
+
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.data-table {
+  background: #1b1d45 !important;
+  color: #ffffff !important;
+}
+
+.data-table th {
+  background: #101c35 !important;
+  color: #ffffff !important;
+}
+
+.data-table td {
+  background: #1b1d45 !important;
+  color: #dfe2f0 !important;
+  border-color: #344878 !important;
+}
+
+
+/* =========================================================
+   DARK BUTTONS
+   ========================================================= */
+
+.primary-button {
+  background: #1264c7 !important;
+  border-color: #2379dc !important;
+  color: #ffffff !important;
+}
+
+.primary-button:hover {
+  background: #1677e8 !important;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #10122f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30446b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #42618f;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .workspace {
+    background: #17183d !important;
+  }
+
+  .topbar {
+    background:
+      linear-gradient(
+        135deg,
+        #031a31,
+        #062442
+      ) !important;
+  }
+
+  .content-grid {
+    background: #17183d !important;
+  }
+
+  .study-panel {
+    background: #1b1d45 !important;
+  }
+}
+
+/* =========================================================
+   SSS STUDENT DASHBOARD
+   DARK 3D INTERACTIVE THEME
+   ========================================================= */
+
+:root {
+  --sss-bg: #151638;
+  --sss-bg-2: #1a1b43;
+
+  --sss-sidebar: #041c30;
+  --sss-sidebar-2: #062942;
+
+  --sss-header: #031b32;
+
+  --sss-card: #20234d;
+  --sss-card-2: #252957;
+
+  --sss-border: #345184;
+
+  --sss-blue: #1675dc;
+  --sss-blue-bright: #2187f3;
+
+  --sss-text: #ffffff;
+  --sss-muted: #c7cbe0;
+
+  --sss-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.35);
+
+  --sss-shadow-hover:
+    0 20px 42px rgba(0, 0, 0, 0.48);
+}
+
+
+/* =========================================================
+   GLOBAL BACKGROUND
+   ========================================================= */
+
+html,
+body {
+  background: #151638 !important;
+  color: #ffffff !important;
+}
+
+body {
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(
+      circle at 75% 15%,
+      rgba(78, 72, 180, 0.20),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      #10112f 0%,
+      #17183d 50%,
+      #131432 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+.app-shell {
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      135deg,
+      #11132f,
+      #17183d 55%,
+      #141535
+    ) !important;
+
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(15, 90, 145, 0.25),
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      #03182a,
+      #062a42 52%,
+      #041a2d
+    ) !important;
+
+  border-right: 1px solid #18517d !important;
+
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SIDEBAR 3D NAVIGATION
+   ========================================================= */
+
+.nav-item {
+  position: relative;
+
+  color: #ffffff !important;
+
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+
+  transform-style: preserve-3d;
+}
+
+
+/* Mouse over */
+
+.nav-item:hover {
+  transform:
+    translateX(7px)
+    translateY(-2px)
+    scale(1.025);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(30, 108, 170, 0.55),
+      rgba(15, 68, 112, 0.65)
+    ) !important;
+
+  box-shadow:
+    8px 10px 22px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(72, 161, 232, 0.30);
+}
+
+
+/* Active */
+
+.nav-item.active {
+  transform: translateX(4px);
+
+  background:
+    linear-gradient(
+      135deg,
+      #1767a5,
+      #0d4d80
+    ) !important;
+
+  box-shadow:
+    7px 9px 24px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(87, 174, 239, 0.30);
+}
+
+
+/* Icon gets slight 3D movement */
+
+.nav-item:hover .icon {
+  transform:
+    translateZ(12px)
+    scale(1.08);
+
+  filter:
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.35));
+
+  transition: transform 180ms ease;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+  transition:
+    transform 200ms ease,
+    filter 200ms ease;
+}
+
+.brand:hover {
+  transform:
+    translateY(-3px)
+    scale(1.015);
+
+  filter:
+    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
+}
+
+.brand-title,
+.brand-subtitle {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   MAIN WORKSPACE
+   ========================================================= */
+
+.workspace {
+  background:
+    linear-gradient(
+      135deg,
+      #151638 0%,
+      #1a1b42 55%,
+      #141535 100%
+    ) !important;
+
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.topbar {
+  background:
+    linear-gradient(
+      135deg,
+      #03192d 0%,
+      #062743 55%,
+      #061d37 100%
+    ) !important;
+
+  border-bottom: 1px solid #1d456c !important;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================================
+   STUDENT INFO
+   ========================================================= */
+
+.student-info,
+.student-info p,
+.student-info h1 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   STUDENT CHIPS - 3D
+   ========================================================= */
+
+.chips span {
+  background:
+    linear-gradient(
+      145deg,
+      #092746,
+      #061a31
+    ) !important;
+
+  border: 1px solid #0965bd !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    4px 5px 12px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(52, 128, 204, 0.10);
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.chips span:hover {
+  transform:
+    translateY(-3px)
+    translateZ(5px);
+
+  box-shadow:
+    0 9px 18px rgba(0, 0, 0, 0.38);
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.page-title {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
+
+.language-select,
+.language-select > span {
+  color: #ffffff !important;
+}
+
+.language-select select {
+  background: #101d35 !important;
+  color: #ffffff !important;
+
+  border: 1px solid #345174 !important;
+
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================================
+   SEARCH BAR
+   ========================================================= */
+
+.voice-search-bar {
+  background: #f5f6f8 !important;
+
+  border: 1px solid #345273 !important;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.35) !important;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.voice-search-bar:hover {
+  transform:
+    translateY(-3px)
+    scale(1.015);
+
+  box-shadow:
+    0 13px 28px rgba(0, 0, 0, 0.42) !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION / TOOL BUTTONS
+   ========================================================= */
+
+.round-tool-button,
+.top-controls .notification-bell button,
+.top-controls .notification-bell .bell-button {
+  background:
+    linear-gradient(
+      145deg,
+      #12294a,
+      #0a1a32
+    ) !important;
+
+  border: 1px solid #345579 !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    4px 5px 12px rgba(0, 0, 0, 0.28);
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.round-tool-button:hover,
+.top-controls .notification-bell button:hover,
+.top-controls .notification-bell .bell-button:hover {
+  transform:
+    translateY(-4px)
+    scale(1.06);
+
+  background: #163762 !important;
+
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.40);
+}
+
+
+/* =========================================================
+   ALL MAIN CARDS
+   ========================================================= */
+
+.card,
+.module-card,
+.chapter-content-card,
+.chapter-message-card,
+.analysis-card,
+.learning-track,
+.assessment-card,
+.assessment-dashboard,
+.quiz-score-card,
+.workflow-card,
+.assignment-upload-card,
+.generated-path-card,
+.ai-learning-card {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #1a1c42
+    ) !important;
+
+  border-color: #354a79 !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    var(--sss-shadow);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+
+/* 3D hover */
+
+.card:hover,
+.module-card:hover,
+.chapter-content-card:hover,
+.chapter-message-card:hover,
+.analysis-card:hover,
+.learning-track:hover,
+.assessment-card:hover,
+.assessment-dashboard:hover,
+.quiz-score-card:hover,
+.workflow-card:hover,
+.assignment-upload-card:hover,
+.generated-path-card:hover,
+.ai-learning-card:hover {
+  transform:
+    translateY(-6px)
+    perspective(800px)
+    rotateX(1deg);
+
+  border-color: #4d72ae !important;
+
+  box-shadow:
+    var(--sss-shadow-hover);
+}
+
+
+/* =========================================================
+   ALL HEADINGS
+   ========================================================= */
+
+.card h1,
+.card h2,
+.card h3,
+.card h4,
+.module-card h2,
+.chapter-content-card h2,
+.learning-track h3,
+.assessment-card h2,
+.assessment-card h3 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   NORMAL TEXT
+   ========================================================= */
+
+.card p,
+.module-card p,
+.chapter-content-card p,
+.learning-track p {
+  color: #c9cde0 !important;
+}
+
+
+/* =========================================================
+   AI TRANSLATOR
+   ========================================================= */
+
+.translator-grid {
+  gap: 18px;
+}
+
+
+/* Main translator panels */
+
+.translator-panel {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #191b40
+    ) !important;
+
+  border: 1px solid #3b4f80 !important;
+
+  color: #ffffff !important;
+
+  border-radius: 14px !important;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.32);
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+
+/* 3D hover translator panel */
+
+.translator-panel:hover {
+  transform:
+    translateY(-7px)
+    rotateX(1deg)
+    rotateY(-1deg);
+
+  border-color: #5478b4 !important;
+
+  box-shadow:
+    0 22px 45px rgba(0, 0, 0, 0.45);
+}
+
+
+/* Translator headings */
+
+.translator-panel h3,
+.translator-panel strong,
+.translator-panel label {
+  color: #ffffff !important;
+}
+
+
+/* Translator source / target selects */
+
+.translator-panel select {
+  background: #111d37 !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #3b557e !important;
+
+  border-radius: 10px !important;
+}
+
+
+/* Translator text input */
+
+.translator-panel textarea,
+.translator-panel input {
+  background:
+    linear-gradient(
+      145deg,
+      #111b34,
+      #0e182e
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #38557e !important;
+
+  border-radius: 10px !important;
+
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+
+.translator-panel textarea::placeholder,
+.translator-panel input::placeholder {
+  color: #9299b2 !important;
+}
+
+
+/* Output */
+
+.translator-panel.output {
+  background:
+    linear-gradient(
+      145deg,
+      #28234a,
+      #1d1c3e
+    ) !important;
+}
+
+
+/* Output text */
+
+.translator-output {
+  background:
+    linear-gradient(
+      145deg,
+      #111b35,
+      #0d172d
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #3a557f !important;
+
+  border-radius: 10px !important;
+
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================================================
+   TRANSLATOR BUTTONS
+   ========================================================= */
+
+.translator-panel button,
+.soft-button,
+.table-action,
+.primary-button {
+  border-radius: 10px !important;
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+
+/* Hover */
+
+.translator-panel button:hover,
+.soft-button:hover,
+.table-action:hover,
+.primary-button:hover {
+  transform:
+    translateY(-4px)
+    scale(1.025);
+
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35);
+
+  filter: brightness(1.08);
+}
+
+
+/* Click */
+
+.translator-panel button:active,
+.soft-button:active,
+.table-action:active,
+.primary-button:active {
+  transform:
+    translateY(1px)
+    scale(0.98);
+}
+
+
+/* Primary buttons */
+
+.primary-button {
+  background:
+    linear-gradient(
+      145deg,
+      #1976dc,
+      #0d5cb5
+    ) !important;
+
+  border: 1px solid #318be9 !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 8px 18px rgba(0, 76, 160, 0.35);
+}
+
+
+/* =========================================================
+   STUDY A / B / C CARDS
+   ========================================================= */
+
+.study-panel {
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.study-panel:hover {
+  transform:
+    translateY(-7px)
+    scale(1.015);
+
+  box-shadow:
+    0 18px 35px rgba(0, 0, 0, 0.38) !important;
+}
+
+
+/* Study rows */
+
+.study-tab-strip .study-row {
+  background:
+    rgba(255, 255, 255, 0.06) !important;
+
+  color: #ffffff !important;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.study-tab-strip .study-row:hover {
+  transform:
+    translateX(6px);
+
+  background:
+    rgba(255, 255, 255, 0.12) !important;
+}
+
+
+/* =========================================================
+   MODULE ACTION BUTTONS
+   ========================================================= */
+
+.module-action {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #181a3d
+    ) !important;
+
+  border-color: #354a79 !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.module-action:hover {
+  transform:
+    translateY(-5px)
+    translateX(2px);
+
+  border-color: #5680bc !important;
+
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.38);
+}
+
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.data-table {
+  color: #ffffff !important;
+}
+
+.data-table th {
+  background: #101b34 !important;
+  color: #ffffff !important;
+}
+
+.data-table td {
+  background: #1c1e44 !important;
+  color: #dfe2ef !important;
+  border-color: #35476f !important;
+}
+
+.data-table tbody tr {
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
+}
+
+.data-table tbody tr:hover {
+  background: #252957 !important;
+
+  transform:
+    scale(1.005);
+}
+
+
+/* =========================================================
+   STATUS PILLS
+   ========================================================= */
+
+.status-pill {
+  background: #18213a !important;
+  color: #ffffff !important;
+  border-color: #3b5378 !important;
+}
+
+.status-pill.submitted,
+.status-pill.completed {
+  background: rgba(33, 166, 91, 0.18) !important;
+  color: #63e59b !important;
+  border-color: #299b62 !important;
+}
+
+.status-pill.in-progress {
+  background: rgba(255, 112, 36, 0.16) !important;
+  color: #ff9b5c !important;
+  border-color: #b75b2c !important;
+}
+
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+input,
+textarea,
+select {
+  background: #111d37 !important;
+  color: #ffffff !important;
+  border-color: #354d76 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8f96ae !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #2781e8 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(39, 129, 232, 0.18) !important;
+}
+
+
+/* =========================================================
+   SETTINGS / HELP
+   ========================================================= */
+
+.settings-card,
+.help-card {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #191b40
+    ) !important;
+
+  border-color: #354a79 !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    var(--sss-shadow);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.settings-card:hover,
+.help-card:hover {
+  transform:
+    translateY(-6px);
+
+  box-shadow:
+    var(--sss-shadow-hover);
+}
+
+
+/* =========================================================
+   3D ICON EFFECT
+   ========================================================= */
+
+.study-panel .icon,
+.study-panel svg,
+.panel-svg {
+  transition:
+    transform 200ms ease,
+    filter 200ms ease;
+}
+
+.study-panel:hover .icon,
+.study-panel:hover svg,
+.study-panel:hover .panel-svg {
+  transform:
+    translateZ(12px)
+    scale(1.10)
+    rotate(-3deg);
+
+  filter:
+    drop-shadow(0 5px 7px rgba(0, 0, 0, 0.35));
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e1030;
+}
+
+::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      #35527d,
+      #243c62
+    );
+
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b6e9f;
+}
+
+
+/* =========================================================
+   REDUCE MOTION ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+/* =========================================================
+   ASSESSMENTS — SSS DARK 3D THEME
+   ========================================================= */
+
+/* Main assessment workspace */
+
+.assessment-page,
+.assessment-dashboard,
+.assessment-content,
+.assessment-container {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   TOP ASSESSMENT TABS
+   ========================================================= */
+
+.assessment-tabs,
+.assessment-tab-strip,
+.assessment-nav {
+  background: transparent !important;
+}
+
+.assessment-tabs > *,
+.assessment-tab-strip > *,
+.assessment-nav > * {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #181a3d
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #354a79 !important;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.assessment-tabs > *:hover,
+.assessment-tab-strip > *:hover,
+.assessment-nav > *:hover {
+  transform:
+    translateY(-5px)
+    scale(1.015);
+
+  border-color: #5680bc !important;
+
+  box-shadow:
+    0 15px 28px rgba(0, 0, 0, 0.40);
+}
+
+
+/* =========================================================
+   UNIT TEST CARD
+   ========================================================= */
+
+.unit-test-card,
+.unit-test-panel,
+.assessment-card {
+  background:
+    linear-gradient(
+      145deg,
+      #232550,
+      #191b40
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #3c5586 !important;
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.34);
+
+  border-radius: 14px !important;
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.unit-test-card:hover,
+.unit-test-panel:hover,
+.assessment-card:hover {
+  transform:
+    translateY(-5px);
+
+  border-color: #5275ad !important;
+
+  box-shadow:
+    0 22px 42px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   UNIT TEST TITLE
+   ========================================================= */
+
+.unit-test-card h1,
+.unit-test-card h2,
+.unit-test-card h3,
+.unit-test-panel h1,
+.unit-test-panel h2,
+.assessment-card h1,
+.assessment-card h2,
+.assessment-card h3 {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SUBJECT / CHAPTER / TOTAL MARKS
+   ========================================================= */
+
+.unit-test-card p,
+.unit-test-card span,
+.unit-test-panel p,
+.unit-test-panel span {
+  color: #c8cde1 !important;
+}
+
+
+/* =========================================================
+   QUESTION AREA
+   ========================================================= */
+
+.question-card,
+.question-box,
+.assessment-question,
+.test-question {
+  background:
+    linear-gradient(
+      145deg,
+      #171d39,
+      #11182f
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #354b76 !important;
+
+  border-radius: 12px !important;
+
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.22),
+    0 8px 20px rgba(0, 0, 0, 0.22);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.question-card:hover,
+.question-box:hover,
+.assessment-question:hover,
+.test-question:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.22),
+    0 13px 25px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   QUESTION TEXT
+   ========================================================= */
+
+.question-card *,
+.question-box *,
+.assessment-question *,
+.test-question * {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   STUDENT ANSWER
+   ========================================================= */
+
+.student-answer,
+.student-answer-box,
+.answer-box,
+.answer-card {
+  background:
+    linear-gradient(
+      145deg,
+      #111b35,
+      #0c162c
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #3a547e !important;
+
+  border-radius: 11px !important;
+
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.28);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.student-answer:hover,
+.student-answer-box:hover,
+.answer-box:hover,
+.answer-card:hover {
+  border-color: #4d75ae !important;
+
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.28),
+    0 8px 18px rgba(0, 0, 0, 0.30);
+}
+
+
+/* Student answer heading */
+
+.student-answer h4,
+.student-answer h5,
+.student-answer strong,
+.student-answer-box h4,
+.student-answer-box strong,
+.answer-box h4,
+.answer-box strong {
+  color: #ffffff !important;
+}
+
+
+/* Student answer actual text */
+
+.student-answer p,
+.student-answer-box p,
+.answer-box p,
+.answer-card p {
+  color: #cdd2e3 !important;
+}
+
+
+/* =========================================================
+   AI EVALUATION
+   ========================================================= */
+
+.ai-evaluation,
+.ai-evaluation-card,
+.evaluation-card,
+.ai-result-card {
+  background:
+    linear-gradient(
+      145deg,
+      #232550,
+      #191b40
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #3b5383 !important;
+
+  border-radius: 14px !important;
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.32);
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.ai-evaluation:hover,
+.ai-evaluation-card:hover,
+.evaluation-card:hover,
+.ai-result-card:hover {
+  transform:
+    translateY(-6px);
+
+  border-color: #5579b5 !important;
+
+  box-shadow:
+    0 22px 42px rgba(0, 0, 0, 0.45);
+}
+
+
+/* AI Evaluation heading */
+
+.ai-evaluation h1,
+.ai-evaluation h2,
+.ai-evaluation h3,
+.ai-evaluation-card h1,
+.ai-evaluation-card h2,
+.evaluation-card h2 {
+  color: #ffffff !important;
+}
+
+
+/* Evaluation labels */
+
+.ai-evaluation label,
+.ai-evaluation-card label,
+.evaluation-card label {
+  color: #aeb6d0 !important;
+}
+
+
+/* Evaluation values */
+
+.ai-evaluation strong,
+.ai-evaluation-card strong,
+.evaluation-card strong {
+  color: #ffffff !important;
+}
+
+
+/* Score */
+
+.score,
+.score-value,
+.evaluation-score {
+  color: #25d56b !important;
+
+  text-shadow:
+    0 0 12px rgba(37, 213, 107, 0.20);
+}
+
+
+/* Pending */
+
+.pending,
+.status-pending {
+  color: #ffb15c !important;
+}
+
+
+/* =========================================================
+   READY STATUS
+   ========================================================= */
+
+.status-ready,
+.ready,
+.badge-ready {
+  background:
+    rgba(255, 119, 38, 0.14) !important;
+
+  color: #ff9b52 !important;
+
+  border: 1px solid #a85829 !important;
+
+  box-shadow:
+    0 5px 12px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================================
+   AI EVALUATION BUTTON
+   ========================================================= */
+
+.ai-evaluation button,
+.ai-evaluate-button,
+.evaluate-button {
+  background:
+    linear-gradient(
+      145deg,
+      #1d7be0,
+      #0d5db7
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #318bea !important;
+
+  border-radius: 10px !important;
+
+  box-shadow:
+    0 8px 18px rgba(0, 76, 160, 0.35);
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.ai-evaluation button:hover,
+.ai-evaluate-button:hover,
+.evaluate-button:hover {
+  transform:
+    translateY(-4px)
+    scale(1.025);
+
+  filter: brightness(1.08);
+
+  box-shadow:
+    0 13px 26px rgba(0, 76, 160, 0.45);
+}
+
+
+/* =========================================================
+   RESET BUTTON
+   ========================================================= */
+
+.reset-button,
+button.reset,
+.secondary-button {
+  background:
+    linear-gradient(
+      145deg,
+      #252a4f,
+      #181c3b
+    ) !important;
+
+  color: #ffffff !important;
+
+  border: 1px solid #526184 !important;
+
+  border-radius: 10px !important;
+
+  box-shadow:
+    0 7px 15px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.reset-button:hover,
+button.reset:hover,
+.secondary-button:hover {
+  transform:
+    translateY(-4px);
+
+  box-shadow:
+    0 12px 22px rgba(0, 0, 0, 0.38);
+}
+
+
+/* =========================================================
+   ASSESSMENT GRID — 3D SPACE
+   ========================================================= */
+
+.assessment-grid,
+.assessment-layout,
+.test-layout {
+  perspective: 1200px;
+}
+
+
+/* =========================================================
+   GENERIC ASSESSMENT CARDS
+   ========================================================= */
+
+.assessment-grid > *,
+.assessment-layout > *,
+.test-layout > * {
+  transform-style: preserve-3d;
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.assessment-grid > *:hover,
+.assessment-layout > *:hover,
+.test-layout > *:hover {
+  transform:
+    translateY(-5px)
+    rotateX(1deg);
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.40);
+}
+
+
+/* =========================================================
+   WHITE BACKGROUND OVERRIDES
+   ========================================================= */
+
+/* Catch remaining white assessment containers */
+
+.assessments-page .card,
+.assessments-page .panel,
+.assessments-page .box,
+.assessment-page .card,
+.assessment-page .panel,
+.assessment-page .box {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #191b40
+    ) !important;
+
+  color: #ffffff !important;
+
+  border-color: #354a79 !important;
+}
+
+
+/* Catch white form controls */
+
+.assessments-page input,
+.assessments-page textarea,
+.assessments-page select,
+.assessment-page input,
+.assessment-page textarea,
+.assessment-page select {
+  background: #111c35 !important;
+  color: #ffffff !important;
+  border-color: #3b547d !important;
+}
+
+
+/* =========================================================
+   ASSESSMENT ICONS
+   ========================================================= */
+
+.assessment-card svg,
+.assessment-card .icon,
+.ai-evaluation svg {
+  transition:
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.assessment-card:hover svg,
+.assessment-card:hover .icon,
+.ai-evaluation:hover svg {
+  transform:
+    translateZ(10px)
+    scale(1.08);
+
+  filter:
+    drop-shadow(
+      0 5px 7px rgba(0, 0, 0, 0.38)
+    );
+}
+{
+  background: #f8fbfe;
+}
+/* =========================================================
+   UNIT TEST - STUDENT ANSWER
+   SSS DARK 3D
+   ========================================================= */
+
+.assessment-answer-box {
+  margin-top: 16px;
+  padding: 18px;
+
+  border: 1px solid #3b5686 !important;
+  border-radius: 12px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #101a34,
+      #0b152b
+    ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.30),
+    0 8px 20px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+
+/* Hover = raised 3D */
+
+.assessment-answer-box:hover {
+  transform:
+    translateY(-4px)
+    scale(1.01);
+
+  border-color: #5b7fb8 !important;
+
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.30),
+    0 16px 30px rgba(0, 0, 0, 0.40);
+}
+
+
+/* Student Answer heading */
+
+.assessment-answer-box span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #ffffff !important;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+
+/* Actual student answer */
+
+.assessment-answer-box p {
+  max-width: none;
+
+  margin: 0;
+
+  color: #d8ddec !important;
+
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   UNIT TEST MAIN CARD
+   ========================================================= */
+
+.assessment-dashboard {
+  margin-top: 18px;
+  padding: 22px;
+
+  border: 1px solid #354d7b !important;
+  border-radius: 14px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #20234d,
+      #181a3d
+    ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.34);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.assessment-dashboard:hover {
+  transform:
+    translateY(-4px);
+
+  border-color: #4d70aa !important;
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.42);
+}
+
+
+/* =========================================================
+   UNIT TEST HEADING
+   ========================================================= */
+
+.assessment-dashboard-head h2 {
+  margin: 0;
+
+  color: #ffffff !important;
+
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   UNIT TEST QUESTION / CONTENT
+   ========================================================= */
+
+.assessment-dashboard p {
+  color: #c9cfe2 !important;
+}
+
+
+/* Don't make important question text dark */
+
+.assessment-dashboard strong {
+  color: #ffffff !important;
+}
+
+
+/* =========================================================
+   UNIT TEST META INFORMATION
+   ========================================================= */
+
+.assessment-dashboard .meta-row,
+.assessment-dashboard .test-row,
+.assessment-dashboard .focus-row {
+  color: #c7cde0 !important;
+}
+
+.assessment-dashboard .meta-row span,
+.assessment-dashboard .test-row span {
+  color: #b9c1d8 !important;
+}
+
+
+/* =========================================================
+   AI EVALUATION CARD
+   ========================================================= */
+
+.assessment-ai-card {
+  background:
+    linear-gradient(
+      145deg,
+      #22244e,
+      #191b40
+    ) !important;
+
+  border: 1px solid #354d7b !important;
+
+  border-radius: 14px !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.32);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.assessment-ai-card:hover {
+  transform:
+    translateY(-5px);
+
+  border-color: #5579b4 !important;
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.42);
+}
+
+
+.assessment-ai-card h2,
+.assessment-ai-card h3,
+.assessment-ai-card strong {
+  color: #ffffff !important;
+}
+
+
+.assessment-ai-card p {
+  color: #bfc6dc !important;
+}
+
+
+/* Score */
+
+.assessment-ai-card .score,
+.assessment-ai-card .score-value {
+  color: #21d66b !important;
+}
+
+
+/* Pending */
+
+.assessment-ai-card .status,
+.assessment-ai-card .pending {
+  color: #ffb45c !important;
+}
+
+/* =========================================================
+   FINAL FIX — UNIT TEST + DARK THEME TEXT VISIBILITY
+   Put this at the VERY END of CSS
+   ========================================================= */
+
+/* Main Unit Test area */
+.assessment-dashboard,
+.assessment-dashboard * {
+  color: #ffffff !important;
+}
+
+/* Unit Test title */
+.assessment-dashboard h1,
+.assessment-dashboard h2,
+.assessment-dashboard h3,
+.assessment-dashboard h4,
+.assessment-dashboard h5,
+.assessment-dashboard h6 {
+  color: #ffffff !important;
+}
+
+/* Question text — make clearly visible */
+.assessment-dashboard .question-card,
+.assessment-dashboard .question-box,
+.assessment-dashboard .assessment-question,
+.assessment-dashboard .test-question,
+.assessment-dashboard .question,
+.assessment-dashboard .question-text {
+  color: #ffffff !important;
+}
+
+/* Everything inside question */
+.assessment-dashboard .question-card *,
+.assessment-dashboard .question-box *,
+.assessment-dashboard .assessment-question *,
+.assessment-dashboard .test-question *,
+.assessment-dashboard .question *,
+.assessment-dashboard .question-text * {
+  color: #ffffff !important;
+}
+
+/* Unit Test metadata */
+.assessment-dashboard .meta-row,
+.assessment-dashboard .meta-row span,
+.assessment-dashboard .test-row,
+.assessment-dashboard .test-row span {
+  color: #c9d1e5 !important;
+}
+
+/* Student Answer box */
+.assessment-dashboard .assessment-answer-box {
+  background: linear-gradient(
+    145deg,
+    #101a34,
+    #0b152b
+  ) !important;
+
+  border: 1px solid #3b5686 !important;
+  color: #ffffff !important;
+}
+
+/* Student Answer heading */
+.assessment-dashboard .assessment-answer-box span {
+  color: #ffffff !important;
+}
+
+/* Actual student answer */
+.assessment-dashboard .assessment-answer-box p {
+  color: #d8ddec !important;
+}
+
+/* AI Evaluation card */
+.assessment-dashboard .assessment-ai-card {
+  background: linear-gradient(
+    145deg,
+    #22244e,
+    #191b40
+  ) !important;
+
+  border: 1px solid #354d7b !important;
+  color: #ffffff !important;
+}
+
+/* AI Evaluation title */
+.assessment-dashboard .assessment-ai-card h2,
+.assessment-dashboard .assessment-ai-card h3,
+.assessment-dashboard .assessment-ai-card strong {
+  color: #ffffff !important;
+}
+
+/* AI Evaluation labels/text */
+.assessment-dashboard .assessment-ai-card p,
+.assessment-dashboard .assessment-ai-card span {
+  color: #c9d1e5 !important;
+}
+
+/* Score */
+.assessment-dashboard .assessment-ai-card .score,
+.assessment-dashboard .assessment-ai-card .score-value {
+  color: #21d66b !important;
+}
+
+/* Pending status */
+.assessment-dashboard .assessment-ai-card .status,
+.assessment-dashboard .assessment-ai-card .pending {
+  color: #ffb45c !important;
+}
+
+/* AI Evaluation button */
+.assessment-dashboard .ai-evaluation button,
+.assessment-dashboard .ai-evaluate-button,
+.assessment-dashboard .evaluate-button {
+  background: linear-gradient(
+    145deg,
+    #1d7be0,
+    #0d5db7
+  ) !important;
+
+  color: #ffffff !important;
+  border: 1px solid #318bea !important;
+}
+
+/* Reset button */
+.assessment-dashboard .reset-button,
+.assessment-dashboard button.reset,
+.assessment-dashboard .secondary-button {
+  background: linear-gradient(
+    145deg,
+    #252a4f,
+    #181c3b
+  ) !important;
+
+  color: #ffffff !important;
+  border: 1px solid #526184 !important;
+}
+
+/* Ready badge */
+.assessment-dashboard .status-pill,
+.assessment-dashboard .ready,
+.assessment-dashboard .badge {
+  color: #ffffff !important;
+}
+
+/* Links inside Unit Test */
+.assessment-dashboard a {
+  color: #62aaff !important;
+}
+
+/* Inputs / textareas */
+.assessment-dashboard input,
+.assessment-dashboard textarea,
+.assessment-dashboard select {
+  background: #101c35 !important;
+  color: #ffffff !important;
+  border-color: #3b547d !important;
+}
+
+/* Placeholder */
+.assessment-dashboard input::placeholder,
+.assessment-dashboard textarea::placeholder {
+  color: #9da8c0 !important;
+}
+/* =========================================================
+   FINAL UNIT TEST QUESTION FIX
+   ========================================================= */
+
+.assessment-content-area .quiz-question {
+  color: #ffffff !important;
+}
+
+.assessment-content-area .quiz-question legend {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.assessment-content-area .quiz-question legend::first-line {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* =========================================================
+   STUDENT ANALYSIS — DARK THEME FIX
+   ========================================================= */
+
+.assessment-analysis-grid .module-card {
+  color: #ffffff !important;
+}
+
+/* Student / Class / Overall Score labels */
+.assessment-analysis-grid .result-grid span {
+  color: #cfd5e8 !important;
+}
+
+/* Aarav / Class 9 - A */
+.assessment-analysis-grid .result-grid strong {
+  color: #ffffff !important;
+}
+
+/* Keep score green */
+.assessment-analysis-grid .result-grid strong.score-text {
+  color: #22c55e !important;
+}
+
+/* Subject Performance rows */
+.assessment-analysis-grid .analysis-row {
+  color: #ffffff !important;
+}
+
+.assessment-analysis-grid .analysis-row span {
+  color: #ffffff !important;
+}
+
+.assessment-analysis-grid .analysis-row strong {
+  color: #ffffff !important;
+}
+
+
+
