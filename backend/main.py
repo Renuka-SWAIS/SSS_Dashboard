@@ -403,7 +403,6 @@ def database_health_check():
         raise HTTPException(status_code=503, detail="Database connection failed.") from error
 
     return {"status": "ok", "database": "connected"}
-
 @app.get("/students/current")
 def get_current_student(
     email: str = Query(..., min_length=3, max_length=150),
@@ -411,11 +410,18 @@ def get_current_student(
     query = """
         SELECT
             student.student_id,
-            student.full_name,
-            student.roll_no,
+            student.name AS full_name,
+            student.roll_number AS roll_no,
             student.admission_no,
-            COALESCE(class.class_name, student.class_id::text) AS class_name,
-            COALESCE(student.section, class.section_name) AS section
+            COALESCE(
+                class.class_name,
+                student.class_name,
+                student.class_id::text
+            ) AS class_name,
+            COALESCE(
+                student.section,
+                class.section_name
+            ) AS section
         FROM sss_student_master student
         LEFT JOIN sss_class_master class
           ON class.class_id = student.class_id
@@ -433,11 +439,19 @@ def get_current_student(
             with connection.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(query, (email,))
                 student = cursor.fetchone()
+
     except psycopg.errors.UndefinedTable as error:
         raise HTTPException(
             status_code=500,
-            detail="Student master table is missing. Create sss_student_master in PostgreSQL.",
+            detail="Student master table is missing.",
         ) from error
+
+    except psycopg.errors.UndefinedColumn as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Student table column mismatch.",
+        ) from error
+
     except psycopg.Error as error:
         raise HTTPException(
             status_code=500,
@@ -445,7 +459,10 @@ def get_current_student(
         ) from error
 
     if student is None:
-        raise HTTPException(status_code=404, detail="No active student found for the logged-in email.")
+        raise HTTPException(
+            status_code=404,
+            detail="No active student found for the logged-in email.",
+        )
 
     return {"student": student}
 
