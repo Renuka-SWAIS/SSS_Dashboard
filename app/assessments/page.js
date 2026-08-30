@@ -128,7 +128,7 @@ function AssessmentsContent() {
 
   const tabFromUrl =
     searchParams.get("tab") || "unit-test";
-
+  const [studentEmail, setStudentEmail] = useState("");
   /* -------------------------------------------------------
      MAIN TAB
      ------------------------------------------------------- */
@@ -182,6 +182,69 @@ function AssessmentsContent() {
 
   const [mockQuestionCount, setMockQuestionCount] =
     useState(5);
+
+      /* =======================================================
+     LOAD LOGGED-IN STUDENT EMAIL
+  ======================================================= */
+
+  useEffect(() => {
+    async function loadStudentEmail() {
+      try {
+        const storedSession =
+          window.sessionStorage.getItem("sssUserSession") ||
+          window.localStorage.getItem("sssUserSession");
+
+        let session = storedSession
+          ? JSON.parse(storedSession)
+          : null;
+
+        if (!session?.email) {
+          const loginServiceUrl =
+            process.env.NEXT_PUBLIC_LOGIN_URL ||
+            window.location.origin;
+
+          const sessionResponse = await fetch(
+            `${loginServiceUrl}/api/auth/session`,
+            {
+              credentials: "include",
+            }
+          );
+
+          session = sessionResponse.ok
+            ? await sessionResponse.json().catch(() => null)
+            : null;
+        }
+
+        const email = (
+          session?.email ||
+          session?.user?.email ||
+          ""
+        ).trim();
+
+        console.log(
+          "LOGGED-IN STUDENT EMAIL:",
+          email
+        );
+
+        if (!email) {
+          throw new Error(
+            "Logged-in student email is unavailable."
+          );
+        }
+
+        setStudentEmail(email);
+      } catch (error) {
+        console.error(
+          "STUDENT EMAIL LOAD ERROR:",
+          error
+        );
+
+        setStudentEmail("");
+      }
+    }
+
+    loadStudentEmail();
+  }, []);
 
   /* =======================================================
      LOAD SUBJECTS + CHAPTERS
@@ -344,54 +407,44 @@ function AssessmentsContent() {
   /* =======================================================
      AI UNIT TEST EVALUATION
      ======================================================= */
+async function handleAiEvaluation() {
+  console.log("🔥 AI EVALUATION BUTTON CLICKED");
 
-  async function handleAiEvaluation() {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response =
-        await selfAssessment({
-          user_email:
-            "student@example.com",
+    console.log("🔥 STUDENT EMAIL:", studentEmail);
+    console.log("🔥 CALLING SELF ASSESSMENT");
 
-          performance_data: {
-            subject: unitTest.subject,
-            chapter: unitTest.chapter,
-            question: unitTest.question,
-            student_answer:
-              unitTest.studentAnswer,
-          },
-        });
+    const response = await selfAssessment({
+      user_email: studentEmail,
+      performance_data: {
+        subject: unitTest.subject,
+        chapter: unitTest.chapter,
+        question: unitTest.question,
+        student_answer: unitTest.studentAnswer,
+      },
+    });
 
-      console.log(
-        "FULL ASSESSMENT RESPONSE:",
-        JSON.stringify(
-          response,
-          null,
-          2
-        )
-      );
+    console.log(
+      "🔥 FULL ASSESSMENT RESPONSE:",
+      response
+    );
 
-      setAssessmentResult(response);
-      setShowEvaluation(true);
-      setActiveOption("unit-test");
-    } catch (error) {
-      console.error(
-        "Assessment Error:",
-        error
-      );
+    setAssessmentResult(response);
+    setShowEvaluation(true);
+    setActiveOption("unit-test");
 
-      console.error(
-        "Response:",
-        error?.response?.data
-      );
+  } catch (error) {
+    console.error("🔥 Assessment Error:", error);
+    console.error("🔥 Status:", error?.response?.status);
+    console.error("🔥 Response:", error?.response?.data);
 
-      alert("Assessment Failed");
-    } finally {
-      setLoading(false);
-    }
+    alert("Assessment Failed");
+  } finally {
+    setLoading(false);
   }
-
+}
   /* =======================================================
      MOCK TEST GENERATION
      ======================================================= */

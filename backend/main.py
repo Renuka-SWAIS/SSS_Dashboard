@@ -410,14 +410,10 @@ def get_current_student(
     query = """
         SELECT
             student.student_id,
-            student.name AS full_name,
+            student.name,
             student.roll_number AS roll_no,
             student.admission_no,
-            COALESCE(
-                class.class_name,
-                student.class_name,
-                student.class_id::text
-            ) AS class_name,
+            COALESCE(student.class_name, class.class_name, student.class_id::text) AS class_name,
             COALESCE(
                 student.section,
                 class.section_name
