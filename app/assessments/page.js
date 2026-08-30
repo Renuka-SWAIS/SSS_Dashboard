@@ -1638,27 +1638,21 @@ function AssessmentsContent() {
                   0 && (
 
                   <div className="quiz-submit-row">
-
-                    <button
-                      className="primary-button"
-                      type="button"
-                      disabled={
-                        mockSubmitted ||
-                        mockLoading ||
-                        Object.keys(
-                          mockAnswers
-                        ).length !==
-                          mockQuestions.length
-                      }
-                      onClick={
-                        handleMockEvaluation
-                      }
-                    >
-                      {mockLoading
-                        ? "Evaluating..."
-                        : "Submit Mock Test"}
-                    </button>
-
+<button
+  className="primary-button"
+  type="button"
+  disabled={
+    mockSubmitted ||
+    mockLoading
+  }
+  onClick={
+    handleMockEvaluation
+  }
+>
+  {mockLoading
+    ? "Evaluating..."
+    : "Submit Mock Test"}
+</button>
                     <button
                       className="soft-button"
                       type="button"
