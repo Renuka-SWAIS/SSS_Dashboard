@@ -3,388 +3,100 @@
 import { useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
+import ChapterSelector from "../chapter-selector";
 import { generateContent } from "../../services/studentApi";
 
-const materials = [
-  {
-    type: "PDF",
-    title: "ML Basics - Study Notes",
-    description: "Detailed notes on ML concepts, types of learning and algorithms.",
-    file: "ml_basics_notes.pdf"
-  },
-  {
-    type: "Video",
-    title: "Introduction to ML",
-    description: "Video lecture explaining the basics of Machine Learning.",
-    file: "ml_intro_video.mp4"
-  },
-  {
-    type: "Text",
-    title: "Key Points Summary",
-    description: "Important points and quick revision notes.",
-    file: "-"
-  }
-];
-
 export default function StudyMaterialPage() {
-
-  const [showPdfContent, setShowPdfContent] = useState(false);
-  const [downloadMessage, setDownloadMessage] = useState("");
-
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   async function handleGenerateContent() {
-
     try {
-
       setLoading(true);
 
       const response = await generateContent({
         topic: "Machine Learning Basics",
-        learning_capacity: "beginner"
+        learning_capacity: "beginner",
       });
 
-
       setContent(response.generated_content);
-
-    }
-    catch(error) {
-
-      console.log("Content Generation Error:", error);
-
-    }
-    finally {
-
+    } catch (error) {
+      console.error("Content Generation Error:", error);
+    } finally {
       setLoading(false);
-
     }
-
   }
-
-
-
-  function handleDownload() {
-
-    setDownloadMessage("Downloaded");
-
-    window.setTimeout(() => setDownloadMessage(""), 2200);
-
-  }
-
-
 
   return (
-
     <DashboardShell>
-
       <section className="module-page">
 
+        {/* Study Tabs */}
         <StudyTabs />
-
 
         <div className="module-content-area">
 
+          {/* =========================================
+              CLASS / SUBJECT / CHAPTER SELECTOR
+          ========================================= */}
+
+          <ChapterSelector showReader={true} />
+
+          {/* =========================================
+              AI STUDY MATERIAL
+          ========================================= */}
 
           <article className="module-card material-card">
 
+            <div className="card-title-row">
 
-            <h2>
-              Chapter Content & Study Material
-            </h2>
+              <h2>
+                AI Study Material
+              </h2>
 
+              <button
+                className="table-action"
+                type="button"
+                onClick={handleGenerateContent}
+                disabled={loading}
+              >
+                {loading
+                  ? "Generating..."
+                  : "Generate AI Content"}
+              </button>
 
-            <button
-              className="table-action"
-              type="button"
-              onClick={handleGenerateContent}
-            >
-
-              {
-                loading 
-                ? "Generating..."
-                : "Generate AI Content"
-              }
-
-            </button>
-
-
-
-            <table className="data-table">
-
-              <thead>
-
-                <tr>
-
-                  <th>Content Type</th>
-                  <th>Title</th>
-                  <th>Description</th>
-                  <th>File / Link</th>
-                  <th>Action</th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-                {materials.map(({ type, title, description, file }) => (
-
-                  <tr key={title}>
-
-
-                    <td>
-
-                      <span className={`file-badge ${type.toLowerCase()}`}>
-
-                        {type}
-
-                      </span>
-
-                    </td>
-
-
-                    <td>{title}</td>
-
-
-                    <td>{description}</td>
-
-
-                    <td>{file}</td>
-
-
-                    <td>
-
-
-                      {type === "PDF" ? (
-
-                        <button
-                          className="table-action"
-                          type="button"
-                          onClick={() => setShowPdfContent(true)}
-                        >
-
-                          View
-
-                        </button>
-
-                      ) : (
-
-                        <button
-                          className="table-action"
-                          type="button"
-                        >
-
-                          {
-                            type === "Video"
-                            ? "Watch"
-                            : "View"
-                          }
-
-                        </button>
-
-                      )}
-
-
-                    </td>
-
-
-                  </tr>
-
-                ))}
-
-
-              </tbody>
-
-
-            </table>
-
+            </div>
 
           </article>
 
-
-
-          {
-            content && (
-
-              <article className="module-card">
-
-                <h2>
-                  AI Generated Content
-                </h2>
-
-
-                <pre>
-
-                  {
-                    typeof content === "string"
-                    ? content
-                    : JSON.stringify(content, null, 2)
-                  }
-
-                </pre>
-
-
-              </article>
-
-            )
-          }
-
-
-
-
-
-          {
-            showPdfContent && (
-
-              <article className="module-card pdf-view-card">
-
-
-                <div className="card-title-row">
-
-
-                  <h2>
-                    ML Basics - Study Notes
-                  </h2>
-
-
-
-                  <div className="pdf-view-actions">
-
-
-                    <button
-                      className="download-icon-button"
-                      type="button"
-                      aria-label="Download PDF"
-                      onClick={handleDownload}
-                    >
-
-                      <span aria-hidden="true">
-                        ↓
-                      </span>
-
-                    </button>
-
-
-
-                    <button
-                      className="soft-button"
-                      type="button"
-                      onClick={() => setShowPdfContent(false)}
-                    >
-
-                      Close
-
-                    </button>
-
-
-                  </div>
-
-
-                </div>
-
-
-
-                {
-                  downloadMessage && 
-
-                  <div
-                    className="download-message pdf-download-message"
-                    role="status"
-                  >
-
-                    {downloadMessage}
-
-                  </div>
-
-                }
-
-
-
-                <div className="pdf-page">
-
-
-                  <h3>
-                    Machine Learning Basics
-                  </h3>
-
-
-                  <p>
-                    Machine Learning is a branch of Artificial Intelligence that helps computers learn from data and improve their performance without being explicitly programmed for every task.
-                  </p>
-
-
-                  <h4>
-                    Types of Learning
-                  </h4>
-
-
-                  <p>
-                    <strong>
-                      Supervised Learning:
-                    </strong>
-
-                    {" "}
-                    The model learns from labelled examples.
-                  </p>
-
-
-
-                  <p>
-
-                    <strong>
-                      Unsupervised Learning:
-                    </strong>
-
-                    {" "}
-                    The model finds patterns in data without labelled answers.
-
-                  </p>
-
-
-
-                  <p>
-
-                    <strong>
-                      Reinforcement Learning:
-                    </strong>
-
-                    {" "}
-                    The model learns by taking actions and receiving rewards.
-
-                  </p>
-
-
-
-                  <h4>
-                    Key Algorithms
-                  </h4>
-
-
-                  <p>
-                    Common algorithms include Linear Regression, Decision Trees, K-Means Clustering, and Neural Networks.
-                  </p>
-
-
-                </div>
-
-
-              </article>
-
-            )
-          }
-
+          {/* =========================================
+              AI GENERATED CONTENT
+          ========================================= */}
+
+          {content && (
+            <article className="module-card">
+
+              <h2>
+                AI Generated Content
+              </h2>
+
+              <pre
+                style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  margin: 0,
+                }}
+              >
+                {typeof content === "string"
+                  ? content
+                  : JSON.stringify(content, null, 2)}
+              </pre>
+
+            </article>
+          )}
 
         </div>
-
-
       </section>
-
-
     </DashboardShell>
-
   );
-
 }
