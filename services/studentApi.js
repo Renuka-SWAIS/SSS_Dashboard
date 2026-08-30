@@ -47,14 +47,61 @@ export const translateText = async (data) => {
 ------------------------------------------------------- */
 
 export const evaluateQuiz = async (data) => {
-  const response = await fetch(`${getApiBaseUrl()}/quiz/evaluate`, {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.detail || "Quiz evaluation failed.");
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_AI_API || ""
+  ).replace(/\/+$/, "");
+
+  if (!baseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_AI_API is not configured."
+    );
+  }
+
+  console.log(
+    "🔥 QUIZ EVALUATION URL:",
+    `${baseUrl}/quiz/evaluate`
+  );
+
+  console.log(
+    "🔥 QUIZ EVALUATION REQUEST:",
+    data
+  );
+
+  const response = await fetch(
+    `${baseUrl}/quiz/evaluate`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  const result =
+    await response.json().catch(() => ({}));
+
+  console.log(
+    "🔥 QUIZ EVALUATION STATUS:",
+    response.status
+  );
+
+  console.log(
+    "🔥 QUIZ EVALUATION RESPONSE:",
+    result
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      result?.detail ||
+      result?.message ||
+      `Quiz evaluation failed: ${response.status}`
+    );
+  }
+
   return result;
 };
-
 /* -------------------------------------------------------
    SELF ASSESSMENT
 ------------------------------------------------------- */
