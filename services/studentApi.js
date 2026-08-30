@@ -60,14 +60,48 @@ export const evaluateQuiz = async (data) => {
 ------------------------------------------------------- */
 
 export const selfAssessment = async (data) => {
-  const response = await api.post(
-    "/assess/self",
-    data
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_AI_API || ""
+  ).replace(/\/+$/, "");
+
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_AI_API is not configured.");
+  }
+
+  const response = await fetch(
+    `${baseUrl}/assess/self`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    }
   );
 
-  return response.data;
-};
+  const result = await response.json().catch(() => ({}));
 
+  console.log(
+    "🔥 SELF ASSESSMENT STATUS:",
+    response.status
+  );
+
+  console.log(
+    "🔥 SELF ASSESSMENT RESPONSE:",
+    result
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      result?.detail ||
+      result?.message ||
+      `Self assessment failed: ${response.status}`
+    );
+  }
+
+  return result;
+};
 /* -------------------------------------------------------
    TEXT TO VOICE
 ------------------------------------------------------- */
