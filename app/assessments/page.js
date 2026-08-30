@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 import { useSearchParams } from "next/navigation";
+
 import { getApiBaseUrl } from "../api-base-url";
 
 import {
@@ -128,17 +129,24 @@ function AssessmentsContent() {
 
   const tabFromUrl =
     searchParams.get("tab") || "unit-test";
-  const [studentEmail, setStudentEmail] = useState("");
-  /* -------------------------------------------------------
+
+  /* =======================================================
+     STUDENT EMAIL
+     ======================================================= */
+
+  const [studentEmail, setStudentEmail] =
+    useState("");
+
+  /* =======================================================
      MAIN TAB
-     ------------------------------------------------------- */
+     ======================================================= */
 
   const [activeOption, setActiveOption] =
     useState(tabFromUrl);
 
-  /* -------------------------------------------------------
+  /* =======================================================
      UNIT TEST STATE
-     ------------------------------------------------------- */
+     ======================================================= */
 
   const [showEvaluation, setShowEvaluation] =
     useState(false);
@@ -149,9 +157,9 @@ function AssessmentsContent() {
   const [assessmentResult, setAssessmentResult] =
     useState(null);
 
-  /* -------------------------------------------------------
+  /* =======================================================
      MOCK TEST STATE
-     ------------------------------------------------------- */
+     ======================================================= */
 
   const [quizChapters, setQuizChapters] =
     useState([]);
@@ -183,16 +191,20 @@ function AssessmentsContent() {
   const [mockQuestionCount, setMockQuestionCount] =
     useState(5);
 
-      /* =======================================================
+  /* =======================================================
      LOAD LOGGED-IN STUDENT EMAIL
-  ======================================================= */
+     ======================================================= */
 
   useEffect(() => {
     async function loadStudentEmail() {
       try {
         const storedSession =
-          window.sessionStorage.getItem("sssUserSession") ||
-          window.localStorage.getItem("sssUserSession");
+          window.sessionStorage.getItem(
+            "sssUserSession"
+          ) ||
+          window.localStorage.getItem(
+            "sssUserSession"
+          );
 
         let session = storedSession
           ? JSON.parse(storedSession)
@@ -203,16 +215,36 @@ function AssessmentsContent() {
             process.env.NEXT_PUBLIC_LOGIN_URL ||
             window.location.origin;
 
-          const sessionResponse = await fetch(
-            `${loginServiceUrl}/api/auth/session`,
-            {
-              credentials: "include",
-            }
+          console.log(
+            "🔐 SESSION URL:",
+            `${loginServiceUrl}/api/auth/session`
           );
 
-          session = sessionResponse.ok
-            ? await sessionResponse.json().catch(() => null)
-            : null;
+          const sessionResponse =
+            await fetch(
+              `${loginServiceUrl}/api/auth/session`,
+              {
+                credentials: "include",
+                cache: "no-store",
+              }
+            );
+
+          console.log(
+            "🔐 SESSION STATUS:",
+            sessionResponse.status
+          );
+
+          if (sessionResponse.ok) {
+            session =
+              await sessionResponse
+                .json()
+                .catch(() => null);
+
+            console.log(
+              "🔐 SESSION RESPONSE:",
+              session
+            );
+          }
         }
 
         const email = (
@@ -247,26 +279,43 @@ function AssessmentsContent() {
   }, []);
 
   /* =======================================================
-     LOAD SUBJECTS + CHAPTERS
+     LOAD QUIZ CHAPTERS
      ======================================================= */
 
   useEffect(() => {
     async function loadQuizChapters() {
       try {
+        const url =
+          `${API_BASE_URL}/quiz-chapters`;
+
         console.log(
           "QUIZ CHAPTER API:",
-          `${API_BASE_URL}/quiz-chapters`
+          url
         );
 
-        const response = await fetch(
-          `${API_BASE_URL}/quiz-chapters`,
-          {
+        const response =
+          await fetch(url, {
             method: "GET",
             headers: {
-              Accept: "application/json",
+              Accept:
+                "application/json",
             },
             cache: "no-store",
-          }
+          });
+
+        console.log(
+          "QUIZ CHAPTER STATUS:",
+          response.status
+        );
+
+        const data =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        console.log(
+          "QUIZ CHAPTER DATA:",
+          data
         );
 
         if (!response.ok) {
@@ -275,29 +324,29 @@ function AssessmentsContent() {
           );
         }
 
-        const data = await response.json();
-
-        console.log(
-          "QUIZ CHAPTER DATA:",
-          data
-        );
-
-        const rows = Array.isArray(data.chapters)
-          ? data.chapters
-          : [];
+        const rows =
+          Array.isArray(data?.chapters)
+            ? data.chapters
+            : [];
 
         setQuizChapters(rows);
 
         if (rows.length > 0) {
           const firstSubject =
-            rows[0].subject || "";
+            rows[0]?.subject || "";
 
           const firstChapter =
-            rows[0].chapter_id;
+            rows[0]?.chapter_id;
 
-          setSelectedSubject(firstSubject);
+          setSelectedSubject(
+            firstSubject
+          );
+
           setSelectedMockChapter(
-            String(firstChapter)
+            firstChapter !== undefined &&
+            firstChapter !== null
+              ? String(firstChapter)
+              : ""
           );
         }
       } catch (error) {
@@ -318,61 +367,75 @@ function AssessmentsContent() {
      ======================================================= */
 
   const subjects = useMemo(() => {
-    const subjectList = quizChapters
-      .map((item) => item.subject)
-      .filter(Boolean);
+    const subjectList =
+      quizChapters
+        .map(
+          (item) =>
+            item?.subject
+        )
+        .filter(Boolean);
 
-    return [...new Set(subjectList)];
+    return [
+      ...new Set(subjectList),
+    ];
   }, [quizChapters]);
 
   /* =======================================================
      CHAPTERS FOR SELECTED SUBJECT
      ======================================================= */
 
-  const subjectChapters = useMemo(() => {
-    return quizChapters.filter(
-      (item) =>
-        item.subject === selectedSubject
-    );
-  }, [
-    quizChapters,
-    selectedSubject,
-  ]);
+  const subjectChapters =
+    useMemo(() => {
+      return quizChapters.filter(
+        (item) =>
+          item?.subject ===
+          selectedSubject
+      );
+    }, [
+      quizChapters,
+      selectedSubject,
+    ]);
 
   /* =======================================================
      CURRENT CHAPTER
      ======================================================= */
 
-  const currentMockChapter = useMemo(() => {
-    return quizChapters.find(
-      (item) =>
-        String(item.chapter_id) ===
-        String(selectedMockChapter)
-    );
-  }, [
-    quizChapters,
-    selectedMockChapter,
-  ]);
+  const currentMockChapter =
+    useMemo(() => {
+      return quizChapters.find(
+        (item) =>
+          String(item?.chapter_id) ===
+          String(selectedMockChapter)
+      );
+    }, [
+      quizChapters,
+      selectedMockChapter,
+    ]);
 
   /* =======================================================
      CHANGE SUBJECT
      ======================================================= */
 
   function handleSubjectChange(event) {
-    const subject = event.target.value;
+    const subject =
+      event.target.value;
 
     setSelectedSubject(subject);
 
     const chaptersForSubject =
       quizChapters.filter(
         (item) =>
-          item.subject === subject
+          item?.subject ===
+          subject
       );
 
-    if (chaptersForSubject.length > 0) {
+    if (
+      chaptersForSubject.length > 0
+    ) {
       setSelectedMockChapter(
         String(
-          chaptersForSubject[0].chapter_id
+          chaptersForSubject[0]
+            .chapter_id
         )
       );
     } else {
@@ -395,11 +458,14 @@ function AssessmentsContent() {
   }
 
   /* =======================================================
-     UNIT TEST
+     UNIT TEST TAB
      ======================================================= */
 
   function handleUnitTest() {
-    setActiveOption("unit-test");
+    setActiveOption(
+      "unit-test"
+    );
+
     setShowEvaluation(false);
     setAssessmentResult(null);
   }
@@ -407,200 +473,395 @@ function AssessmentsContent() {
   /* =======================================================
      AI UNIT TEST EVALUATION
      ======================================================= */
-async function handleAiEvaluation() {
-  console.log("🔥 AI EVALUATION BUTTON CLICKED");
 
-  if (!studentEmail) {
-    alert("Student email is unavailable.");
-    return;
-  }
-
-  if (!unitTest?.studentAnswer) {
-    alert("Please provide your answer before evaluation.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const payload = {
-      user_email: studentEmail,
-      performance_data: {
-        subject: unitTest.subject,
-        chapter: unitTest.chapter,
-        question: unitTest.question,
-        student_answer: unitTest.studentAnswer,
-      },
-    };
+  async function handleAiEvaluation() {
+    console.log(
+      "🔥 AI EVALUATION BUTTON CLICKED"
+    );
 
     console.log(
-      "🔥 SELF ASSESSMENT REQUEST:",
-      JSON.stringify(payload, null, 2)
+      "🔥 CURRENT STUDENT EMAIL:",
+      studentEmail
     );
 
-    const response = await selfAssessment(payload);
-
-    console.log(
-      "🔥 FULL ASSESSMENT RESPONSE:",
-      response
-    );
-
-    setAssessmentResult(response);
-    setShowEvaluation(true);
-    setActiveOption("unit-test");
-
-  } catch (error) {
-    console.error("🔥 Assessment Error:", error);
-
-    console.error(
-      "🔥 Status:",
-      error?.response?.status
-    );
-
-    console.error(
-      "🔥 Response:",
-      error?.response?.data
-    );
-
-    alert(
-      error?.response?.data?.detail ||
-      error?.message ||
-      "Assessment Failed"
-    );
-
-  } finally {
-    setLoading(false);
-  }
-}
-
-  /* =======================================================
-     MOCK TEST GENERATION
-     ======================================================= */
-async function handleMockTest() {
-  if (!currentMockChapter) {
-    alert("Please select a subject and chapter.");
-    return;
-  }
-
-  if (!studentEmail) {
-    alert("Student email is unavailable.");
-    return;
-  }
-
-  try {
-    setMockLoading(true);
-
-    const topic =
-      `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
-
-    console.log("AI QUIZ TOPIC:", topic);
-const response =
-  await generateQuiz({
-    topic: topic,
-
-    difficulty:
-      mockDifficulty,
-
-    num_questions:
-      Number(mockQuestionCount),
-
-    user_email:
-      studentEmail,
-
-    client_name:
-      "SSS",
-  });
-    console.log(
-      "FULL MOCK TEST RESPONSE:",
-      JSON.stringify(response, null, 2)
-    );
-
-    const generatedQuestions =
-      Array.isArray(response?.quiz_data)
-        ? response.quiz_data
-        : [];
-
-    if (generatedQuestions.length === 0) {
-      alert("AI did not generate any questions.");
+    if (!studentEmail) {
+      alert(
+        "Student email is unavailable."
+      );
       return;
     }
 
-    setMockQuestions(generatedQuestions);
-    setMockAnswers({});
-    setMockSubmitted(false);
-    setMockEvaluation(null);
-    setActiveOption("mock-test");
+    if (!unitTest?.studentAnswer) {
+      alert(
+        "Please provide your answer before evaluation."
+      );
+      return;
+    }
 
-  } catch (error) {
-    console.error("Mock Test Generation Error:", error);
+    try {
+      setLoading(true);
 
-    alert(
-      error?.message ||
-      "Mock Test Generation Failed"
-    );
-  } finally {
-    setMockLoading(false);
-  }
-}
- /* =======================================================
-     MOCK TEST EVALUATION
-     ======================================================= */
-async function handleMockEvaluation() {
-  if (mockQuestions.length === 0) {
-    return;
-  }
+      const payload = {
+        user_email:
+          studentEmail,
 
-  if (!studentEmail) {
-    alert("Student email is unavailable.");
-    return;
-  }
+        performance_data: {
+          subject:
+            unitTest.subject,
 
-  try {
-    setMockLoading(true);
+          chapter:
+            unitTest.chapter,
 
-    const submission = {
-  user_email:
-    studentEmail,
-
-  submission_data: {
-        answers: mockQuestions.map((question, index) => ({
-          question: question.question,
+          question:
+            unitTest.question,
 
           student_answer:
-            question.options?.[mockAnswers[index]] || "",
+            unitTest.studentAnswer,
+        },
+      };
 
-          correct_answer:
-            question.correct_answer,
-        })),
-      },
-    };
+      console.log(
+        "🔥 SELF ASSESSMENT REQUEST:",
+        JSON.stringify(
+          payload,
+          null,
+          2
+        )
+      );
 
-    console.log(
-      "MOCK EVALUATION REQUEST:",
-      JSON.stringify(submission, null, 2)
-    );
+      const response =
+        await selfAssessment(
+          payload
+        );
 
-    const result = await evaluateQuiz(submission);
+      console.log(
+        "🔥 FULL ASSESSMENT RESPONSE:",
+        response
+      );
 
-    console.log(
-      "MOCK TEST EVALUATION:",
-      JSON.stringify(result, null, 2)
-    );
+      setAssessmentResult(
+        response
+      );
 
-    setMockEvaluation(result);
-    setMockSubmitted(true);
+      setShowEvaluation(true);
 
-  } catch (error) {
-    console.error("Mock Test Evaluation Error:", error);
+      setActiveOption(
+        "unit-test"
+      );
+    } catch (error) {
+      console.error(
+        "🔥 Assessment Error:",
+        error
+      );
 
-    alert(
-      error?.message ||
-      "Mock Test Evaluation Failed"
-    );
-  } finally {
-    setMockLoading(false);
+      console.error(
+        "🔥 Status:",
+        error?.response?.status
+      );
+
+      console.error(
+        "🔥 Response:",
+        error?.response?.data
+      );
+
+      alert(
+        error?.response?.data
+          ?.detail ||
+        error?.message ||
+        "Assessment Failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
-}
+
+
+    /* =======================================================
+     MOCK TEST GENERATION
+     ======================================================= */
+
+  async function handleMockTest() {
+    console.log(
+      "🔥 MOCK TEST GENERATION STARTED"
+    );
+
+    if (!currentMockChapter) {
+      alert(
+        "Please select a subject and chapter."
+      );
+      return;
+    }
+
+    if (!studentEmail) {
+      alert(
+        "Student email is unavailable."
+      );
+      return;
+    }
+
+    try {
+      setMockLoading(true);
+
+      setMockQuestions([]);
+      setMockAnswers({});
+      setMockSubmitted(false);
+      setMockEvaluation(null);
+
+      const topic =
+        `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
+
+      console.log(
+        "🔥 MOCK TEST TOPIC:",
+        topic
+      );
+
+      const payload = {
+        topic,
+
+        difficulty:
+          mockDifficulty,
+
+        num_questions:
+          Number(mockQuestionCount),
+
+        user_email:
+          studentEmail,
+
+        client_name:
+          "SSS",
+      };
+
+      console.log(
+        "🔥 MOCK TEST REQUEST:",
+        JSON.stringify(
+          payload,
+          null,
+          2
+        )
+      );
+
+      const response =
+        await generateQuiz(
+          payload
+        );
+
+      console.log(
+        "🔥 FULL MOCK TEST RESPONSE:",
+        response
+      );
+
+      const generatedQuestions =
+        Array.isArray(
+          response?.quiz_data
+        )
+          ? response.quiz_data
+          : [];
+
+      console.log(
+        "🔥 GENERATED QUESTIONS:",
+        generatedQuestions
+      );
+
+      if (
+        generatedQuestions.length === 0
+      ) {
+        alert(
+          "AI did not generate any questions."
+        );
+        return;
+      }
+
+      setMockQuestions(
+        generatedQuestions
+      );
+
+      setMockAnswers({});
+
+      setMockSubmitted(false);
+
+      setMockEvaluation(null);
+
+      setActiveOption(
+        "mock-test"
+      );
+
+    } catch (error) {
+      console.error(
+        "🔥 MOCK TEST GENERATION ERROR:",
+        error
+      );
+
+      console.error(
+        "🔥 MOCK TEST STATUS:",
+        error?.response?.status
+      );
+
+      console.error(
+        "🔥 MOCK TEST RESPONSE:",
+        error?.response?.data
+      );
+
+      alert(
+        error?.response?.data
+          ?.detail ||
+        error?.message ||
+        "Mock Test Generation Failed"
+      );
+
+    } finally {
+      setMockLoading(false);
+    }
+  }
+
+  /* =======================================================
+     MOCK TEST EVALUATION
+     ======================================================= */
+
+  async function handleMockEvaluation() {
+    console.log(
+      "🔥 MOCK TEST EVALUATION STARTED"
+    );
+
+    if (
+      mockQuestions.length === 0
+    ) {
+      alert(
+        "No mock-test questions available."
+      );
+      return;
+    }
+
+    if (!studentEmail) {
+      alert(
+        "Student email is unavailable."
+      );
+      return;
+    }
+
+    /* -----------------------------------------------------
+       CHECK ALL QUESTIONS ANSWERED
+    ----------------------------------------------------- */
+
+    const unansweredQuestions =
+      mockQuestions.filter(
+        (_, index) =>
+          mockAnswers[index] ===
+          undefined
+      );
+
+    if (
+      unansweredQuestions.length > 0
+    ) {
+      alert(
+        `Please answer all ${mockQuestions.length} questions before submitting.`
+      );
+      return;
+    }
+
+    try {
+      setMockLoading(true);
+
+      /* ---------------------------------------------------
+         CREATE SUBMISSION
+      --------------------------------------------------- */
+
+      const answers =
+        mockQuestions.map(
+          (
+            question,
+            index
+          ) => {
+            const selectedOptionIndex =
+              mockAnswers[index];
+
+            const studentAnswer =
+              question.options?.[
+                selectedOptionIndex
+              ] || "";
+
+            return {
+              question:
+                question.question,
+
+              student_answer:
+                studentAnswer,
+
+              correct_answer:
+                question.correct_answer,
+            };
+          }
+        );
+
+      const submission = {
+        user_email:
+          studentEmail,
+
+        submission_data: {
+          answers,
+        },
+      };
+
+      console.log(
+        "🔥 MOCK EVALUATION REQUEST:",
+        JSON.stringify(
+          submission,
+          null,
+          2
+        )
+      );
+
+      /* ---------------------------------------------------
+         CALL AI EVALUATION API
+      --------------------------------------------------- */
+
+      const result =
+        await evaluateQuiz(
+          submission
+        );
+
+      console.log(
+        "🔥 FULL MOCK EVALUATION RESPONSE:",
+        result
+      );
+
+      /* ---------------------------------------------------
+         SAVE RESULT
+      --------------------------------------------------- */
+
+      setMockEvaluation(
+        result
+      );
+
+      setMockSubmitted(true);
+
+    } catch (error) {
+      console.error(
+        "🔥 MOCK TEST EVALUATION ERROR:",
+        error
+      );
+
+      console.error(
+        "🔥 STATUS:",
+        error?.response?.status
+      );
+
+      console.error(
+        "🔥 RESPONSE:",
+        error?.response?.data
+      );
+
+      alert(
+        error?.response?.data
+          ?.detail ||
+        error?.message ||
+        "Mock Test Evaluation Failed"
+      );
+
+    } finally {
+      setMockLoading(false);
+    }
+  }
+
   /* =======================================================
      RESET MOCK TEST
      ======================================================= */
@@ -613,11 +874,84 @@ async function handleMockEvaluation() {
     setMockSubmitted(false);
 
     setMockEvaluation(null);
+
+    setMockLoading(false);
   }
 
   /* =======================================================
-     RENDER
+     MOCK ANSWER CHANGE
      ======================================================= */
+
+  function handleMockAnswerChange(
+    questionIndex,
+    optionIndex
+  ) {
+    if (mockSubmitted) {
+      return;
+    }
+
+    setMockAnswers(
+      (previous) => ({
+        ...previous,
+
+        [questionIndex]:
+          optionIndex,
+      })
+    );
+  }
+
+  /* =======================================================
+     MOCK SCORE
+     ======================================================= */
+
+  const mockScore =
+    useMemo(() => {
+      if (
+        !mockSubmitted ||
+        mockQuestions.length === 0
+      ) {
+        return null;
+      }
+
+      return mockQuestions.reduce(
+        (total, question, index) => {
+          const selectedIndex =
+            mockAnswers[index];
+
+          const selectedAnswer =
+            question.options?.[
+              selectedIndex
+            ];
+
+          return (
+            total +
+            (selectedAnswer ===
+            question.correct_answer
+              ? 1
+              : 0)
+          );
+        },
+        0
+      );
+    }, [
+      mockSubmitted,
+      mockQuestions,
+      mockAnswers,
+    ]);
+
+  const mockPercentage =
+    mockScore !== null &&
+    mockQuestions.length > 0
+      ? Math.round(
+          (mockScore /
+            mockQuestions.length) *
+            100
+        )
+      : null;
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <DashboardShell>
@@ -778,21 +1112,29 @@ async function handleMockEvaluation() {
                 <div className="quiz-submit-row">
 
                   <button
-  className="primary-button"
-  type="button"
-  onClick={handleAiEvaluation}
-  disabled={loading}
->
-  {loading
-    ? "Evaluating..."
-    : "AI Evaluation"}
-</button>
+                    className="primary-button"
+                    type="button"
+                    onClick={
+                      handleAiEvaluation
+                    }
+                    disabled={
+                      loading ||
+                      !studentEmail
+                    }
+                  >
+                    {loading
+                      ? "Evaluating..."
+                      : "AI Evaluation"}
+                  </button>
 
-<button
-  className="soft-button"
-  type="button"
-  onClick={handleUnitTest}
->
+                  <button
+                    className="soft-button"
+                    type="button"
+                    onClick={
+                      handleUnitTest
+                    }
+                    disabled={loading}
+                  >
                     Reset
                   </button>
 
@@ -830,15 +1172,17 @@ async function handleMockEvaluation() {
                     <strong className="score-text">
 
                       {showEvaluation
-                        ? `${(
+                        ? `${
                             (
-                              assessmentResult
-                                ?.assessment_data
-                                ?.chart_data_per_subject?.[0]
-                                ?.score ??
-                              0
-                            ) / 10
-                          ).toFixed(1)} / 10`
+                              (
+                                assessmentResult
+                                  ?.assessment_data
+                                  ?.chart_data_per_subject?.[0]
+                                  ?.score ??
+                                0
+                              ) / 10
+                            ).toFixed(1)
+                          } / 10`
                         : "- / 10"}
 
                     </strong>
@@ -859,6 +1203,7 @@ async function handleMockEvaluation() {
                 </div>
 
                 {showEvaluation && (
+
                   <div className="quiz-score-card assessment-ai-card">
 
                     <strong>
@@ -875,11 +1220,13 @@ async function handleMockEvaluation() {
                     </p>
 
                   </div>
+
                 )}
 
               </article>
 
             </div>
+
           )}
 
           {/* =================================================
@@ -908,18 +1255,16 @@ async function handleMockEvaluation() {
                   >
                     {mockSubmitted
                       ? "Completed"
-                      : "Ready"}
+                      : mockQuestions.length > 0
+                        ? "In Progress"
+                        : "Ready"}
                   </span>
 
                 </div>
 
-                {/* =================================================
-                    SUBJECT + CHAPTER SELECTION
-                ================================================= */}
+                {/* SUBJECT + CHAPTER */}
 
                 <div className="mock-selection-grid">
-
-                  {/* SUBJECT */}
 
                   <label className="assignment-field">
 
@@ -957,8 +1302,6 @@ async function handleMockEvaluation() {
                     </select>
 
                   </label>
-
-                  {/* CHAPTER */}
 
                   <label className="assignment-field">
 
@@ -1004,8 +1347,6 @@ async function handleMockEvaluation() {
 
                   </label>
 
-                  {/* DIFFICULTY */}
-
                   <label className="assignment-field">
 
                     <span>
@@ -1041,8 +1382,6 @@ async function handleMockEvaluation() {
                     </select>
 
                   </label>
-
-                  {/* NUMBER OF QUESTIONS */}
 
                   <label className="assignment-field">
 
@@ -1088,11 +1427,10 @@ async function handleMockEvaluation() {
 
                 </div>
 
-                {/* =================================================
-                    SELECTED CHAPTER INFO
-                ================================================= */}
+                {/* SELECTED CHAPTER */}
 
                 {currentMockChapter && (
+
                   <div className="meta-row">
 
                     <span>
@@ -1118,11 +1456,10 @@ async function handleMockEvaluation() {
                     </span>
 
                   </div>
+
                 )}
 
-                {/* =================================================
-                    GENERATE BUTTON
-                ================================================= */}
+                {/* GENERATE BUTTON */}
 
                 {mockQuestions.length ===
                   0 && (
@@ -1137,7 +1474,8 @@ async function handleMockEvaluation() {
                       }
                       disabled={
                         mockLoading ||
-                        !currentMockChapter
+                        !currentMockChapter ||
+                        !studentEmail
                       }
                     >
                       {mockLoading
@@ -1146,179 +1484,169 @@ async function handleMockEvaluation() {
                     </button>
 
                   </div>
+
                 )}
 
-                {/* =================================================
-                    QUESTIONS
-                ================================================= */}
+                {/* QUESTIONS */}
 
                 {mockQuestions.length >
                   0 && (
 
-                  <>
+                  <div className="quiz-question-list">
 
-                    <div className="quiz-question-list">
+                    {mockQuestions.map(
+                      (
+                        question,
+                        questionIndex
+                      ) => (
 
-                      {mockQuestions.map(
-                        (
-                          question,
-                          questionIndex
-                        ) => (
+                        <fieldset
+                          className="quiz-question"
+                          key={
+                            questionIndex
+                          }
+                          disabled={
+                            mockSubmitted
+                          }
+                        >
 
-                          <fieldset
-                            className="quiz-question"
-                            key={
-                              questionIndex
+                          <legend>
+                            {questionIndex + 1}
+                            .{" "}
+                            {
+                              question.question
                             }
-                            disabled={
-                              mockSubmitted
-                            }
-                          >
+                          </legend>
 
-                            <legend>
-                              {questionIndex +
-                                1}
-                              .{" "}
-                              {
-                                question.question
-                              }
-                            </legend>
+                          <div className="quiz-options">
 
-                            <div className="quiz-options">
+                            {question.options?.map(
+                              (
+                                option,
+                                optionIndex
+                              ) => {
 
-                              {question.options?.map(
-                                (
-                                  option,
-                                  optionIndex
-                                ) => {
+                                const selected =
+                                  mockAnswers[
+                                    questionIndex
+                                  ] ===
+                                  optionIndex;
 
-                                  const selected =
-                                    mockAnswers[
-                                      questionIndex
-                                    ] ===
-                                    optionIndex;
+                                const correct =
+                                  mockSubmitted &&
+                                  option ===
+                                    question.correct_answer;
 
-                                  const correct =
-                                    mockSubmitted &&
-                                    option ===
-                                      question.correct_answer;
+                                const wrong =
+                                  mockSubmitted &&
+                                  selected &&
+                                  option !==
+                                    question.correct_answer;
 
-                                  const wrong =
-                                    mockSubmitted &&
-                                    selected &&
-                                    option !==
-                                      question.correct_answer;
+                                return (
+                                  <label
+                                    key={
+                                      optionIndex
+                                    }
+                                    className={`quiz-option ${
+                                      selected
+                                        ? "selected"
+                                        : ""
+                                    } ${
+                                      correct
+                                        ? "correct"
+                                        : ""
+                                    } ${
+                                      wrong
+                                        ? "wrong"
+                                        : ""
+                                    }`}
+                                  >
 
-                                  return (
-                                    <label
-                                      key={
-                                        optionIndex
-                                      }
-                                      className={`quiz-option ${
+                                    <input
+                                      type="radio"
+                                      name={`mock-question-${questionIndex}`}
+                                      checked={
                                         selected
-                                          ? "selected"
-                                          : ""
-                                      } ${
-                                        correct
-                                          ? "correct"
-                                          : ""
-                                      } ${
-                                        wrong
-                                          ? "wrong"
-                                          : ""
-                                      }`}
-                                    >
+                                      }
+                                      disabled={
+                                        mockSubmitted
+                                      }
+                                      onChange={() =>
+                                        handleMockAnswerChange(
+                                          questionIndex,
+                                          optionIndex
+                                        )
+                                      }
+                                    />
 
-                                      <input
-                                        type="radio"
-                                        name={`mock-question-${questionIndex}`}
-                                        checked={
-                                          selected
-                                        }
-                                        disabled={
-                                          mockSubmitted
-                                        }
-                                        onChange={() =>
-                                          setMockAnswers(
-                                            (
-                                              previous
-                                            ) => ({
-                                              ...previous,
-                                              [questionIndex]:
-                                                optionIndex,
-                                            })
-                                          )
-                                        }
-                                      />
+                                    <span>
+                                      {option}
+                                    </span>
 
-                                      <span>
-                                        {
-                                          option
-                                        }
-                                      </span>
+                                  </label>
+                                );
+                              }
+                            )}
 
-                                    </label>
-                                  );
-                                }
-                              )}
+                          </div>
 
-                            </div>
+                        </fieldset>
 
-                          </fieldset>
-                        )
-                      )}
+                      )
+                    )}
 
-                    </div>
+                  </div>
 
-                    {/* =================================================
-                        SUBMIT / RESET
-                    ================================================= */}
+                )}
 
-                    <div className="quiz-submit-row">
+                {/* SUBMIT / RESET */}
 
-                      <button
-                        className="primary-button"
-                        type="button"
-                        disabled={
-                          mockSubmitted ||
-                          mockLoading ||
-                          Object.keys(
-                            mockAnswers
-                          ).length !==
-                            mockQuestions.length
-                        }
-                        onClick={
-                          handleMockEvaluation
-                        }
-                      >
-                        {mockLoading
-                          ? "Evaluating..."
-                          : "Submit Mock Test"}
-                      </button>
+                {mockQuestions.length >
+                  0 && (
 
-                      <button
-                        className="soft-button"
-                        type="button"
-                        onClick={
-                          resetMockTest
-                        }
-                        disabled={
-                          mockLoading
-                        }
-                      >
-                        Reset
-                      </button>
+                  <div className="quiz-submit-row">
 
-                    </div>
+                    <button
+                      className="primary-button"
+                      type="button"
+                      disabled={
+                        mockSubmitted ||
+                        mockLoading ||
+                        Object.keys(
+                          mockAnswers
+                        ).length !==
+                          mockQuestions.length
+                      }
+                      onClick={
+                        handleMockEvaluation
+                      }
+                    >
+                      {mockLoading
+                        ? "Evaluating..."
+                        : "Submit Mock Test"}
+                    </button>
 
-                  </>
+                    <button
+                      className="soft-button"
+                      type="button"
+                      onClick={
+                        resetMockTest
+                      }
+                      disabled={
+                        mockLoading
+                      }
+                    >
+                      Reset
+                    </button>
+
+                  </div>
+
                 )}
 
               </article>
 
-              {/* =================================================
-                  MOCK TEST RESULT
-              ================================================= */}
+              {/* MOCK TEST RESULT */}
 
               <article className="module-card latest-result-card">
 
@@ -1364,20 +1692,29 @@ async function handleMockEvaluation() {
                     <strong className="score-text">
 
                       {mockSubmitted
-                        ? (
-                            mockEvaluation
-                              ?.evaluation_report
-                              ?.total_score ??
-                            mockEvaluation
-                              ?.score ??
-                            mockEvaluation
-                              ?.evaluation_data
-                              ?.total_score ??
-                            "Evaluated"
-                          )
+                        ? mockScore !== null
+                          ? `${mockScore} / ${mockQuestions.length}`
+                          : "Evaluated"
                         : "- / -"}
 
                     </strong>
+
+                  </div>
+
+                  <div>
+                    <span>
+                      Percentage
+                    </span>
+
+                    <strong className="score-text">
+
+                      {mockSubmitted &&
+                      mockPercentage !== null
+                        ? `${mockPercentage}%`
+                        : "-"}
+
+                    </strong>
+
                   </div>
 
                   <div>
@@ -1386,22 +1723,18 @@ async function handleMockEvaluation() {
                     </span>
 
                     <strong>
-
                       {mockSubmitted
                         ? "Completed"
                         : mockQuestions.length >
                             0
                           ? "In Progress"
                           : "Pending"}
-
                     </strong>
                   </div>
 
                 </div>
 
-                {/* =================================================
-                    EVALUATION REPORT
-                ================================================= */}
+                {/* EVALUATION REPORT */}
 
                 {mockSubmitted &&
                   mockEvaluation && (
@@ -1422,6 +1755,114 @@ async function handleMockEvaluation() {
                           ?.feedback ||
                         mockEvaluation
                           ?.textual_report ||
+                        mockEvaluation
+                          ?.feedback ||
+                        "Evaluation completed successfully."
+                      }
+                    </p>
+
+                  </div>
+
+                )}
+
+              </article>
+
+            </div>
+
+          )}
+                        {/* =================================================
+                  MOCK TEST RESULT
+              ================================================= */}
+
+              <article className="module-card latest-result-card">
+
+                <h2>
+                  Mock Test Result
+                </h2>
+
+                <div className="result-grid quiz-result-grid">
+
+                  <div>
+                    <span>
+                      Subject
+                    </span>
+
+                    <strong>
+                      {currentMockChapter?.subject || "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Chapter
+                    </span>
+
+                    <strong>
+                      {currentMockChapter?.chapter_title || "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Score
+                    </span>
+
+                    <strong className="score-text">
+                      {mockSubmitted
+                        ? (
+                            mockEvaluation
+                              ?.evaluation_report
+                              ?.total_score ??
+                            mockEvaluation
+                              ?.score ??
+                            mockEvaluation
+                              ?.evaluation_data
+                              ?.total_score ??
+                            "Evaluated"
+                          )
+                        : "- / -"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Status
+                    </span>
+
+                    <strong>
+                      {mockSubmitted
+                        ? "Completed"
+                        : mockQuestions.length > 0
+                          ? "In Progress"
+                          : "Pending"}
+                    </strong>
+                  </div>
+
+                </div>
+
+                {/* =================================================
+                    MOCK TEST EVALUATION REPORT
+                ================================================= */}
+
+                {mockSubmitted && mockEvaluation && (
+                  <div className="quiz-score-card assessment-ai-card">
+
+                    <strong>
+                      Mock Test Evaluation
+                    </strong>
+
+                    <p>
+                      {
+                        mockEvaluation
+                          ?.evaluation_report
+                          ?.textual_report ||
+                        mockEvaluation
+                          ?.evaluation_report
+                          ?.feedback ||
+                        mockEvaluation
+                          ?.textual_report ||
+                        mockEvaluation
+                          ?.feedback ||
                         "Evaluation completed successfully."
                       }
                     </p>
@@ -1438,8 +1879,7 @@ async function handleMockEvaluation() {
               STUDENT ANALYSIS
           ================================================= */}
 
-          {activeOption ===
-            "student-analysis" && (
+          {activeOption === "student-analysis" && (
             <StudentAnalysisView />
           )}
 
@@ -1447,8 +1887,7 @@ async function handleMockEvaluation() {
               TEACHER REMARK
           ================================================= */}
 
-          {activeOption ===
-            "teacher-remark" && (
+          {activeOption === "teacher-remark" && (
             <TeacherRemarkView />
           )}
 
