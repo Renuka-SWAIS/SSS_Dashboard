@@ -410,13 +410,20 @@ function AssessmentsContent() {
 async function handleAiEvaluation() {
   console.log("🔥 AI EVALUATION BUTTON CLICKED");
 
+  if (!studentEmail) {
+    alert("Student email is unavailable.");
+    return;
+  }
+
+  if (!unitTest?.studentAnswer) {
+    alert("Please provide your answer before evaluation.");
+    return;
+  }
+
   try {
     setLoading(true);
 
-    console.log("🔥 STUDENT EMAIL:", studentEmail);
-    console.log("🔥 CALLING SELF ASSESSMENT");
-
-    const response = await selfAssessment({
+    const payload = {
       user_email: studentEmail,
       performance_data: {
         subject: unitTest.subject,
@@ -424,7 +431,14 @@ async function handleAiEvaluation() {
         question: unitTest.question,
         student_answer: unitTest.studentAnswer,
       },
-    });
+    };
+
+    console.log(
+      "🔥 SELF ASSESSMENT REQUEST:",
+      JSON.stringify(payload, null, 2)
+    );
+
+    const response = await selfAssessment(payload);
 
     console.log(
       "🔥 FULL ASSESSMENT RESPONSE:",
@@ -437,211 +451,156 @@ async function handleAiEvaluation() {
 
   } catch (error) {
     console.error("🔥 Assessment Error:", error);
-    console.error("🔥 Status:", error?.response?.status);
-    console.error("🔥 Response:", error?.response?.data);
 
-    alert("Assessment Failed");
+    console.error(
+      "🔥 Status:",
+      error?.response?.status
+    );
+
+    console.error(
+      "🔥 Response:",
+      error?.response?.data
+    );
+
+    alert(
+      error?.response?.data?.detail ||
+      error?.message ||
+      "Assessment Failed"
+    );
+
   } finally {
     setLoading(false);
   }
 }
+
   /* =======================================================
      MOCK TEST GENERATION
      ======================================================= */
+async function handleMockTest() {
+  if (!currentMockChapter) {
+    alert("Please select a subject and chapter.");
+    return;
+  }
 
-  async function handleMockTest() {
-    if (!currentMockChapter) {
-      alert(
-        "Please select a subject and chapter."
-      );
+  if (!studentEmail) {
+    alert("Student email is unavailable.");
+    return;
+  }
 
+  try {
+    setMockLoading(true);
+
+    const topic =
+      `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
+
+    console.log("AI QUIZ TOPIC:", topic);
+const response =
+  await generateQuiz({
+    topic: topic,
+
+    difficulty:
+      mockDifficulty,
+
+    num_questions:
+      Number(mockQuestionCount),
+
+    user_email:
+      studentEmail,
+
+    client_name:
+      "SSS",
+  });
+    console.log(
+      "FULL MOCK TEST RESPONSE:",
+      JSON.stringify(response, null, 2)
+    );
+
+    const generatedQuestions =
+      Array.isArray(response?.quiz_data)
+        ? response.quiz_data
+        : [];
+
+    if (generatedQuestions.length === 0) {
+      alert("AI did not generate any questions.");
       return;
     }
 
-    try {
-      setMockLoading(true);
+    setMockQuestions(generatedQuestions);
+    setMockAnswers({});
+    setMockSubmitted(false);
+    setMockEvaluation(null);
+    setActiveOption("mock-test");
 
-      console.log(
-        "GENERATING QUIZ FOR:",
-        currentMockChapter.subject,
-        currentMockChapter.chapter_title
-      );
+  } catch (error) {
+    console.error("Mock Test Generation Error:", error);
 
-      /*
-       * IMPORTANT
-       *
-       * The topic sent to the AI contains BOTH
-       * subject and chapter.
-       *
-       * This removes the old Social Science hardcode.
-       */
-
-      const topic =
-        `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
-
-      console.log(
-        "AI QUIZ TOPIC:",
-        topic
-      );
-
-      const response =
-        await generateQuiz({
-          topic: topic,
-
-          difficulty:
-            mockDifficulty,
-
-          num_questions:
-            Number(mockQuestionCount),
-
-          user_email:
-            "student@example.com",
-
-          client_name:
-            "SSS",
-        });
-
-      console.log(
-        "FULL MOCK TEST RESPONSE:",
-        JSON.stringify(
-          response,
-          null,
-          2
-        )
-      );
-
-      const generatedQuestions =
-        Array.isArray(
-          response?.quiz_data
-        )
-          ? response.quiz_data
-          : [];
-
-      if (
-        generatedQuestions.length === 0
-      ) {
-        alert(
-          "AI did not generate any questions."
-        );
-
-        return;
-      }
-
-      setMockQuestions(
-        generatedQuestions
-      );
-
-      setMockAnswers({});
-
-      setMockSubmitted(false);
-
-      setMockEvaluation(null);
-
-      setActiveOption("mock-test");
-    } catch (error) {
-      console.error(
-        "Mock Test Generation Error:",
-        error
-      );
-
-      console.error(
-        "Response:",
-        error?.response?.data
-      );
-
-      alert(
-        "Mock Test Generation Failed"
-      );
-    } finally {
-      setMockLoading(false);
-    }
+    alert(
+      error?.message ||
+      "Mock Test Generation Failed"
+    );
+  } finally {
+    setMockLoading(false);
   }
-
-  /* =======================================================
+}
+ /* =======================================================
      MOCK TEST EVALUATION
      ======================================================= */
-
-  async function handleMockEvaluation() {
-    if (
-      mockQuestions.length === 0
-    ) {
-      return;
-    }
-
-    try {
-      setMockLoading(true);
-
-      const submission = {
-        user_email:
-          "student@example.com",
-
-        submission_data: {
-          answers:
-            mockQuestions.map(
-              (
-                question,
-                index
-              ) => ({
-                question:
-                  question.question,
-
-                student_answer:
-                  question.options?.[
-                    mockAnswers[index]
-                  ] || "",
-
-                correct_answer:
-                  question.correct_answer,
-              })
-            ),
-        },
-      };
-
-      console.log(
-        "MOCK EVALUATION REQUEST:",
-        JSON.stringify(
-          submission,
-          null,
-          2
-        )
-      );
-
-      const result =
-        await evaluateQuiz(
-          submission
-        );
-
-      console.log(
-        "MOCK TEST EVALUATION:",
-        JSON.stringify(
-          result,
-          null,
-          2
-        )
-      );
-
-      setMockEvaluation(result);
-
-      setMockSubmitted(true);
-    } catch (error) {
-      console.error(
-        "Mock Test Evaluation Error:",
-        error
-      );
-
-      console.error(
-        "Response:",
-        error?.response?.data
-      );
-
-      alert(
-        "Mock Test Evaluation Failed"
-      );
-    } finally {
-      setMockLoading(false);
-    }
+async function handleMockEvaluation() {
+  if (mockQuestions.length === 0) {
+    return;
   }
 
+  if (!studentEmail) {
+    alert("Student email is unavailable.");
+    return;
+  }
+
+  try {
+    setMockLoading(true);
+
+    const submission = {
+  user_email:
+    studentEmail,
+
+  submission_data: {
+        answers: mockQuestions.map((question, index) => ({
+          question: question.question,
+
+          student_answer:
+            question.options?.[mockAnswers[index]] || "",
+
+          correct_answer:
+            question.correct_answer,
+        })),
+      },
+    };
+
+    console.log(
+      "MOCK EVALUATION REQUEST:",
+      JSON.stringify(submission, null, 2)
+    );
+
+    const result = await evaluateQuiz(submission);
+
+    console.log(
+      "MOCK TEST EVALUATION:",
+      JSON.stringify(result, null, 2)
+    );
+
+    setMockEvaluation(result);
+    setMockSubmitted(true);
+
+  } catch (error) {
+    console.error("Mock Test Evaluation Error:", error);
+
+    alert(
+      error?.message ||
+      "Mock Test Evaluation Failed"
+    );
+  } finally {
+    setMockLoading(false);
+  }
+}
   /* =======================================================
      RESET MOCK TEST
      ======================================================= */
@@ -819,25 +778,21 @@ async function handleAiEvaluation() {
                 <div className="quiz-submit-row">
 
                   <button
-                    className="primary-button"
-                    type="button"
-                    onClick={
-                      handleAiEvaluation
-                    }
-                    disabled={loading}
-                  >
-                    {loading
-                      ? "Evaluating..."
-                      : "AI Evaluation"}
-                  </button>
+  className="primary-button"
+  type="button"
+  onClick={handleAiEvaluation}
+  disabled={loading}
+>
+  {loading
+    ? "Evaluating..."
+    : "AI Evaluation"}
+</button>
 
-                  <button
-                    className="soft-button"
-                    type="button"
-                    onClick={
-                      handleUnitTest
-                    }
-                  >
+<button
+  className="soft-button"
+  type="button"
+  onClick={handleUnitTest}
+>
                     Reset
                   </button>
 
