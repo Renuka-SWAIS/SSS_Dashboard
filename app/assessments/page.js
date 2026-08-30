@@ -132,21 +132,20 @@ function AssessmentsContent() {
 
   /* =======================================================
      STUDENT EMAIL
-     ======================================================= */
+  ======================================================= */
 
-  const [studentEmail, setStudentEmail] =
-    useState("");
+  const [studentEmail, setStudentEmail] = useState("");
 
   /* =======================================================
      MAIN TAB
-     ======================================================= */
+  ======================================================= */
 
   const [activeOption, setActiveOption] =
     useState(tabFromUrl);
 
   /* =======================================================
      UNIT TEST STATE
-     ======================================================= */
+  ======================================================= */
 
   const [showEvaluation, setShowEvaluation] =
     useState(false);
@@ -159,7 +158,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      MOCK TEST STATE
-     ======================================================= */
+  ======================================================= */
 
   const [quizChapters, setQuizChapters] =
     useState([]);
@@ -193,7 +192,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      LOAD LOGGED-IN STUDENT EMAIL
-     ======================================================= */
+  ======================================================= */
 
   useEffect(() => {
     async function loadStudentEmail() {
@@ -280,7 +279,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      LOAD QUIZ CHAPTERS
-     ======================================================= */
+  ======================================================= */
 
   useEffect(() => {
     async function loadQuizChapters() {
@@ -364,7 +363,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      UNIQUE SUBJECTS
-     ======================================================= */
+  ======================================================= */
 
   const subjects = useMemo(() => {
     const subjectList =
@@ -382,7 +381,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      CHAPTERS FOR SELECTED SUBJECT
-     ======================================================= */
+  ======================================================= */
 
   const subjectChapters =
     useMemo(() => {
@@ -398,7 +397,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      CURRENT CHAPTER
-     ======================================================= */
+  ======================================================= */
 
   const currentMockChapter =
     useMemo(() => {
@@ -414,7 +413,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      CHANGE SUBJECT
-     ======================================================= */
+  ======================================================= */
 
   function handleSubjectChange(event) {
     const subject =
@@ -447,7 +446,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      CHANGE CHAPTER
-     ======================================================= */
+  ======================================================= */
 
   function handleChapterChange(event) {
     setSelectedMockChapter(
@@ -459,7 +458,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      UNIT TEST TAB
-     ======================================================= */
+  ======================================================= */
 
   function handleUnitTest() {
     setActiveOption(
@@ -472,7 +471,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      AI UNIT TEST EVALUATION
-     ======================================================= */
+  ======================================================= */
 
   async function handleAiEvaluation() {
     console.log(
@@ -575,10 +574,9 @@ function AssessmentsContent() {
     }
   }
 
-
-    /* =======================================================
+  /* =======================================================
      MOCK TEST GENERATION
-     ======================================================= */
+  ======================================================= */
 
   async function handleMockTest() {
     console.log(
@@ -684,7 +682,6 @@ function AssessmentsContent() {
       setActiveOption(
         "mock-test"
       );
-
     } catch (error) {
       console.error(
         "🔥 MOCK TEST GENERATION ERROR:",
@@ -707,7 +704,6 @@ function AssessmentsContent() {
         error?.message ||
         "Mock Test Generation Failed"
       );
-
     } finally {
       setMockLoading(false);
     }
@@ -715,7 +711,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      MOCK TEST EVALUATION
-     ======================================================= */
+  ======================================================= */
 
   async function handleMockEvaluation() {
     console.log(
@@ -833,7 +829,6 @@ function AssessmentsContent() {
       );
 
       setMockSubmitted(true);
-
     } catch (error) {
       console.error(
         "🔥 MOCK TEST EVALUATION ERROR:",
@@ -856,7 +851,6 @@ function AssessmentsContent() {
         error?.message ||
         "Mock Test Evaluation Failed"
       );
-
     } finally {
       setMockLoading(false);
     }
@@ -864,7 +858,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      RESET MOCK TEST
-     ======================================================= */
+  ======================================================= */
 
   function resetMockTest() {
     setMockQuestions([]);
@@ -880,7 +874,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      MOCK ANSWER CHANGE
-     ======================================================= */
+  ======================================================= */
 
   function handleMockAnswerChange(
     questionIndex,
@@ -902,7 +896,7 @@ function AssessmentsContent() {
 
   /* =======================================================
      MOCK SCORE
-     ======================================================= */
+  ======================================================= */
 
   const mockScore =
     useMemo(() => {
@@ -948,6 +942,38 @@ function AssessmentsContent() {
             100
         )
       : null;
+
+  /* =======================================================
+     MOCK EVALUATION TEXT
+  ======================================================= */
+
+  const mockEvaluationText =
+    mockEvaluation
+      ?.evaluation_report
+      ?.textual_report ||
+    mockEvaluation
+      ?.evaluation_report
+      ?.feedback ||
+    mockEvaluation
+      ?.textual_report ||
+    mockEvaluation
+      ?.feedback ||
+    "Evaluation completed successfully.";
+
+  /* =======================================================
+     MOCK SCORE FROM API
+  ======================================================= */
+
+  const mockApiScore =
+    mockEvaluation
+      ?.evaluation_report
+      ?.total_score ??
+    mockEvaluation
+      ?.score ??
+    mockEvaluation
+      ?.evaluation_data
+      ?.total_score ??
+    null;
 
   /* =======================================================
      RENDER
@@ -1044,6 +1070,8 @@ function AssessmentsContent() {
 
             <div className="quiz-layout assessment-layout">
 
+              {/* UNIT TEST QUESTION */}
+
               <article className="module-card purple-module">
 
                 <div className="card-title-row">
@@ -1133,7 +1161,9 @@ function AssessmentsContent() {
                     onClick={
                       handleUnitTest
                     }
-                    disabled={loading}
+                    disabled={
+                      loading
+                    }
                   >
                     Reset
                   </button>
@@ -1237,6 +1267,8 @@ function AssessmentsContent() {
             "mock-test" && (
 
             <div className="quiz-layout assessment-layout">
+
+              {/* MOCK TEST QUESTION SIDE */}
 
               <article className="module-card purple-module">
 
@@ -1646,7 +1678,9 @@ function AssessmentsContent() {
 
               </article>
 
-              {/* MOCK TEST RESULT */}
+              {/* =================================================
+                  MOCK TEST RESULT
+              ================================================= */}
 
               <article className="module-card latest-result-card">
 
@@ -1692,13 +1726,14 @@ function AssessmentsContent() {
                     <strong className="score-text">
 
                       {mockSubmitted
-                        ? mockScore !== null
-                          ? `${mockScore} / ${mockQuestions.length}`
-                          : "Evaluated"
+                        ? mockApiScore !== null
+                          ? mockApiScore
+                          : mockScore !== null
+                            ? `${mockScore} / ${mockQuestions.length}`
+                            : "Evaluated"
                         : "- / -"}
 
                     </strong>
-
                   </div>
 
                   <div>
@@ -1714,7 +1749,6 @@ function AssessmentsContent() {
                         : "-"}
 
                     </strong>
-
                   </div>
 
                   <div>
@@ -1747,17 +1781,7 @@ function AssessmentsContent() {
 
                     <p>
                       {
-                        mockEvaluation
-                          ?.evaluation_report
-                          ?.textual_report ||
-                        mockEvaluation
-                          ?.evaluation_report
-                          ?.feedback ||
-                        mockEvaluation
-                          ?.textual_report ||
-                        mockEvaluation
-                          ?.feedback ||
-                        "Evaluation completed successfully."
+                        mockEvaluationText
                       }
                     </p>
 
@@ -1769,117 +1793,14 @@ function AssessmentsContent() {
 
             </div>
 
-          )}
-                        {/* =================================================
-                  MOCK TEST RESULT
-              ================================================= */}
-
-              <article className="module-card latest-result-card">
-
-                <h2>
-                  Mock Test Result
-                </h2>
-
-                <div className="result-grid quiz-result-grid">
-
-                  <div>
-                    <span>
-                      Subject
-                    </span>
-
-                    <strong>
-                      {currentMockChapter?.subject || "-"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Chapter
-                    </span>
-
-                    <strong>
-                      {currentMockChapter?.chapter_title || "-"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Score
-                    </span>
-
-                    <strong className="score-text">
-                      {mockSubmitted
-                        ? (
-                            mockEvaluation
-                              ?.evaluation_report
-                              ?.total_score ??
-                            mockEvaluation
-                              ?.score ??
-                            mockEvaluation
-                              ?.evaluation_data
-                              ?.total_score ??
-                            "Evaluated"
-                          )
-                        : "- / -"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Status
-                    </span>
-
-                    <strong>
-                      {mockSubmitted
-                        ? "Completed"
-                        : mockQuestions.length > 0
-                          ? "In Progress"
-                          : "Pending"}
-                    </strong>
-                  </div>
-
-                </div>
-
-                {/* =================================================
-                    MOCK TEST EVALUATION REPORT
-                ================================================= */}
-
-                {mockSubmitted && mockEvaluation && (
-                  <div className="quiz-score-card assessment-ai-card">
-
-                    <strong>
-                      Mock Test Evaluation
-                    </strong>
-
-                    <p>
-                      {
-                        mockEvaluation
-                          ?.evaluation_report
-                          ?.textual_report ||
-                        mockEvaluation
-                          ?.evaluation_report
-                          ?.feedback ||
-                        mockEvaluation
-                          ?.textual_report ||
-                        mockEvaluation
-                          ?.feedback ||
-                        "Evaluation completed successfully."
-                      }
-                    </p>
-
-                  </div>
-                )}
-
-              </article>
-
-            </div>
           )}
 
           {/* =================================================
               STUDENT ANALYSIS
           ================================================= */}
 
-          {activeOption === "student-analysis" && (
+          {activeOption ===
+            "student-analysis" && (
             <StudentAnalysisView />
           )}
 
@@ -1887,7 +1808,8 @@ function AssessmentsContent() {
               TEACHER REMARK
           ================================================= */}
 
-          {activeOption === "teacher-remark" && (
+          {activeOption ===
+            "teacher-remark" && (
             <TeacherRemarkView />
           )}
 
