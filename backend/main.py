@@ -98,10 +98,15 @@ class QuizGenerationInput(BaseModel):
     user_email: str | None = Field(default=None, max_length=150)
     client_name: str | None = Field(default=None, max_length=80)
 
-
 class QuizEvaluationInput(BaseModel):
     submission_data: dict
     user_email: str | None = None
+
+
+class SelfAssessmentInput(BaseModel):
+    performance_data: dict = Field(default_factory=dict)
+    user_email: str | None = Field(default=None, max_length=150)
+    client_name: str | None = Field(default="SSS", max_length=80)
 
 
 class StudyContentGenerationInput(BaseModel):
@@ -348,6 +353,82 @@ def evaluate_quiz(payload: QuizEvaluationInput):
     report = {"correct_answers": correct, "total_questions": total, "score": correct,
               "percentage": percentage, "feedback": "Excellent work!" if percentage >= 80 else "Review the chapter and try again."}
     return {"status": "success", "evaluation_report": report, **report}
+
+# 👇 ADD THIS ENTIRE BLOCK HERE
+
+@app.post("/assess/self")
+def self_assessment(payload: SelfAssessmentInput):
+    """
+    Self Assessment API for Student Dashboard.
+    """
+
+    performance = payload.performance_data or {}
+
+    quiz_score = performance.get("quiz_score")
+    comprehension_score = performance.get("comprehension_score")
+    reading_time_minutes = performance.get("reading_time_minutes")
+    retry_count = performance.get("retry_count")
+
+    scores = []
+
+    for value in (quiz_score, comprehension_score):
+        if isinstance(value, (int, float)):
+            scores.append(float(value))
+
+    overall_score = (
+        round(sum(scores) / len(scores), 2)
+        if scores
+        else None
+    )
+
+    if overall_score is not None:
+        if overall_score >= 80:
+            level = "Excellent"
+            feedback = (
+                "Excellent performance. Keep maintaining "
+                "your current study pattern."
+            )
+        elif overall_score >= 60:
+            level = "Good"
+            feedback = (
+                "Good performance. Review weaker areas "
+                "and continue practicing."
+            )
+        elif overall_score >= 40:
+            level = "Needs Improvement"
+            feedback = (
+                "Your performance needs improvement. "
+                "Review the chapter and practice more."
+            )
+        else:
+            level = "Needs Significant Improvement"
+            feedback = (
+                "Spend more time reviewing the chapter "
+                "and retry the assessment."
+            )
+    else:
+        level = "Assessment Available"
+        feedback = (
+            "Performance data has been received successfully."
+        )
+
+    assessment = {
+        "overall_score": overall_score,
+        "level": level,
+        "feedback": feedback,
+        "quiz_score": quiz_score,
+        "comprehension_score": comprehension_score,
+        "reading_time_minutes": reading_time_minutes,
+        "retry_count": retry_count,
+    }
+
+    return {
+        "status": "success",
+        "user_email": payload.user_email,
+        "client_name": payload.client_name or "SSS",
+        "performance_data": performance,
+        "assessment": assessment,
+    }
 
 
 @app.post("/translate")
