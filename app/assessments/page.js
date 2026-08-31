@@ -472,107 +472,71 @@ function AssessmentsContent() {
   /* =======================================================
      AI UNIT TEST EVALUATION
   ======================================================= */
-
-  async function handleAiEvaluation() {
-    console.log(
-      "🔥 AI EVALUATION BUTTON CLICKED"
-    );
-
-    console.log(
-      "🔥 CURRENT STUDENT EMAIL:",
-      studentEmail
-    );
-
+async function handleAiEvaluation() {
+  try {
     if (!studentEmail) {
-      alert(
-        "Student email is unavailable."
-      );
+      alert("Student email not available. Please login again.");
       return;
     }
 
-    if (!unitTest?.studentAnswer) {
-      alert(
-        "Please provide your answer before evaluation."
-      );
-      return;
-    }
+    setLoading(true);
 
-    try {
-      setLoading(true);
+    console.log("AI EVALUATION STARTED");
+    console.log("Student Email:", studentEmail);
 
-      const payload = {
-        user_email:
-          studentEmail,
+    const requestData = {
+      user_email: studentEmail,
 
-        performance_data: {
-          subject:
-            unitTest.subject,
+      performance_data: {
+        subject: unitTest.subject,
+        chapter: unitTest.chapter,
+        question: unitTest.question,
+        student_answer: unitTest.studentAnswer,
+      },
+    };
 
-          chapter:
-            unitTest.chapter,
+    console.log(
+      "AI EVALUATION REQUEST:",
+      JSON.stringify(requestData, null, 2)
+    );
 
-          question:
-            unitTest.question,
+    const response = await selfAssessment(requestData);
 
-          student_answer:
-            unitTest.studentAnswer,
-        },
-      };
+    console.log(
+      "FULL ASSESSMENT RESPONSE:",
+      JSON.stringify(response, null, 2)
+    );
 
-      console.log(
-        "🔥 SELF ASSESSMENT REQUEST:",
-        JSON.stringify(
-          payload,
-          null,
-          2
-        )
-      );
+    setAssessmentResult(response);
+    setShowEvaluation(true);
+    setActiveOption("unit-test");
 
-      const response =
-        await selfAssessment(
-          payload
-        );
+  } catch (error) {
+    console.error(
+      "Assessment Error:",
+      error
+    );
 
-      console.log(
-        "🔥 FULL ASSESSMENT RESPONSE:",
-        response
-      );
+    console.error(
+      "Assessment Error Message:",
+      error?.message
+    );
 
-      setAssessmentResult(
-        response
-      );
+    console.error(
+      "Assessment Response:",
+      error?.response?.data
+    );
 
-      setShowEvaluation(true);
+    alert(
+      error?.response?.data?.detail ||
+      error?.message ||
+      "Assessment Failed"
+    );
 
-      setActiveOption(
-        "unit-test"
-      );
-    } catch (error) {
-      console.error(
-        "🔥 Assessment Error:",
-        error
-      );
-
-      console.error(
-        "🔥 Status:",
-        error?.response?.status
-      );
-
-      console.error(
-        "🔥 Response:",
-        error?.response?.data
-      );
-
-      alert(
-        error?.response?.data
-          ?.detail ||
-        error?.message ||
-        "Assessment Failed"
-      );
-    } finally {
-      setLoading(false);
-    }
+  } finally {
+    setLoading(false);
   }
+}
 
   /* =======================================================
      MOCK TEST GENERATION

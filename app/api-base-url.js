@@ -1,7 +1,11 @@
 export function getApiBaseUrl() {
-  const fallbackUrl = "/api";
-  const rawUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || fallbackUrl).trim();
-  const normalizedUrl = rawUrl.replace(/^https?:\/\/(?=https?:\/\/)/i, "");
+  const fallbackUrl =
+    "https://staging.sss.swais.in/api/student";
 
-  return normalizedUrl.replace(/\/+$/, "");
+  const rawUrl = (
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    fallbackUrl
+  ).trim();
+
+  return rawUrl.replace(/\/+$/, "");
 }
