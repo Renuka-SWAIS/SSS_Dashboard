@@ -472,17 +472,26 @@ function AssessmentsContent() {
   /* =======================================================
      AI UNIT TEST EVALUATION
   ======================================================= */
-async function handleAiEvaluation() {
+
+  async function handleAiEvaluation() {
   try {
     if (!studentEmail) {
-      alert("Student email not available. Please login again.");
+      alert(
+        "Student email not available. Please login again."
+      );
       return;
     }
 
     setLoading(true);
 
-    console.log("AI EVALUATION STARTED");
-    console.log("Student Email:", studentEmail);
+    console.log(
+      "AI EVALUATION STARTED"
+    );
+
+    console.log(
+      "Student Email:",
+      studentEmail
+    );
 
     const requestData = {
       user_email: studentEmail,
@@ -491,25 +500,43 @@ async function handleAiEvaluation() {
         subject: unitTest.subject,
         chapter: unitTest.chapter,
         question: unitTest.question,
-        student_answer: unitTest.studentAnswer,
+        student_answer:
+          unitTest.studentAnswer,
       },
     };
 
     console.log(
       "AI EVALUATION REQUEST:",
-      JSON.stringify(requestData, null, 2)
+      JSON.stringify(
+        requestData,
+        null,
+        2
+      )
     );
 
-    const response = await selfAssessment(requestData);
+    const response =
+      await selfAssessment(
+        requestData
+      );
 
     console.log(
       "FULL ASSESSMENT RESPONSE:",
-      JSON.stringify(response, null, 2)
+      JSON.stringify(
+        response,
+        null,
+        2
+      )
     );
 
-    setAssessmentResult(response);
+    setAssessmentResult(
+      response
+    );
+
     setShowEvaluation(true);
-    setActiveOption("unit-test");
+
+    setActiveOption(
+      "unit-test"
+    );
 
   } catch (error) {
     console.error(
