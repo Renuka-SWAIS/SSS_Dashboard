@@ -5602,3 +5602,33 @@ button.reset:hover,
 .generated-path-card span {
   opacity: 1;
 }
+/* =========================================================
+   AI LEARNING PATH - WHITE CONTENT BOXES
+   ========================================================= */
+
+.generated-path-card .learning-focus-box {
+  background: #f8fafc;
+}
+
+.generated-path-card .learning-focus-box,
+.generated-path-card .learning-focus-box strong,
+.generated-path-card .learning-focus-box p {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+/* Key Terms */
+.generated-path-card .key-terms,
+.generated-path-card .key-terms span,
+.generated-path-card .key-terms strong {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+/* Recommended Material */
+.generated-path-card .recommended-materials,
+.generated-path-card .recommended-materials span,
+.generated-path-card .recommended-materials strong {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
