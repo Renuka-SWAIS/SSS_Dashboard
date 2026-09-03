@@ -5776,3 +5776,200 @@ button.reset:hover,
 .latest-result-card div[style*="border"] strong {
   color: #ffffff !important;
 }
+
+
+/* =========================================================
+   FINAL COLOR FIX - ASSESSMENT + AI LEARNING PATH
+   ========================================================= */
+
+/* =========================
+   UNIT TEST - DARK SECTION
+   ========================= */
+
+.assessment-dashboard .quiz-question,
+.assessment-dashboard .quiz-question legend {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+
+/* =========================
+   AI EVALUATION CARD
+   ========================= */
+
+.assessment-dashboard .assessment-ai-card h2,
+.assessment-dashboard .assessment-ai-card h3 {
+  color: #ffffff !important;
+}
+
+.assessment-dashboard .assessment-ai-card p,
+.assessment-dashboard .assessment-ai-card span {
+  color: #c9d1e5 !important;
+}
+
+.assessment-dashboard .assessment-ai-card strong {
+  color: #ffffff !important;
+}
+
+
+/* Score */
+.assessment-dashboard .assessment-ai-card .score,
+.assessment-dashboard .assessment-ai-card .score-value {
+  color: #21d66b !important;
+}
+
+
+/* Pending */
+.assessment-dashboard .assessment-ai-card .status,
+.assessment-dashboard .assessment-ai-card .pending {
+  color: #ffb45c !important;
+}
+
+
+/* =========================
+   AI EVALUATION BUTTON
+   ========================= */
+
+.assessment-dashboard .ai-evaluation button,
+.assessment-dashboard .ai-evaluate-button,
+.assessment-dashboard .evaluate-button {
+  background: linear-gradient(145deg, #1d7be0, #0d5db7) !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================
+   RESET BUTTON
+   ========================= */
+
+.assessment-dashboard .reset-button,
+.assessment-dashboard button.reset,
+.assessment-dashboard .secondary-button {
+  background: linear-gradient(145deg, #252a4f, #181c3b) !important;
+  color: #ffffff !important;
+}
+
+
+/* =========================
+   QUIZ WHITE BOXES
+   ========================= */
+
+.quiz-card .quiz-option {
+  background: #ffffff !important;
+  color: #172554 !important;
+}
+
+.quiz-card .quiz-option span {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================
+   QUIZ DROPDOWN
+   ========================= */
+
+.quiz-card .assignment-field select,
+.quiz-card .assignment-field select option {
+  background: #ffffff !important;
+  color: #172554 !important;
+}
+
+
+/* =========================
+   AI LEARNING PATH
+   ========================= */
+
+.generated-path-card {
+  color: #ffffff;
+}
+
+
+/* Dark sections */
+.generated-path-card .learning-step-list,
+.generated-path-card .learning-step-list li,
+.generated-path-card ul li,
+.generated-path-card ol li {
+  color: #ffffff !important;
+}
+
+
+/* =========================
+   WHITE BOXES
+   ========================= */
+
+/* Quick Recap */
+.generated-path-card .learning-focus-box {
+  background: #f8fafc !important;
+  color: #172554 !important;
+}
+
+.generated-path-card .learning-focus-box,
+.generated-path-card .learning-focus-box p,
+.generated-path-card .learning-focus-box span,
+.generated-path-card .learning-focus-box strong {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+
+/* Key Terms */
+.generated-path-card .key-terms,
+.generated-path-card .key-terms p,
+.generated-path-card .key-terms span,
+.generated-path-card .key-terms strong {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+
+/* Recommended Materials */
+.generated-path-card .recommended-materials,
+.generated-path-card .recommended-materials p,
+.generated-path-card .recommended-materials span,
+.generated-path-card .recommended-materials strong {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================
+   QUIZ RESULT
+   ========================= */
+
+.latest-result-card h2,
+.latest-result-card h3 {
+  color: #ffffff !important;
+}
+
+.latest-result-card .result-grid span {
+  color: #c9d1e5 !important;
+  opacity: 1 !important;
+}
+
+.latest-result-card .result-grid strong {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+
+/* Score */
+.latest-result-card .result-grid strong.score-text {
+  color: #22c55e !important;
+}
+
+
+/* =========================
+   AI REPORT GREEN BOX
+   ========================= */
+
+.quiz-score-card {
+  background: #eafaf0 !important;
+}
+
+.quiz-score-card,
+.quiz-score-card strong,
+.quiz-score-card p {
+  color: #0b6130 !important;
+  opacity: 1 !important;
+}
