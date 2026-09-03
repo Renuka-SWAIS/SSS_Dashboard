@@ -5632,3 +5632,147 @@ button.reset:hover,
   color: #172554 !important;
   opacity: 1 !important;
 }
+
+/* =========================================================
+   QUIZ PAGE - TEXT VISIBILITY FIX
+   ========================================================= */
+
+/* Main quiz card text */
+.quiz-card {
+  color: #ffffff;
+}
+
+/* Quiz title */
+.quiz-card h2,
+.quiz-card h3 {
+  color: #ffffff !important;
+}
+
+/* Total Marks / Questions / Duration */
+.quiz-card .meta-row,
+.quiz-card .meta-row span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Chapter label */
+.quiz-card .assignment-field > span {
+  color: #ffffff !important;
+}
+
+/* Chapter dropdown */
+.quiz-card .assignment-field select {
+  color: #172554 !important;
+  background: #ffffff !important;
+}
+
+/* Dropdown options */
+.quiz-card .assignment-field select option {
+  color: #172554 !important;
+  background: #ffffff !important;
+}
+
+/* Question box */
+.quiz-card .quiz-question {
+  color: #ffffff !important;
+}
+
+/* Question text */
+.quiz-card .quiz-question legend {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* White answer boxes */
+.quiz-card .quiz-option {
+  color: #172554 !important;
+  background: #ffffff !important;
+}
+
+/* Answer text */
+.quiz-card .quiz-option span {
+  color: #172554 !important;
+  opacity: 1 !important;
+}
+
+/* Selected answer */
+.quiz-card .quiz-option.selected {
+  color: #172554 !important;
+}
+
+/* Correct answer */
+.quiz-card .quiz-option.correct {
+  color: #14532d !important;
+}
+
+.quiz-card .quiz-option.correct span {
+  color: #14532d !important;
+}
+
+/* Wrong answer */
+.quiz-card .quiz-option.wrong {
+  color: #991b1b !important;
+}
+
+.quiz-card .quiz-option.wrong span {
+  color: #991b1b !important;
+}
+
+/* Warning text */
+.quiz-card .quiz-warning {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   QUIZ RESULT CARD
+   ========================================================= */
+
+.latest-result-card {
+  color: #ffffff;
+}
+
+.latest-result-card h2,
+.latest-result-card h3 {
+  color: #ffffff !important;
+}
+
+/* Result labels */
+.latest-result-card .result-grid span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Result values */
+.latest-result-card .result-grid strong {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   EVALUATION REPORT
+   ========================================================= */
+
+.latest-result-card p {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.latest-result-card p strong {
+  color: #ffffff !important;
+}
+
+/* Evaluation correction boxes */
+.latest-result-card div[style*="border"] {
+  color: #ffffff !important;
+}
+
+.latest-result-card div[style*="border"] p {
+  color: #ffffff !important;
+}
+
+.latest-result-card div[style*="border"] strong {
+  color: #ffffff !important;
+}
