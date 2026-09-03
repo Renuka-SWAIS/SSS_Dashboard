@@ -5540,3 +5540,61 @@ button.reset:hover,
 
 
 
+/* =========================================================
+   AI LEARNING PATH - TEXT VISIBILITY FIX
+   ========================================================= */
+
+.generated-path-card {
+  color: #ffffff;
+}
+
+.generated-path-card h2,
+.generated-path-card h3,
+.generated-path-card p,
+.generated-path-card li,
+.generated-path-card span,
+.generated-path-card strong {
+  color: #ffffff;
+}
+
+.generated-path-card .card-title-row p {
+  color: #ffffff;
+}
+
+.generated-path-card .learning-focus-box {
+  color: #ffffff;
+}
+
+.generated-path-card .learning-focus-box strong,
+.generated-path-card .learning-focus-box p {
+  color: #ffffff;
+}
+
+.generated-path-card .learning-step-list,
+.generated-path-card .learning-step-list li {
+  color: #ffffff;
+}
+
+.generated-path-card .recommended-materials,
+.generated-path-card .recommended-materials span,
+.generated-path-card .recommended-materials strong {
+  color: #ffffff;
+}
+
+/* Personalized Study Content */
+.generated-path-card h3 {
+  color: #ffffff;
+}
+
+/* Make practice questions and simple notes clearly visible */
+.generated-path-card ul li,
+.generated-path-card ol li {
+  color: #ffffff;
+}
+
+/* Improve readability of the generated text */
+.generated-path-card p,
+.generated-path-card li,
+.generated-path-card span {
+  opacity: 1;
+}
