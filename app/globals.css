@@ -5557,18 +5557,29 @@ button.reset:hover,
   color: #ffffff;
 }
 
-.generated-path-card .card-title-row p {
-  color: #ffffff;
-}
+/* =========================================================
+   WHITE BOX / QUICK RECAP
+   ========================================================= */
 
 .generated-path-card .learning-focus-box {
-  color: #ffffff;
+  background: #f8fafc;
+  color: #172554;
 }
 
-.generated-path-card .learning-focus-box strong,
-.generated-path-card .learning-focus-box p {
-  color: #ffffff;
+.generated-path-card .learning-focus-box strong {
+  color: #172554 !important;
+  font-weight: 700;
 }
+
+.generated-path-card .learning-focus-box p {
+  color: #334155 !important;
+  font-weight: 500;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   DARK BACKGROUND CONTENT
+   ========================================================= */
 
 .generated-path-card .learning-step-list,
 .generated-path-card .learning-step-list li {
@@ -5581,18 +5592,11 @@ button.reset:hover,
   color: #ffffff;
 }
 
-/* Personalized Study Content */
-.generated-path-card h3 {
-  color: #ffffff;
-}
-
-/* Make practice questions and simple notes clearly visible */
 .generated-path-card ul li,
 .generated-path-card ol li {
   color: #ffffff;
 }
 
-/* Improve readability of the generated text */
 .generated-path-card p,
 .generated-path-card li,
 .generated-path-card span {
