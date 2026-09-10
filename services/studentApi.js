@@ -47,107 +47,92 @@ export const translateText = async (data) => {
 ------------------------------------------------------- */
 
 export const evaluateQuiz = async (data) => {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_AI_API || ""
-  ).replace(/\/+$/, "");
-
-  if (!baseUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_AI_API is not configured."
-    );
-  }
-
-  console.log(
-    "🔥 QUIZ EVALUATION URL:",
-    `${baseUrl}/quiz/evaluate`
-  );
-
-  console.log(
-    "🔥 QUIZ EVALUATION REQUEST:",
-    data
-  );
-
-  const response = await fetch(
-    `${baseUrl}/quiz/evaluate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
-
-  const result =
-    await response.json().catch(() => ({}));
-
-  console.log(
-    "🔥 QUIZ EVALUATION STATUS:",
-    response.status
-  );
-
-  console.log(
-    "🔥 QUIZ EVALUATION RESPONSE:",
-    result
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      result?.detail ||
-      result?.message ||
-      `Quiz evaluation failed: ${response.status}`
-    );
-  }
-
-  return result;
-};
-/* -------------------------------------------------------
-   SELF ASSESSMENT
-------------------------------------------------------- */
-
-export const selfAssessment = async (data) => {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_AI_API || ""
-  ).replace(/\/+$/, "");
+  const baseUrl = (process.env.NEXT_PUBLIC_AI_API || "").replace(/\/+$/, "");
 
   if (!baseUrl) {
     throw new Error("NEXT_PUBLIC_AI_API is not configured.");
   }
 
-  const response = await fetch(
-    `${baseUrl}/assess/self`,
-    {
+  const url = `${baseUrl}/quiz/evaluate`;
+
+  console.log("🔥 QUIZ EVALUATION URL:", url);
+  console.log("🔥 QUIZ EVALUATION REQUEST:", data);
+
+  try {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       body: JSON.stringify(data),
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    console.log("🔥 QUIZ EVALUATION STATUS:", response.status);
+    console.log("🔥 QUIZ EVALUATION RESPONSE:", result);
+
+    if (!response.ok) {
+      throw new Error(
+        result?.detail ||
+        result?.message ||
+        `Quiz evaluation failed: ${response.status}`
+      );
     }
-  );
 
-  const result = await response.json().catch(() => ({}));
+    return result;
+  } catch (error) {
+    console.error("🔥 QUIZ EVALUATION FETCH ERROR:", error);
+    throw error;
+  }
+};
 
-  console.log(
-    "🔥 SELF ASSESSMENT STATUS:",
-    response.status
-  );
 
-  console.log(
-    "🔥 SELF ASSESSMENT RESPONSE:",
-    result
-  );
+/* -------------------------------------------------------
+   SELF ASSESSMENT
+------------------------------------------------------- */
 
-  if (!response.ok) {
-    throw new Error(
-      result?.detail ||
-      result?.message ||
-      `Self assessment failed: ${response.status}`
-    );
+export const selfAssessment = async (data) => {
+  const baseUrl = (process.env.NEXT_PUBLIC_AI_API || "").replace(/\/+$/, "");
+
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_AI_API is not configured.");
   }
 
-  return result;
+  const url = `${baseUrl}/assess/self`;
+
+  console.log("🔥 SELF ASSESSMENT URL:", url);
+  console.log("🔥 SELF ASSESSMENT REQUEST:", data);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    console.log("🔥 SELF ASSESSMENT STATUS:", response.status);
+    console.log("🔥 SELF ASSESSMENT RESPONSE:", result);
+
+    if (!response.ok) {
+      throw new Error(
+        result?.detail ||
+        result?.message ||
+        `Self assessment failed: ${response.status}`
+      );
+    }
+
+    return result;
+  } catch (error) {
+    console.error("🔥 SELF ASSESSMENT FETCH ERROR:", error);
+    throw error;
+  }
 };
 /* -------------------------------------------------------
    TEXT TO VOICE
