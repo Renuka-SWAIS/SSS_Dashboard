@@ -1589,6 +1589,33 @@ button {
   font-size: 16px;
   font-weight: 700;
 }
+/* =================================================
+   MOCK TEST TIMER
+================================================= */
+
+.mock-test-timer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+}
+
+.mock-test-timer span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mock-test-timer strong {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+
 
 .quiz-submit-row {
   display: flex;
