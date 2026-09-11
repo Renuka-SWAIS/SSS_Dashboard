@@ -184,11 +184,44 @@ function AssessmentsContent() {
   const [mockEvaluation, setMockEvaluation] =
     useState(null);
 
+  /*
+   * Dedicated result state.
+   * This stores the final API score separately so the UI
+   * does not depend on nested evaluation_report fields.
+   */
+  const [mockResult, setMockResult] =
+    useState(null);
+
   const [mockDifficulty, setMockDifficulty] =
     useState("easy");
 
   const [mockQuestionCount, setMockQuestionCount] =
     useState(5);
+
+  /* =======================================================
+     DEBUG MOCK RESULT STATE
+  ======================================================= */
+
+  useEffect(() => {
+    console.log(
+      "🔥 MOCK SUBMITTED STATE:",
+      mockSubmitted
+    );
+
+    console.log(
+      "🔥 MOCK RESULT STATE:",
+      mockResult
+    );
+
+    console.log(
+      "🔥 MOCK EVALUATION STATE:",
+      mockEvaluation
+    );
+  }, [
+    mockSubmitted,
+    mockResult,
+    mockEvaluation,
+  ]);
 
   /* =======================================================
      LOAD LOGGED-IN STUDENT EMAIL
@@ -537,7 +570,6 @@ function AssessmentsContent() {
       setActiveOption(
         "unit-test"
       );
-
     } catch (error) {
       console.error(
         "🔥 Assessment Error:",
@@ -559,7 +591,6 @@ function AssessmentsContent() {
         error?.message ||
         "Assessment Failed"
       );
-
     } finally {
       setLoading(false);
     }
@@ -595,6 +626,7 @@ function AssessmentsContent() {
       setMockAnswers({});
       setMockSubmitted(false);
       setMockEvaluation(null);
+      setMockResult(null);
 
       const topic =
         `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
@@ -669,6 +701,8 @@ function AssessmentsContent() {
       setMockSubmitted(false);
 
       setMockEvaluation(null);
+
+      setMockResult(null);
 
       setActiveOption(
         "mock-test"
@@ -808,7 +842,50 @@ function AssessmentsContent() {
 
       console.log(
         "🔥 FULL MOCK EVALUATION RESPONSE:",
-        result
+        JSON.stringify(
+          result,
+          null,
+          2
+        )
+      );
+
+      /* ---------------------------------------------------
+         EXTRACT FINAL RESULT
+      --------------------------------------------------- */
+
+      const score =
+        Number(
+          result?.score ??
+          result?.correct_answers ??
+          0
+        );
+
+      const total =
+        Number(
+          result?.total_questions ??
+          mockQuestions.length
+        );
+
+      const percentage =
+        total > 0
+          ? Math.round(
+              (score / total) * 100
+            )
+          : 0;
+
+      console.log(
+        "🔥 FINAL SCORE:",
+        score
+      );
+
+      console.log(
+        "🔥 FINAL TOTAL:",
+        total
+      );
+
+      console.log(
+        "🔥 FINAL PERCENTAGE:",
+        percentage
       );
 
       /* ---------------------------------------------------
@@ -819,8 +896,17 @@ function AssessmentsContent() {
         result
       );
 
+      setMockResult({
+        score,
+        total,
+        percentage,
+      });
+
       setMockSubmitted(true);
 
+      console.log(
+        "🔥 MOCK RESULT STATE UPDATE TRIGGERED"
+      );
     } catch (error) {
       console.error(
         "🔥 MOCK TEST EVALUATION ERROR:",
@@ -843,7 +929,6 @@ function AssessmentsContent() {
         error?.message ||
         "Mock Test Evaluation Failed"
       );
-
     } finally {
       setMockLoading(false);
     }
@@ -861,6 +946,8 @@ function AssessmentsContent() {
     setMockSubmitted(false);
 
     setMockEvaluation(null);
+
+    setMockResult(null);
 
     setMockLoading(false);
   }
@@ -888,7 +975,7 @@ function AssessmentsContent() {
   }
 
   /* =======================================================
-     MOCK SCORE
+     MOCK SCORE - LOCAL FALLBACK
   ======================================================= */
 
   const mockScore =
@@ -973,21 +1060,27 @@ function AssessmentsContent() {
   ======================================================= */
 
   const finalMockScore =
-    mockApiScore !== null
+    mockResult?.score ??
+    (mockApiScore !== null
       ? Number(mockApiScore)
       : mockScore !== null
         ? Number(mockScore)
-        : 0;
+        : 0);
+
+  const finalMockTotal =
+    mockResult?.total ??
+    mockQuestions.length;
 
   const finalMockPercentage =
-    mockQuestions.length > 0 &&
+    mockResult?.percentage ??
+    (finalMockTotal > 0 &&
     mockSubmitted
       ? Math.round(
           (finalMockScore /
-            mockQuestions.length) *
+            finalMockTotal) *
             100
         )
-      : null;
+      : null);
 
   /* =======================================================
      RENDER
@@ -1776,7 +1869,7 @@ function AssessmentsContent() {
                     <strong className="score-text">
 
                       {mockSubmitted
-                        ? `${finalMockScore} / ${mockQuestions.length}`
+                        ? `${finalMockScore} / ${finalMockTotal}`
                         : "- / -"}
 
                     </strong>
