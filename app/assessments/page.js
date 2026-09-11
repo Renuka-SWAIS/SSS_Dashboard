@@ -474,96 +474,96 @@ function AssessmentsContent() {
   ======================================================= */
 
   async function handleAiEvaluation() {
-  try {
-    if (!studentEmail) {
+    try {
+      if (!studentEmail) {
+        alert(
+          "Student email not available. Please login again."
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      console.log(
+        "🔥 AI EVALUATION STARTED"
+      );
+
+      console.log(
+        "🔥 Student Email:",
+        studentEmail
+      );
+
+      const requestData = {
+        user_email: studentEmail,
+
+        performance_data: {
+          subject: unitTest.subject,
+          chapter: unitTest.chapter,
+          question: unitTest.question,
+          student_answer:
+            unitTest.studentAnswer,
+        },
+      };
+
+      console.log(
+        "🔥 AI EVALUATION REQUEST:",
+        JSON.stringify(
+          requestData,
+          null,
+          2
+        )
+      );
+
+      const response =
+        await selfAssessment(
+          requestData
+        );
+
+      console.log(
+        "🔥 FULL ASSESSMENT RESPONSE:",
+        JSON.stringify(
+          response,
+          null,
+          2
+        )
+      );
+
+      setAssessmentResult(
+        response
+      );
+
+      setShowEvaluation(true);
+
+      setActiveOption(
+        "unit-test"
+      );
+
+    } catch (error) {
+      console.error(
+        "🔥 Assessment Error:",
+        error
+      );
+
+      console.error(
+        "🔥 Assessment Error Message:",
+        error?.message
+      );
+
+      console.error(
+        "🔥 Assessment Response:",
+        error?.response?.data
+      );
+
       alert(
-        "Student email not available. Please login again."
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Assessment Failed"
       );
-      return;
+
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-
-    console.log(
-      "AI EVALUATION STARTED"
-    );
-
-    console.log(
-      "Student Email:",
-      studentEmail
-    );
-
-    const requestData = {
-      user_email: studentEmail,
-
-      performance_data: {
-        subject: unitTest.subject,
-        chapter: unitTest.chapter,
-        question: unitTest.question,
-        student_answer:
-          unitTest.studentAnswer,
-      },
-    };
-
-    console.log(
-      "AI EVALUATION REQUEST:",
-      JSON.stringify(
-        requestData,
-        null,
-        2
-      )
-    );
-
-    const response =
-      await selfAssessment(
-        requestData
-      );
-
-    console.log(
-      "FULL ASSESSMENT RESPONSE:",
-      JSON.stringify(
-        response,
-        null,
-        2
-      )
-    );
-
-    setAssessmentResult(
-      response
-    );
-
-    setShowEvaluation(true);
-
-    setActiveOption(
-      "unit-test"
-    );
-
-  } catch (error) {
-    console.error(
-      "Assessment Error:",
-      error
-    );
-
-    console.error(
-      "Assessment Error Message:",
-      error?.message
-    );
-
-    console.error(
-      "Assessment Response:",
-      error?.response?.data
-    );
-
-    alert(
-      error?.response?.data?.detail ||
-      error?.message ||
-      "Assessment Failed"
-    );
-
-  } finally {
-    setLoading(false);
   }
-}
 
   /* =======================================================
      MOCK TEST GENERATION
@@ -820,6 +820,7 @@ function AssessmentsContent() {
       );
 
       setMockSubmitted(true);
+
     } catch (error) {
       console.error(
         "🔥 MOCK TEST EVALUATION ERROR:",
@@ -842,6 +843,7 @@ function AssessmentsContent() {
         error?.message ||
         "Mock Test Evaluation Failed"
       );
+
     } finally {
       setMockLoading(false);
     }
@@ -935,6 +937,21 @@ function AssessmentsContent() {
       : null;
 
   /* =======================================================
+     MOCK API SCORE
+  ======================================================= */
+
+  const mockApiScore =
+    mockEvaluation
+      ?.evaluation_report
+      ?.total_score ??
+    mockEvaluation
+      ?.score ??
+    mockEvaluation
+      ?.evaluation_data
+      ?.total_score ??
+    null;
+
+  /* =======================================================
      MOCK EVALUATION TEXT
   ======================================================= */
 
@@ -952,19 +969,25 @@ function AssessmentsContent() {
     "Evaluation completed successfully.";
 
   /* =======================================================
-     MOCK SCORE FROM API
+     FINAL DISPLAY SCORE
   ======================================================= */
 
-  const mockApiScore =
-    mockEvaluation
-      ?.evaluation_report
-      ?.total_score ??
-    mockEvaluation
-      ?.score ??
-    mockEvaluation
-      ?.evaluation_data
-      ?.total_score ??
-    null;
+  const finalMockScore =
+    mockApiScore !== null
+      ? Number(mockApiScore)
+      : mockScore !== null
+        ? Number(mockScore)
+        : 0;
+
+  const finalMockPercentage =
+    mockQuestions.length > 0 &&
+    mockSubmitted
+      ? Math.round(
+          (finalMockScore /
+            mockQuestions.length) *
+            100
+        )
+      : null;
 
   /* =======================================================
      RENDER
@@ -1130,16 +1153,31 @@ function AssessmentsContent() {
 
                 <div className="quiz-submit-row">
 
+                  {/* AI EVALUATION BUTTON */}
+
                   <button
                     className="primary-button"
                     type="button"
-                    onClick={
-                      handleAiEvaluation
-                    }
-                    disabled={
-                      loading ||
-                      !studentEmail
-                    }
+                    disabled={loading}
+                    onClick={() => {
+                      console.log(
+                        "🔥 AI EVALUATION BUTTON CLICKED"
+                      );
+
+                      console.log(
+                        "🔥 CURRENT STUDENT EMAIL:",
+                        studentEmail
+                      );
+
+                      if (!studentEmail) {
+                        alert(
+                          "Student email is not available."
+                        );
+                        return;
+                      }
+
+                      handleAiEvaluation();
+                    }}
                   >
                     {loading
                       ? "Evaluating..."
@@ -1629,21 +1667,48 @@ function AssessmentsContent() {
                   0 && (
 
                   <div className="quiz-submit-row">
-<button
-  className="primary-button"
-  type="button"
-  disabled={
-    mockSubmitted ||
-    mockLoading
-  }
-  onClick={
-    handleMockEvaluation
-  }
->
-  {mockLoading
-    ? "Evaluating..."
-    : "Submit Mock Test"}
-</button>
+
+                    {/* SUBMIT MOCK TEST */}
+
+                    <button
+                      className="primary-button"
+                      type="button"
+                      disabled={
+                        mockSubmitted ||
+                        mockLoading
+                      }
+                      onClick={() => {
+                        console.log(
+                          "🔥 SUBMIT MOCK TEST BUTTON CLICKED"
+                        );
+
+                        console.log(
+                          "🔥 QUESTIONS:",
+                          mockQuestions.length
+                        );
+
+                        console.log(
+                          "🔥 ANSWERS:",
+                          mockAnswers
+                        );
+
+                        console.log(
+                          "🔥 STUDENT EMAIL:",
+                          studentEmail
+                        );
+
+                        handleMockEvaluation();
+                      }}
+                    >
+                      {mockLoading
+                        ? "Evaluating..."
+                        : mockSubmitted
+                          ? "Submitted"
+                          : "Submit Mock Test"}
+                    </button>
+
+                    {/* RESET */}
+
                     <button
                       className="soft-button"
                       type="button"
@@ -1711,11 +1776,7 @@ function AssessmentsContent() {
                     <strong className="score-text">
 
                       {mockSubmitted
-                        ? mockApiScore !== null
-                          ? mockApiScore
-                          : mockScore !== null
-                            ? `${mockScore} / ${mockQuestions.length}`
-                            : "Evaluated"
+                        ? `${finalMockScore} / ${mockQuestions.length}`
                         : "- / -"}
 
                     </strong>
@@ -1729,8 +1790,8 @@ function AssessmentsContent() {
                     <strong className="score-text">
 
                       {mockSubmitted &&
-                      mockPercentage !== null
-                        ? `${mockPercentage}%`
+                      finalMockPercentage !== null
+                        ? `${finalMockPercentage}%`
                         : "-"}
 
                     </strong>
