@@ -1815,7 +1815,8 @@ button {
 
 @keyframes loading-slide {
   from {
-    transform: translateX(0);
+    
+    slateX(0);
   }
 
   to {
@@ -5972,4 +5973,8 @@ button.reset:hover,
 .quiz-score-card p {
   color: #0b6130 !important;
   opacity: 1 !important;
+}
+
+.quiz-submit-row .primary-button:active {
+  transform: none !important;
 }
