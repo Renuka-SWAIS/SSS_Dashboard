@@ -1589,6 +1589,8 @@ button {
   font-size: 16px;
   font-weight: 700;
 }
+
+
 /* =================================================
    MOCK TEST TIMER
 ================================================= */
@@ -1597,24 +1599,28 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 16px 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 18px 0 20px;
   padding: 12px 16px;
   border-radius: 10px;
-  background: #f5f3ff;
-  border: 1px solid #ddd6fe;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .mock-test-timer span {
   font-size: 14px;
   font-weight: 600;
+  color: #ffffff;
 }
 
 .mock-test-timer strong {
   font-size: 20px;
   font-weight: 700;
+  color: #ffffff;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
 }
-
 
 
 .quiz-submit-row {
@@ -1623,6 +1629,23 @@ button {
   gap: 10px;
   margin-top: 20px;
 }
+
+.quiz-submit-row button {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.quiz-submit-row button:disabled {
+  cursor: not-allowed;
+}
+
+.quiz-submit-row .primary-button:active,
+.quiz-submit-row .soft-button:active {
+  transform: none !important;
+}
+
 
 .quiz-submit-row .primary-button:disabled {
   border-color: #c8d3df;
