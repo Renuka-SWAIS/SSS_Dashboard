@@ -1816,7 +1816,7 @@ button {
 @keyframes loading-slide {
   from {
     
-    slateX(0);
+    transform: translateX(0);
   }
 
   to {
@@ -5978,3 +5978,5 @@ button.reset:hover,
 .quiz-submit-row .primary-button:active {
   transform: none !important;
 }
+
+
