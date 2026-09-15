@@ -382,37 +382,54 @@ async function handleAskAi() {
                           <button
   className="table-action"
   type="button"
-  onClick={async () => {
-    setSelectedAssignment(assignment);
-    setSelectedFile(null);
-    setShowAiSummary(false);
+ onClick={async () => {
+  setSelectedAssignment(assignment);
+  setSelectedFile(null);
+  setShowAiSummary(false);
 
-    if (assignment.action !== "Start" || !studentId) {
+  // Open submitted assignment
+  if (assignment.action === "View") {
+    if (!studentId) {
+      alert("Student information is not available.");
       return;
     }
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
-        {
-          method: "POST",
-        }
-      );
+    const fileUrl =
+      `${API_BASE_URL}/assignment-submissions/file` +
+      `?student_id=${studentId}` +
+      `&assignment_id=${assignment.assignment_id}`;
 
-      const data = await response.json().catch(() => ({}));
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
 
-      if (!response.ok) {
-        throw new Error(
-          data.detail || "Unable to start assignment."
-        );
+  // Start assignment
+  if (assignment.action !== "Start" || !studentId) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
+      {
+        method: "POST",
       }
+    );
 
-      await loadAssignments(assignment.assignment_id);
-    } catch (error) {
-      console.error("Start Assignment Error:", error);
-      alert(error.message || "Unable to start assignment.");
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || "Unable to start assignment."
+      );
     }
-  }}
+
+    await loadAssignments(assignment.assignment_id);
+  } catch (error) {
+    console.error("Start Assignment Error:", error);
+    alert(error.message || "Unable to start assignment.");
+  }
+}}
 >
   {assignment.action || "Start"}
 </button>

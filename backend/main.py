@@ -15,7 +15,7 @@ from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from psycopg.rows import dict_row
@@ -1083,6 +1083,63 @@ def get_assignment_submission(
         )
 
     return {"submission": submission}
+
+@app.get("/assignment-submissions/file")
+def view_assignment_submission_file(
+    student_id: int = Query(..., ge=1),
+    assignment_id: int = Query(..., ge=1),
+):
+    query = """
+        SELECT
+            submitted_file_name,
+            submitted_file_type,
+            submitted_file_content
+        FROM sss_assignment_results
+        WHERE student_id = %s
+          AND assignment_id = %s
+          AND LOWER(COALESCE(record_status, 'Active')) = 'active'
+          AND submitted_file_content IS NOT NULL
+        ORDER BY submitted_at DESC NULLS LAST, assignment_result_id DESC
+        LIMIT 1;
+    """
+
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                ensure_assignment_result_upload_columns(cursor)
+                cursor.execute(query, (student_id, assignment_id))
+                submission = cursor.fetchone()
+
+    except psycopg.errors.UndefinedTable as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Assignment result table is missing.",
+        ) from error
+
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch submitted file.",
+        ) from error
+
+    if submission is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No submitted file found for this assignment.",
+        )
+
+    file_content = submission["submitted_file_content"]
+    file_type = submission["submitted_file_type"] or "application/octet-stream"
+
+    return Response(
+        content=file_content,
+        media_type=file_type,
+        headers={
+            "Content-Disposition": (
+                f'inline; filename="{submission["submitted_file_name"] or "submission"}"'
+            )
+        },
+    )
 
 @app.get("/classes")
 def get_classes():
