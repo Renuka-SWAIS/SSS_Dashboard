@@ -50,16 +50,25 @@ async function loadAssignments(preferredId = null) {
     const apiCandidates = [...new Set([API_BASE_URL, localBackend])];
 
     // Get logged-in student's email
-    const storedEmail =
-      typeof window !== "undefined"
-        ? localStorage.getItem("student_email") ||
-          sessionStorage.getItem("student_email") ||
-          ""
-        : "";
+    const storedSession =
+  typeof window !== "undefined"
+    ? window.sessionStorage.getItem("sssUserSession") ||
+      window.localStorage.getItem("sssUserSession")
+    : null;
 
-    if (!storedEmail) {
-      throw new Error("Student email not found. Please login again.");
-    }
+const session = storedSession
+  ? JSON.parse(storedSession)
+  : null;
+
+const storedEmail = (
+  session?.email ||
+  session?.user?.email ||
+  ""
+).trim();
+
+if (!storedEmail) {
+  throw new Error("Student email not found. Please login again.");
+}
 
     let data = null;
     let lastError = null;
@@ -67,11 +76,11 @@ async function loadAssignments(preferredId = null) {
     for (const apiUrl of apiCandidates) {
       try {
         const response = await fetch(
-          `${apiUrl}/assignments/current?email=${encodeURIComponent(storedEmail)}`,
-          {
-            cache: "no-store",
-          }
-        );
+  `${apiUrl}/assignments/current?email=${encodeURIComponent(storedEmail)}`,
+  {
+    cache: "no-store",
+  }
+);
 
         const responseData = await response.json().catch(() => ({}));
 
