@@ -579,7 +579,7 @@ def get_current_assignments(
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
-            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%(email)s))
+            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
             LIMIT 1
         )
         SELECT
@@ -650,13 +650,13 @@ def get_current_assignments(
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
                 ensure_assignment_result_upload_columns(cursor)
-                cursor.execute(query, {"email": email})
+                cursor.execute(query, (email,))
                 rows = cursor.fetchall()
     except psycopg.errors.UndefinedTable:
         try:
             with get_connection() as connection:
                 with connection.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute(assignment_only_query, (email,))
+                    cursor.execute(assignment_only_query, {"email": email})
                     rows = cursor.fetchall()
         except psycopg.Error as error:
             raise HTTPException(
@@ -674,7 +674,7 @@ def get_current_assignments(
         try:
             with get_connection() as connection:
                 with connection.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute(all_assignments_query)
+                    cursor.execute(all_assignments_query, {"email": email})
                     rows = cursor.fetchall()
         except psycopg.Error as error:
             print(f"ASSIGNMENTS FALLBACK DB ERROR: {error}")
