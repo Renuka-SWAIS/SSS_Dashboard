@@ -2929,13 +2929,13 @@ button {
 .top-controls > * {
   flex-shrink: 0;
 }
-
 /* =========================================================
    SEARCH / VOICE BAR
    ========================================================= */
 
 .top-controls .voice-search-bar {
-  width: 210px;
+  width: 320px;
+  min-width: 320px;
   height: 36px;
   min-height: 36px;
 }
@@ -2961,7 +2961,6 @@ button {
 .workspace > .topbar {
   box-sizing: border-box;
 }
-
 /* =========================================================
    RESPONSIVE
    ========================================================= */
@@ -2988,42 +2987,11 @@ button {
   }
 
   .top-controls .voice-search-bar {
-    width: 180px;
+    width: 280px;
+    min-width: 280px;
   }
+
 }
-
-/* =========================================================
-   TABLET
-   ========================================================= */
-
-@media (max-width: 1050px) {
-
-  .topbar {
-    min-height: auto;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .student-card {
-    width: 100%;
-  }
-
-  .top-actions {
-    width: 100%;
-    align-items: flex-start;
-  }
-
-  .page-title {
-    text-align: left;
-  }
-
-  .top-controls {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-}
-
 /* =========================================================
    MOBILE
    ========================================================= */

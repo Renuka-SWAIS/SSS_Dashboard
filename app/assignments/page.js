@@ -28,6 +28,7 @@ export default function AssignmentsPage() {
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [studentId, setStudentId] = useState(null);
+  const [studentEmail, setStudentEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [showAiSummary, setShowAiSummary] = useState(false);
@@ -64,6 +65,7 @@ export default function AssignmentsPage() {
       const rows = Array.isArray(data.assignments) ? data.assignments : [];
       setAssignments(rows);
       setStudentId(data.student_id || null);
+      setStudentEmail(data.student_email || "");
       setSelectedAssignment((current) =>
         rows.find((item) => item.assignment_id === (preferredId || current?.assignment_id)) || rows[0] || null
       );
@@ -77,42 +79,57 @@ export default function AssignmentsPage() {
   }
 
   useEffect(() => { loadAssignments(); }, []);
+/* -------------------------------------------------------
+   AI ALERT
+------------------------------------------------------- */
 
-  /* -------------------------------------------------------
-     AI ALERT
-  ------------------------------------------------------- */
-
-  async function handleAskAi() {
-    try {
-      setAlertLoading(true);
-      setAlertResponse(null);
-
-      const response = await generateAlert({
-        assignment_name: selectedAssignment?.assignment_title || "Assignment",
-        due_date: selectedAssignment?.due_date || "",
-        user_email: "student@example.com",
-        client_name: "SSS",
-      });
-
-      console.log(
-        "GENERATE ALERT RESPONSE:",
-        JSON.stringify(response, null, 2)
-      );
-
-      setAlertResponse(response);
-      setShowAiSummary(true);
-    } catch (error) {
-      console.log("Generate Alert Error:", error);
-      console.log(
-        "Response:",
-        error.response?.data
-      );
-
-      alert("Alert Generation Failed");
-    } finally {
-      setAlertLoading(false);
-    }
+async function handleAskAi() {
+  if (!studentEmail) {
+    alert("Student email not found. Please login again.");
+    return;
   }
+
+  if (!selectedAssignment) {
+    alert("Please select an assignment first.");
+    return;
+  }
+
+  try {
+    setAlertLoading(true);
+    setAlertResponse(null);
+
+    const response = await generateAlert({
+      assignment_name:
+        selectedAssignment.assignment_title || "Assignment",
+      due_date:
+        selectedAssignment.due_date || "",
+      user_email: studentEmail,
+      client_name: "SSS",
+    });
+
+    console.log(
+      "GENERATE ALERT RESPONSE:",
+      JSON.stringify(response, null, 2)
+    );
+
+    setAlertResponse(response);
+    setShowAiSummary(true);
+  } catch (error) {
+    console.log("Generate Alert Error:", error);
+    console.log(
+      "Response:",
+      error.response?.data
+    );
+
+    alert(
+      error.response?.data?.detail ||
+      error.message ||
+      "Alert Generation Failed"
+    );
+  } finally {
+    setAlertLoading(false);
+  }
+}
 
   /* -------------------------------------------------------
      FILE SELECT

@@ -565,13 +565,11 @@ useEffect(() => {
   ======================================================= */
 
   function handleUnitTest() {
-    setActiveOption(
-      "unit-test"
-    );
-
-    setShowEvaluation(false);
-    setAssessmentResult(null);
-  }
+  setActiveOption("unit-test");
+  setShowEvaluation(false);
+  setAssessmentResult(null);
+  setLoading(false);
+}
 
   /* =======================================================
      AI UNIT TEST EVALUATION
@@ -710,12 +708,17 @@ useEffect(() => {
       throw new Error("No quiz questions were generated.");
     }
 
-    setMockQuestions(generatedQuestions);
-    setMockAnswers({});
-    setReviewedQuestions({});
-    setCurrentQuestion(0);
-    setMockTimeLeft(15 * 60);
-    setMockPhase("testing");
+setMockQuestions(generatedQuestions);
+setMockAnswers({});
+setReviewedQuestions({});
+setCurrentQuestion(0);
+setMockTimeLeft(15 * 60);
+setMockSubmitted(false);
+setMockEvaluation(null);
+setMockResult(null);
+setAutoSubmitted(false);
+setShowSubmitConfirmation(false);
+setMockPhase("testing");
   } catch (error) {
     console.error("Mock test generation error:", error);
     alert(error?.message || "Failed to generate mock test.");
@@ -1289,20 +1292,18 @@ function resetMockTest() {
                       ? "Evaluating..."
                       : "AI Evaluation"}
                   </button>
-
-                  <button
-                    className="soft-button"
-                    type="button"
-                    onClick={
-                      handleUnitTest
-                    }
-                    disabled={
-                      loading
-                    }
-                  >
-                    Reset
-                  </button>
-
+<button
+  className="soft-button"
+  type="button"
+  onClick={() => {
+    setShowEvaluation(false);
+    setAssessmentResult(null);
+    setLoading(false);
+  }}
+  disabled={loading}
+>
+  Reset
+</button>
                 </div>
 
               </article>
@@ -1787,47 +1788,44 @@ function resetMockTest() {
   mockPhase === "testing" && (
 
     <div className="quiz-submit-row">
-
-      <button
-        className="soft-button"
-        type="button"
-        disabled={
-          currentQuestion === 0 ||
-          mockLoading
-        }
-        onClick={() => {
-          setCurrentQuestion(
-            (previous) =>
-              Math.max(
-                previous - 1,
-                0
-              )
-          );
-        }}
-      >
-        Previous
-      </button>
-
-      <button
-        className="primary-button"
-        type="button"
-        disabled={
-          currentQuestion >=
-            mockQuestions.length - 1 ||
-          mockLoading
-        }
-        onClick={() => {
-          setCurrentQuestion(
-            (previous) =>
-              Math.min(
-                previous + 1,
-                mockQuestions.length - 1
-              )
-          );
-        }}
-      >
-        Next
-      </button>
+<button
+  className="soft-button"
+  type="button"
+  disabled={
+    mockLoading ||
+    mockSubmitted ||
+    currentQuestion <= 0
+  }
+  onClick={() => {
+    setCurrentQuestion((previous) => {
+      if (previous <= 0) {
+        return previous;
+      }
+      return previous - 1;
+    });
+  }}
+>
+  Previous
+</button>
+<button
+  className="primary-button"
+  type="button"
+  disabled={
+    mockLoading ||
+    mockSubmitted ||
+    currentQuestion >= mockQuestions.length - 1
+  }
+  onClick={() => {
+    setCurrentQuestion((previous) => {
+      if (previous >= mockQuestions.length - 1) {
+        return previous;
+      }
+      return previous + 1;
+    });
+  }}
+>
+  Next
+</button>
 
     </div>
 

@@ -206,7 +206,7 @@ export default function DashboardShell({ children }) {
             <Avatar />
             <div className='student-info'>
               <p>Welcome back,</p>
-              <h1>{student?.full_name || 'Student'}</h1>
+              <h1>{student?.name || 'Student'}</h1>
 
               <div className='chips'>
                 <span>Roll No.: {student?.roll_no || '-'}</span>
@@ -220,7 +220,7 @@ export default function DashboardShell({ children }) {
           </div>
 
          <div className='top-actions'>
-  <h2 className='page-title'>Student Dashboard</h2>
+  
 
   <div className='top-controls'>
     <label className='language-select'>
