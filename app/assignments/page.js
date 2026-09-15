@@ -327,16 +327,42 @@ async function handleAskAi() {
                         <td>
 
                           <button
-                            className="table-action"
-                            type="button"
-                            onClick={() => {
-                              setSelectedAssignment(assignment);
-                              setSelectedFile(null);
-                              setShowAiSummary(false);
-                            }}
-                          >
-                            {assignment.action || "Start"}
-                          </button>
+  className="table-action"
+  type="button"
+  onClick={async () => {
+    setSelectedAssignment(assignment);
+    setSelectedFile(null);
+    setShowAiSummary(false);
+
+    if (assignment.action !== "Start" || !studentId) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Unable to start assignment."
+        );
+      }
+
+      await loadAssignments(assignment.assignment_id);
+    } catch (error) {
+      console.error("Start Assignment Error:", error);
+      alert(error.message || "Unable to start assignment.");
+    }
+  }}
+>
+  {assignment.action || "Start"}
+</button>
 
                         </td>
 

@@ -673,16 +673,99 @@ def get_current_assignments():
             raise HTTPException(status_code=500, detail="Unable to fetch assignments.") from error
 
     assignments = []
+
     for number, row in enumerate(rows, start=1):
         item = dict(row)
         item["number"] = number
-        item["status"] = "Submitted" if item.get("submission_id") else "Not Started"
-        item["action"] = "View" if item.get("submission_id") else "Start"
+
+        submission_status = (item.get("submission_status") or "").strip()
+
+        if submission_status:
+            item["status"] = submission_status
+        else:
+            item["status"] = "Not Started"
+
+        item["action"] = "View" if submission_status == "Submitted" else "Start"
+
         assignments.append(item)
 
     return {
         "student_id": assignments[0]["student_id"] if assignments else None,
         "assignments": assignments,
+    }
+
+
+
+
+
+@app.post("/assignments/start")
+def start_assignment(
+    student_id: int = Query(..., ge=1),
+    assignment_id: int = Query(..., ge=1),
+):
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(
+                    """
+                    SELECT assignment_result_id
+                    FROM sss_assignment_results
+                    WHERE student_id = %s
+                      AND assignment_id = %s
+                      AND LOWER(COALESCE(record_status, 'Active')) = 'active'
+                    ORDER BY assignment_result_id DESC
+                    LIMIT 1;
+                    """,
+                    (student_id, assignment_id),
+                )
+
+                existing = cursor.fetchone()
+
+                if existing:
+                    cursor.execute(
+                        """
+                        UPDATE sss_assignment_results
+                        SET status = 'In Progress'
+                        WHERE assignment_result_id = %s
+                        RETURNING assignment_result_id,
+                                  student_id,
+                                  assignment_id,
+                                  status;
+                        """,
+                        (existing["assignment_result_id"],),
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        INSERT INTO sss_assignment_results
+                            (student_id, assignment_id, status)
+                        VALUES (%s, %s, 'In Progress')
+                        RETURNING assignment_result_id,
+                                  student_id,
+                                  assignment_id,
+                                  status;
+                        """,
+                        (student_id, assignment_id),
+                    )
+
+                result = cursor.fetchone()
+                connection.commit()
+
+    except psycopg.errors.UndefinedTable as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Assignment result table is missing."
+        ) from error
+
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to start assignment."
+        ) from error
+
+    return {
+        "status": "success",
+        "assignment": result,
     }
 
 
