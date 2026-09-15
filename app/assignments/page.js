@@ -37,6 +37,9 @@ export default function AssignmentsPage() {
   const [alertResponse, setAlertResponse] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
+  useEffect(() => {
+  loadAssignments();
+}, []);
 async function loadAssignments(preferredId = null) {
   setLoading(true);
   setLoadError("");
