@@ -573,7 +573,7 @@ def get_current_assignments():
     """Return assignments for the current student's class with latest submission state."""
     query = """
         WITH current_student AS (
-            SELECT student_id, class_id
+            SELECT student_id, class_id, student_email
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
