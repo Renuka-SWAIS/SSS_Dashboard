@@ -600,7 +600,17 @@ def get_current_assignments(
             submission.submitted_file_size,
             submission.submission_text AS typed_answer
         FROM current_student student
-        JOIN sss_assignment_master assignment ON assignment.class_id = student.class_id
+        JOIN sss_assignment_master assignment
+  ON (
+       assignment.class_id = student.class_id
+       OR EXISTS (
+            SELECT 1
+            FROM sss_assignment_results existing_submission
+            WHERE existing_submission.student_id = student.student_id
+              AND existing_submission.assignment_id = assignment.assignment_id
+              AND LOWER(COALESCE(existing_submission.record_status, 'Active')) = 'active'
+       )
+     )
         LEFT JOIN sss_subject_master subject ON subject.subject_id = assignment.subject_id
         LEFT JOIN sss_chapter_master chapter ON chapter.chapter_id = assignment.chapter_id
         LEFT JOIN LATERAL (
@@ -634,7 +644,17 @@ def get_current_assignments(
                NULL::varchar AS submitted_file_name, NULL::integer AS submitted_file_size,
                NULL::text AS typed_answer
         FROM current_student student
-        JOIN sss_assignment_master assignment ON assignment.class_id = student.class_id
+        JOIN sss_assignment_master assignment
+  ON (
+       assignment.class_id = student.class_id
+       OR EXISTS (
+            SELECT 1
+            FROM sss_assignment_results existing_submission
+            WHERE existing_submission.student_id = student.student_id
+              AND existing_submission.assignment_id = assignment.assignment_id
+              AND LOWER(COALESCE(existing_submission.record_status, 'Active')) = 'active'
+       )
+     )
         LEFT JOIN sss_subject_master subject ON subject.subject_id = assignment.subject_id
         LEFT JOIN sss_chapter_master chapter ON chapter.chapter_id = assignment.chapter_id
         WHERE COALESCE(assignment.record_status, 'Active') = 'Active'
