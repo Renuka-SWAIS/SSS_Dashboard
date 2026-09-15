@@ -692,6 +692,7 @@ def get_current_assignments():
 
     return {
         "student_id": assignments[0]["student_id"] if assignments else None,
+        "student_email": assignments[0]["student_email"] if assignments else None,
         "assignments": assignments,
     }
 
