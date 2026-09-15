@@ -590,6 +590,7 @@ def get_current_assignments():
             subject.subject_name,
             chapter.chapter_name,
             student.student_id,
+            student.student_email,
             submission.assignment_result_id AS submission_id,
             submission.status AS submission_status,
             submission.submitted_at,
@@ -616,7 +617,7 @@ def get_current_assignments():
     """
     assignment_only_query = """
         WITH current_student AS (
-            SELECT student_id, class_id
+            SELECT student_id, class_id, student_email
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
@@ -626,7 +627,7 @@ def get_current_assignments():
         SELECT assignment.assignment_id, assignment.assignment_title,
                assignment.assignment_text, assignment.due_date, assignment.class_id,
                assignment.subject_id, subject.subject_name, chapter.chapter_name,
-               student.student_id, NULL::bigint AS submission_id,
+               student.student_id, student.student_email, NULL::bigint AS submission_id,
                NULL::varchar AS submission_status, NULL::timestamptz AS submitted_at,
                NULL::varchar AS submitted_file_name, NULL::integer AS submitted_file_size,
                NULL::text AS typed_answer
