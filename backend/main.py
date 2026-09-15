@@ -579,7 +579,7 @@ def get_current_assignments(
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
-            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
+            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%(email)s))
             LIMIT 1
         )
         SELECT
@@ -623,7 +623,7 @@ def get_current_assignments(
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
-            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
+            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%(email)s))
             LIMIT 1
         )
         SELECT assignment.assignment_id, assignment.assignment_title,
