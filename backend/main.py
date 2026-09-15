@@ -724,11 +724,6 @@ def get_current_assignments(
         "student_email": assignments[0]["student_email"] if assignments else None,
         "assignments": assignments,
     }
-
-
-
-
-
 @app.post("/assignments/start")
 def start_assignment(
     student_id: int = Query(..., ge=1),
@@ -739,7 +734,7 @@ def start_assignment(
             with connection.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(
                     """
-                    SELECT assignment_result_id
+                    SELECT assignment_result_id, status
                     FROM sss_assignment_results
                     WHERE student_id = %s
                       AND assignment_id = %s
@@ -753,18 +748,29 @@ def start_assignment(
                 existing = cursor.fetchone()
 
                 if existing:
-                    cursor.execute(
-                        """
-                        UPDATE sss_assignment_results
-                        SET status = 'In Progress'
-                        WHERE assignment_result_id = %s
-                        RETURNING assignment_result_id,
-                                  student_id,
-                                  assignment_id,
-                                  status;
-                        """,
-                        (existing["assignment_result_id"],),
-                    )
+                    # Do NOT change a submitted assignment back to In Progress
+                    if (existing.get("status") or "").strip().lower() == "submitted":
+                        result = {
+                            "assignment_result_id": existing["assignment_result_id"],
+                            "student_id": student_id,
+                            "assignment_id": assignment_id,
+                            "status": "Submitted",
+                        }
+                    else:
+                        cursor.execute(
+                            """
+                            UPDATE sss_assignment_results
+                            SET status = 'In Progress'
+                            WHERE assignment_result_id = %s
+                            RETURNING assignment_result_id,
+                                      student_id,
+                                      assignment_id,
+                                      status;
+                            """,
+                            (existing["assignment_result_id"],),
+                        )
+                        result = cursor.fetchone()
+
                 else:
                     cursor.execute(
                         """
@@ -778,8 +784,8 @@ def start_assignment(
                         """,
                         (student_id, assignment_id),
                     )
+                    result = cursor.fetchone()
 
-                result = cursor.fetchone()
                 connection.commit()
 
     except psycopg.errors.UndefinedTable as error:
@@ -798,6 +804,8 @@ def start_assignment(
         "status": "success",
         "assignment": result,
     }
+
+
 
 
 @app.get("/notifications")
