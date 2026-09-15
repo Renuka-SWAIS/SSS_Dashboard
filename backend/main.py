@@ -664,7 +664,11 @@ def get_current_assignments(
                 detail="Assignment tables are missing. Confirm sss_assignment_master and sss_assignment_results exist.",
             ) from error
     except psycopg.Error as error:
-        raise HTTPException(status_code=500, detail="Unable to fetch assignments.") from error
+        print(f"ASSIGNMENTS DB ERROR: {error}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to fetch assignments: {error}",
+    ) from error
 
     if not rows:
         try:
@@ -673,8 +677,11 @@ def get_current_assignments(
                     cursor.execute(all_assignments_query)
                     rows = cursor.fetchall()
         except psycopg.Error as error:
-            raise HTTPException(status_code=500, detail="Unable to fetch assignments.") from error
-
+            print(f"ASSIGNMENTS FALLBACK DB ERROR: {error}")
+            raise HTTPException(
+                  status_code=500,
+                detail=f"Unable to fetch assignments: {error}",
+        ) from error
     assignments = []
 
     for number, row in enumerate(rows, start=1):
