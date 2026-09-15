@@ -37,48 +37,89 @@ export default function AssignmentsPage() {
   const [alertResponse, setAlertResponse] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
+async function loadAssignments(preferredId = null) {
+  setLoading(true);
+  setLoadError("");
 
-  async function loadAssignments(preferredId = null) {
-    setLoading(true);
-    setLoadError("");
-    try {
-      const localBackend = typeof window === "undefined"
+  try {
+    const localBackend =
+      typeof window === "undefined"
         ? "http://localhost:8000"
         : `${window.location.protocol}//${window.location.hostname}:8000`;
-      const apiCandidates = [...new Set([API_BASE_URL, localBackend])];
-      let data = null;
-      let lastError = null;
 
-      for (const apiUrl of apiCandidates) {
-        try {
-          const response = await fetch(`${apiUrl}/assignments/current`, { cache: "no-store" });
-          const responseData = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(responseData.detail || `Unable to load assignments (${response.status}).`);
-          data = responseData;
-          break;
-        } catch (requestError) {
-          lastError = requestError;
-        }
-      }
+    const apiCandidates = [...new Set([API_BASE_URL, localBackend])];
 
-      if (!data) throw lastError || new Error("Unable to load assignments.");
-      const rows = Array.isArray(data.assignments) ? data.assignments : [];
-      setAssignments(rows);
-      setStudentId(data.student_id || null);
-      setStudentEmail(data.student_email || "");
-      setSelectedAssignment((current) =>
-        rows.find((item) => item.assignment_id === (preferredId || current?.assignment_id)) || rows[0] || null
-      );
-    } catch (error) {
-      setAssignments([]);
-      setSelectedAssignment(null);
-      setLoadError(error.message || "Unable to load assignments.");
-    } finally {
-      setLoading(false);
+    // Get logged-in student's email
+    const storedEmail =
+      typeof window !== "undefined"
+        ? localStorage.getItem("student_email") ||
+          sessionStorage.getItem("student_email") ||
+          ""
+        : "";
+
+    if (!storedEmail) {
+      throw new Error("Student email not found. Please login again.");
     }
-  }
 
-  useEffect(() => { loadAssignments(); }, []);
+    let data = null;
+    let lastError = null;
+
+    for (const apiUrl of apiCandidates) {
+      try {
+        const response = await fetch(
+          `${apiUrl}/assignments/current?email=${encodeURIComponent(storedEmail)}`,
+          {
+            cache: "no-store",
+          }
+        );
+
+        const responseData = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            responseData.detail ||
+            `Unable to load assignments (${response.status}).`
+          );
+        }
+
+        data = responseData;
+        break;
+      } catch (requestError) {
+        lastError = requestError;
+      }
+    }
+
+    if (!data) {
+      throw lastError || new Error("Unable to load assignments.");
+    }
+
+    const rows = Array.isArray(data.assignments)
+      ? data.assignments
+      : [];
+
+    setAssignments(rows);
+    setStudentId(data.student_id || null);
+    setStudentEmail(data.student_email || storedEmail);
+
+    setSelectedAssignment((current) =>
+      rows.find(
+        (item) =>
+          item.assignment_id ===
+          (preferredId || current?.assignment_id)
+      ) ||
+      rows[0] ||
+      null
+    );
+  } catch (error) {
+    setAssignments([]);
+    setSelectedAssignment(null);
+    setLoadError(
+      error.message || "Unable to load assignments."
+    );
+  } finally {
+    setLoading(false);
+  }
+}
 /* -------------------------------------------------------
    AI ALERT
 ------------------------------------------------------- */

@@ -567,17 +567,19 @@ def ensure_assignment_result_upload_columns(cursor) -> None:
         """
     )
 
-
 @app.get("/assignments/current")
-def get_current_assignments():
+def get_current_assignments(
+    email: str = Query(..., min_length=3, max_length=150),
+):
     """Return assignments for the current student's class with latest submission state."""
+
     query = """
         WITH current_student AS (
             SELECT student_id, class_id, student_email
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
-            ORDER BY CASE WHEN admission_no IS NULL THEN 1 ELSE 0 END, student_id
+            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
             LIMIT 1
         )
         SELECT
@@ -621,7 +623,7 @@ def get_current_assignments():
             FROM sss_student_master
             WHERE COALESCE(record_status, 'Active') = 'Active'
               AND COALESCE(is_active, true) = true
-            ORDER BY CASE WHEN admission_no IS NULL THEN 1 ELSE 0 END, student_id
+            AND LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
             LIMIT 1
         )
         SELECT assignment.assignment_id, assignment.assignment_title,
@@ -648,13 +650,13 @@ def get_current_assignments():
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
                 ensure_assignment_result_upload_columns(cursor)
-                cursor.execute(query)
+                cursor.execute(query, (email,))
                 rows = cursor.fetchall()
     except psycopg.errors.UndefinedTable:
         try:
             with get_connection() as connection:
                 with connection.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute(assignment_only_query)
+                    cursor.execute(assignment_only_query, (email,))
                     rows = cursor.fetchall()
         except psycopg.Error as error:
             raise HTTPException(
