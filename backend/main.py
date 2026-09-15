@@ -625,7 +625,7 @@ def get_current_assignments(
         ) submission ON TRUE
         WHERE COALESCE(assignment.record_status, 'Active') = 'Active'
         ORDER BY assignment.due_date ASC NULLS LAST, assignment.assignment_id DESC
-        LIMIT 50;
+        LIMIT 100;
     """
     assignment_only_query = """
         WITH current_student AS (
@@ -659,7 +659,7 @@ def get_current_assignments(
         LEFT JOIN sss_chapter_master chapter ON chapter.chapter_id = assignment.chapter_id
         WHERE COALESCE(assignment.record_status, 'Active') = 'Active'
         ORDER BY assignment.due_date ASC NULLS LAST, assignment.assignment_id DESC
-        LIMIT 50;
+        LIMIT 100;
     """
     all_assignments_query = assignment_only_query.replace(
         "JOIN sss_assignment_master assignment ON assignment.class_id = student.class_id",
@@ -708,14 +708,15 @@ def get_current_assignments(
         item = dict(row)
         item["number"] = number
 
+
         submission_status = (item.get("submission_status") or "").strip()
 
-        if submission_status:
-            item["status"] = submission_status
+        if submission_status.lower() == "submitted":
+              item["status"] = "Completed"
+              item["action"] = "View"
         else:
-            item["status"] = "Not Started"
-
-        item["action"] = "View" if submission_status == "Submitted" else "Start"
+              item["status"] = "Not Started"
+              item["action"] = "Start"
 
         assignments.append(item)
 
@@ -1047,6 +1048,7 @@ def get_assignment_submission(
             submitted_file_name AS file_name,
             submitted_file_type AS file_type,
             submitted_file_size AS file_size,
+            submitted_file_content AS file_content,
             status,
             submitted_at
         FROM sss_assignment_results
