@@ -650,7 +650,7 @@ def get_current_assignments(
         with get_connection() as connection:
             with connection.cursor(row_factory=dict_row) as cursor:
                 ensure_assignment_result_upload_columns(cursor)
-                cursor.execute(query, (email,))
+                cursor.execute(query, {"email": email})
                 rows = cursor.fetchall()
     except psycopg.errors.UndefinedTable:
         try:
