@@ -4111,7 +4111,6 @@ body {
 
 
 /* 3D hover */
-
 .card:hover,
 .module-card:hover,
 .chapter-content-card:hover,
@@ -4121,8 +4120,6 @@ body {
 .assessment-card:hover,
 .assessment-dashboard:hover,
 .quiz-score-card:hover,
-.workflow-card:hover,
-.assignment-upload-card:hover,
 .generated-path-card:hover,
 .ai-learning-card:hover {
   transform:
@@ -6140,4 +6137,12 @@ button.reset:hover,
   align-self: start;
   height: auto;
   min-height: 0;
+}
+.assignment-upload-card {
+  align-self: start;
+  height: fit-content;
+}
+.assignment-upload-card .status-pill,
+.assignment-list-card .status-pill {
+  white-space: nowrap;
 }
