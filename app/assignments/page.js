@@ -491,24 +491,6 @@ async function handleAskAi() {
                 {selectedAssignment?.assignment_text || "Select an assignment to view its instructions."}
               </p>
 
-              {/* -------------------------------------------------------
-                  AI ALERT
-              ------------------------------------------------------- */}
-
-              <div className="quiz-submit-row assignment-ai-row">
-
-                <button
-                  className="primary-button"
-                  type="button"
-                  onClick={handleAskAi}
-                  disabled={alertLoading || !selectedAssignment}
-                >
-                  {alertLoading
-                    ? "Generating..."
-                    : "Ask AI"}
-                </button>
-
-              </div>
 
               {showAiSummary && (
 
