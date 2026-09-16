@@ -312,7 +312,10 @@ async function handleAskAi() {
           {/* -------------------------------------------------------
               ASSIGNMENT LIST
           ------------------------------------------------------- */}
+
+          <div className="assignment-layout">
 <article className="module-card assignment-list-card">
+
 
   <div className="card-title-row">
 
