@@ -6058,3 +6058,55 @@ button.reset:hover,
 }
 
 
+.assignment-list-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.assignment-list-card .data-table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+.assignment-list-card .data-table th,
+.assignment-list-card .data-table td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.assignment-list-card .data-table th:nth-child(1),
+.assignment-list-card .data-table td:nth-child(1) {
+  width: 7%;
+}
+
+.assignment-list-card .data-table th:nth-child(2),
+.assignment-list-card .data-table td:nth-child(2) {
+  width: 35%;
+}
+
+.assignment-list-card .data-table th:nth-child(3),
+.assignment-list-card .data-table td:nth-child(3) {
+  width: 15%;
+}
+
+.assignment-list-card .data-table th:nth-child(4),
+.assignment-list-card .data-table td:nth-child(4) {
+  width: 18%;
+}
+
+.assignment-list-card .data-table th:nth-child(5),
+.assignment-list-card .data-table td:nth-child(5) {
+  width: 25%;
+}
+.assignment-summary span {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #1b2445;
+  color: #dce4ff;
+  border: 1px solid #3b4a78;
+  white-space: nowrap;
+}
+
+.assignment-summary strong {
+  color: #ffffff;
+}
