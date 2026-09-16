@@ -1140,20 +1140,72 @@ button {
 .blue-module {
   border-color: #c3d9ee;
 }
-
 .assignment-layout,
 .quiz-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
 }
 
+.assignment-layout > *,
+.quiz-layout > * {
+  min-width: 0;
+  width: 100%;
+}
 .card-title-row {
+
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   gap: 16px;
+
   margin-bottom: 16px;
+
+}
+
+.assignment-summary {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-left: auto;
+
+  margin-right: 12px;
+
+  font-size: 14px;
+
+}
+
+.assignment-summary span {
+
+  padding: 6px 10px;
+
+  border-radius: 8px;
+
+  background: #f3f6fb;
+
+  white-space: nowrap;
+
+}
+
+.assignment-summary strong {
+
+  font-weight: 700;
+
+}
+
+.card-title-row h2 {
+
+  margin-bottom: 0;
+
 }
 
 .card-title-row h2 {
@@ -1316,19 +1368,27 @@ button {
   color: #263469;
   font-size: 16px;
 }
-
 .upload-zone {
-  min-height: 210px;
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  padding: 22px;
-  border: 1px dashed #b9ccef;
-  border-radius: 10px;
-  background: #fbfcff;
-  text-align: center;
-}
 
+  min-height: 0;
+
+  display: grid;
+
+  place-items: center;
+
+  gap: 6px;
+
+  padding: 14px 18px;
+
+  border: 1px dashed #b9ccef;
+
+  border-radius: 10px;
+
+  background: #fbfcff;
+
+  text-align: center;
+
+}
 .upload-icon {
   color: #0062ff;
   font-size: 28px;

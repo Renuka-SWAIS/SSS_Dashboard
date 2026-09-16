@@ -37,6 +37,17 @@ export default function AssignmentsPage() {
   const [alertResponse, setAlertResponse] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const submittedCount = assignments.filter(
+  (assignment) =>
+    (assignment.status || "").toLowerCase() === "completed" ||
+    (assignment.status || "").toLowerCase() === "submitted"
+).length;
+
+const remainingCount = Math.max(
+  assignments.length - submittedCount,
+  0
+);
   useEffect(() => {
   loadAssignments();
 }, []);
@@ -214,6 +225,8 @@ async function handleAskAi() {
       return;
     }
 
+    
+
     const maxSize = 10 * 1024 * 1024;
 
     if (file.size > maxSize) {
@@ -299,27 +312,34 @@ async function handleAskAi() {
           {/* -------------------------------------------------------
               ASSIGNMENT LIST
           ------------------------------------------------------- */}
+<article className="module-card assignment-list-card">
 
-          <div className="assignment-layout">
+  <div className="card-title-row">
 
-            <article className="module-card assignment-list-card">
+    <h2>
+      Your Assignments
+    </h2>
 
-              <div className="card-title-row">
+    <div className="assignment-summary">
+      <span>
+        Submitted: <strong>{submittedCount}</strong>
+      </span>
 
-                <h2>
-                  Your Assignments
-                </h2>
+      <span>
+        Remaining: <strong>{remainingCount}</strong>
+      </span>
+    </div>
 
-                <button
-                  className="soft-button"
-                  type="button"
-                  onClick={() => loadAssignments()}
-                  disabled={loading}
-                >
-                  {loading ? "Loading..." : "Refresh"}
-                </button>
+    <button
+      className="soft-button"
+      type="button"
+      onClick={() => loadAssignments()}
+      disabled={loading}
+    >
+      {loading ? "Loading..." : "Refresh"}
+    </button>
 
-              </div>
+  </div>
 
               <table className="data-table">
 
@@ -654,13 +674,9 @@ async function handleAskAi() {
                       <p>
                         No file uploaded yet
                       </p>
-
-                      <p>
-                        Last saved:
-                        {" "}
-                        25 May 2024,
-                        04:30 PM
-                      </p>
+<p>
+  Select a file to submit
+</p>
                     </>
 
                   )}
