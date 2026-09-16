@@ -6110,3 +6110,34 @@ button.reset:hover,
 .assignment-summary strong {
   color: #ffffff;
 }
+.assignment-list-card .data-table th:nth-child(4),
+.assignment-list-card .data-table td:nth-child(4) {
+  width: 20%;
+  white-space: nowrap;
+}
+
+.assignment-list-card .status-pill {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+}
+.assignment-list-card .data-table th:nth-child(2),
+.assignment-list-card .data-table td:nth-child(2) {
+  width: 32%;
+}
+
+.assignment-list-card .data-table th:nth-child(5),
+.assignment-list-card .data-table td:nth-child(5) {
+  width: 23%;
+}
+.assignment-layout {
+  align-items: start;
+}
+
+.assignment-upload-card {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
