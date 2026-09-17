@@ -82,7 +82,12 @@ class MockLearningPathLLM:
 
     provider_name = "mock-free-llm"
 
-    def generate_path(self, chapter_title: str, classification: str, metrics: dict[str, int]) -> dict[str, Any]:
+    def generate_path(
+        self,
+        chapter_title: str,
+        classification: str,
+        metrics: dict[str, int],
+    ) -> dict[str, Any]:
         track = TRACKS[classification]
         focus = _focus_area(metrics)
 
@@ -109,10 +114,21 @@ class DeepSeekLearningPathLLM:
 
     def __init__(self):
         self.api_key = os.getenv("DEEPSEEK_API_KEY")
-        self.base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
-        self.model = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
+        self.base_url = os.getenv(
+            "DEEPSEEK_BASE_URL",
+            "https://api.deepseek.com",
+        ).rstrip("/")
+        self.model = os.getenv(
+            "DEEPSEEK_MODEL",
+            "deepseek-v4-flash",
+        )
 
-    def generate_path(self, chapter_title: str, classification: str, metrics: dict[str, int]) -> dict[str, Any]:
+    def generate_path(
+        self,
+        chapter_title: str,
+        classification: str,
+        metrics: dict[str, int],
+    ) -> dict[str, Any]:
         if not self.api_key:
             raise RuntimeError("DEEPSEEK_API_KEY is not configured.")
 
@@ -127,6 +143,7 @@ class DeepSeekLearningPathLLM:
                 "recommended_materials": ["3 recommended materials"],
             },
         }
+
         payload = {
             "model": self.model,
             "messages": [
@@ -134,10 +151,14 @@ class DeepSeekLearningPathLLM:
                     "role": "system",
                     "content": (
                         "You create personalized school study paths. "
-                        "Return only valid JSON with keys: summary, focus_area, steps, recommended_materials."
+                        "Return only valid JSON with keys: summary, focus_area, "
+                        "steps, recommended_materials."
                     ),
                 },
-                {"role": "user", "content": json.dumps(prompt)},
+                {
+                    "role": "user",
+                    "content": json.dumps(prompt),
+                },
             ],
             "response_format": {"type": "json_object"},
             "max_tokens": 900,
@@ -148,12 +169,25 @@ class DeepSeekLearningPathLLM:
             response = self._post_chat_completion(payload)
             content = response["choices"][0]["message"]["content"]
             ai_path = json.loads(content)
+
         except HTTPError as error:
-            raise RuntimeError(_deepseek_http_error_message(error)) from error
+            raise RuntimeError(
+                _deepseek_http_error_message(error)
+            ) from error
+
         except URLError as error:
-            raise RuntimeError(f"DeepSeek connection failed: {error.reason}") from error
-        except (KeyError, IndexError, json.JSONDecodeError) as error:
-            raise RuntimeError("DeepSeek returned an invalid learning path response.") from error
+            raise RuntimeError(
+                f"DeepSeek connection failed: {error.reason}"
+            ) from error
+
+        except (
+            KeyError,
+            IndexError,
+            json.JSONDecodeError,
+        ) as error:
+            raise RuntimeError(
+                "DeepSeek returned an invalid learning path response."
+            ) from error
 
         track = TRACKS[classification]
 
@@ -164,7 +198,10 @@ class DeepSeekLearningPathLLM:
             "track_title": track["title"],
             "summary": ai_path.get("summary") or track["summary"],
             "focus_area": ai_path.get("focus_area") or _focus_area(metrics),
-            "steps": _list_or_default(ai_path.get("steps"), track["steps"]),
+            "steps": _list_or_default(
+                ai_path.get("steps"),
+                track["steps"],
+            ),
             "recommended_materials": _list_or_default(
                 ai_path.get("recommended_materials"),
                 [
@@ -175,7 +212,10 @@ class DeepSeekLearningPathLLM:
             ),
         }
 
-    def _post_chat_completion(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def _post_chat_completion(
+        self,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
         request = Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload).encode("utf-8"),
@@ -187,7 +227,9 @@ class DeepSeekLearningPathLLM:
         )
 
         with urlopen(request, timeout=25) as response:
-            return json.loads(response.read().decode("utf-8"))
+            return json.loads(
+                response.read().decode("utf-8")
+            )
 
 
 class GeminiLearningPathLLM:
@@ -197,10 +239,21 @@ class GeminiLearningPathLLM:
 
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
-        self.base_url = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com").rstrip("/")
-        self.model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self.base_url = os.getenv(
+            "GEMINI_BASE_URL",
+            "https://generativelanguage.googleapis.com",
+        ).rstrip("/")
+        self.model = os.getenv(
+            "GEMINI_MODEL",
+            "gemini-2.5-flash",
+        )
 
-    def generate_path(self, chapter_title: str, classification: str, metrics: dict[str, int]) -> dict[str, Any]:
+    def generate_path(
+        self,
+        chapter_title: str,
+        classification: str,
+        metrics: dict[str, int],
+    ) -> dict[str, Any]:
         if not self.api_key:
             raise RuntimeError("GEMINI_API_KEY is not configured.")
 
@@ -208,8 +261,12 @@ class GeminiLearningPathLLM:
             "chapter_title": chapter_title,
             "classification": classification,
             "metrics": metrics,
-            "instructions": "Return concise JSON only: summary, focus_area, steps, recommended_materials.",
+            "instructions": (
+                "Return concise JSON only: summary, focus_area, "
+                "steps, recommended_materials."
+            ),
         }
+
         payload = {
             "contents": [
                 {
@@ -228,12 +285,25 @@ class GeminiLearningPathLLM:
             response = self._generate_content(payload)
             content = _gemini_text(response)
             ai_path = _loads_json_object(content)
+
         except HTTPError as error:
-            raise RuntimeError(_gemini_http_error_message(error)) from error
+            raise RuntimeError(
+                _gemini_http_error_message(error)
+            ) from error
+
         except URLError as error:
-            raise RuntimeError(f"Gemini connection failed: {error.reason}") from error
-        except (KeyError, IndexError, json.JSONDecodeError) as error:
-            raise RuntimeError("Gemini returned an invalid learning path response.") from error
+            raise RuntimeError(
+                f"Gemini connection failed: {error.reason}"
+            ) from error
+
+        except (
+            KeyError,
+            IndexError,
+            json.JSONDecodeError,
+        ) as error:
+            raise RuntimeError(
+                "Gemini returned an invalid learning path response."
+            ) from error
 
         track = TRACKS[classification]
 
@@ -244,7 +314,10 @@ class GeminiLearningPathLLM:
             "track_title": track["title"],
             "summary": ai_path.get("summary") or track["summary"],
             "focus_area": ai_path.get("focus_area") or _focus_area(metrics),
-            "steps": _list_or_default(ai_path.get("steps"), track["steps"]),
+            "steps": _list_or_default(
+                ai_path.get("steps"),
+                track["steps"],
+            ),
             "recommended_materials": _list_or_default(
                 ai_path.get("recommended_materials"),
                 [
@@ -255,133 +328,313 @@ class GeminiLearningPathLLM:
             ),
         }
 
-    def _generate_content(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def _generate_content(
+        self,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
         model = quote(self.model, safe="")
+
         request = Request(
-            f"{self.base_url}/v1beta/models/{model}:generateContent?key={self.api_key}",
+            f"{self.base_url}/v1beta/models/{model}:generateContent"
+            f"?key={self.api_key}",
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+            },
             method="POST",
         )
 
         with urlopen(request, timeout=25) as response:
-            return json.loads(response.read().decode("utf-8"))
+            return json.loads(
+                response.read().decode("utf-8")
+            )
 
 
-def translate_text_with_gemini(text: str, target_language: str, source_language: str = "auto-detect") -> str:
+# -------------------------------------------------------
+# TRANSLATION
+# -------------------------------------------------------
+
+def translate_text_with_gemini(
+    text: str,
+    target_language: str,
+    source_language: str = "auto-detect",
+) -> str:
     client = GeminiLearningPathLLM()
-    if not client.api_key:
-        raise RuntimeError("GEMINI_API_KEY is not configured.")
 
-    prompt = (
-        f"Translate the following school-learning text from {source_language} into {target_language}. "
-        "Preserve names, numbers, formatting and subject terminology. Return only the translated text, "
-        "without explanations or quotation marks.\n\n" + text
-    )
+    if not client.api_key:
+        raise RuntimeError(
+            "GEMINI_API_KEY is not configured."
+        )
+
+    if source_language.strip().lower() in {
+        "auto-detect",
+        "auto",
+        "",
+    }:
+        prompt = (
+            f"First identify the language of the following text internally. "
+            f"Then translate the text into {target_language}. "
+            "Do not translate into the detected language; translate INTO "
+            "the requested target language. "
+            "Preserve names, numbers, formatting, punctuation and subject "
+            "terminology. "
+            "Return only the translated text. "
+            "Do not mention the detected language. "
+            "Do not add explanations, labels, quotation marks, or notes.\n\n"
+            f"Text:\n{text}"
+        )
+    else:
+        prompt = (
+            f"Translate the following school-learning text from "
+            f"{source_language} into {target_language}. "
+            "Preserve names, numbers, formatting, punctuation and subject "
+            "terminology. "
+            "Return only the translated text, without explanations or "
+            "quotation marks.\n\n"
+            f"Text:\n{text}"
+        )
+
     payload = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 4096},
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": prompt}],
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 4096,
+        },
     }
+
     try:
-        translated = _gemini_text(client._generate_content(payload)).strip()
+        translated = _gemini_text(
+            client._generate_content(payload)
+        ).strip()
+
     except HTTPError as error:
-        raise RuntimeError(_gemini_http_error_message(error)) from error
+        raise RuntimeError(
+            _gemini_http_error_message(error)
+        ) from error
+
     except URLError as error:
-        raise RuntimeError(f"Gemini connection failed: {error.reason}") from error
-    except (KeyError, IndexError, json.JSONDecodeError) as error:
-        raise RuntimeError("Gemini returned an invalid translation response.") from error
+        raise RuntimeError(
+            f"Gemini connection failed: {error.reason}"
+        ) from error
+
+    except (
+        KeyError,
+        IndexError,
+        json.JSONDecodeError,
+    ) as error:
+        raise RuntimeError(
+            "Gemini returned an invalid translation response."
+        ) from error
+
     if not translated:
-        raise RuntimeError("Gemini returned an empty translation.")
+        raise RuntimeError(
+            "Gemini returned an empty translation."
+        )
+
     return translated
 
 
-def generate_quiz_with_gemini(topic: str, difficulty: str, question_count: int) -> list[dict[str, Any]]:
+def generate_quiz_with_gemini(
+    topic: str,
+    difficulty: str,
+    question_count: int,
+) -> list[dict[str, Any]]:
     client = GeminiLearningPathLLM()
+
     if not client.api_key:
-        raise RuntimeError("GEMINI_API_KEY is not configured.")
+        raise RuntimeError(
+            "GEMINI_API_KEY is not configured."
+        )
+
     prompt = {
         "task": "Generate a school quiz",
         "topic": topic,
         "difficulty": difficulty,
         "question_count": question_count,
         "instructions": (
-            "Return JSON only with key quiz. quiz must contain exactly question_count multiple-choice "
-            "questions. Each item must have question, options (exactly 4 unique strings), answer "
+            "Return JSON only with key quiz. quiz must contain exactly "
+            "question_count multiple-choice questions. Each item must have "
+            "question, options (exactly 4 unique strings), answer "
             "(exact text from options), and explanation."
         ),
     }
+
     payload = {
-        "contents": [{"role": "user", "parts": [{"text": json.dumps(prompt)}]}],
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": json.dumps(prompt)}],
+            }
+        ],
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.5,
             "maxOutputTokens": 4096,
         },
     }
+
     try:
-        data = _loads_json_object(_gemini_text(client._generate_content(payload)))
+        data = _loads_json_object(
+            _gemini_text(
+                client._generate_content(payload)
+            )
+        )
+
     except HTTPError as error:
-        raise RuntimeError(_gemini_http_error_message(error)) from error
+        raise RuntimeError(
+            _gemini_http_error_message(error)
+        ) from error
+
     except URLError as error:
-        raise RuntimeError(f"Gemini connection failed: {error.reason}") from error
-    except (KeyError, IndexError, json.JSONDecodeError) as error:
-        raise RuntimeError("Gemini returned an invalid quiz response.") from error
+        raise RuntimeError(
+            f"Gemini connection failed: {error.reason}"
+        ) from error
+
+    except (
+        KeyError,
+        IndexError,
+        json.JSONDecodeError,
+    ) as error:
+        raise RuntimeError(
+            "Gemini returned an invalid quiz response."
+        ) from error
 
     normalized = []
+
     for item in data.get("quiz", []):
-        options = [str(value).strip() for value in item.get("options", []) if str(value).strip()]
-        answer = str(item.get("answer") or item.get("correct_answer") or "").strip()
-        question = str(item.get("question") or "").strip()
+        options = [
+            str(value).strip()
+            for value in item.get("options", [])
+            if str(value).strip()
+        ]
+
+        answer = str(
+            item.get("answer")
+            or item.get("correct_answer")
+            or ""
+        ).strip()
+
+        question = str(
+            item.get("question")
+            or ""
+        ).strip()
+
         if question and len(options) == 4 and answer in options:
-            normalized.append({
-                "question": question,
-                "options": options,
-                "answer": answer,
-                "correct_answer": answer,
-                "explanation": str(item.get("explanation") or "").strip(),
-            })
+            normalized.append(
+                {
+                    "question": question,
+                    "options": options,
+                    "answer": answer,
+                    "correct_answer": answer,
+                    "explanation": str(
+                        item.get("explanation") or ""
+                    ).strip(),
+                }
+            )
+
     if len(normalized) < question_count:
-        raise RuntimeError("Gemini did not return enough valid quiz questions. Please generate again.")
+        raise RuntimeError(
+            "Gemini did not return enough valid quiz questions. "
+            "Please generate again."
+        )
+
     return normalized[:question_count]
 
 
-def generate_study_content_with_gemini(chapter_title: str, chapter_text: str, classification: str) -> dict[str, Any]:
+def generate_study_content_with_gemini(
+    chapter_title: str,
+    chapter_text: str,
+    classification: str,
+) -> dict[str, Any]:
     client = GeminiLearningPathLLM()
+
     if not client.api_key:
-        raise RuntimeError("GEMINI_API_KEY is not configured.")
+        raise RuntimeError(
+            "GEMINI_API_KEY is not configured."
+        )
+
     prompt = {
-        "task": "Generate personalized study content using only the supplied chapter text",
+        "task": (
+            "Generate personalized study content using only the supplied "
+            "chapter text"
+        ),
         "chapter_title": chapter_title,
         "learner_type": classification,
         "chapter_text": chapter_text[:18000],
         "instructions": (
-            "Return JSON only with simple_notes (5-8 strings), key_terms (objects with term and meaning), "
-            "recap (string), and practice_questions (4-6 strings). For Fast Reader add challenge; "
-            "for Average Reader use balanced checkpoints; for Slow Reader use short simple points."
+            "Return JSON only with simple_notes (5-8 strings), key_terms "
+            "(objects with term and meaning), recap (string), and "
+            "practice_questions (4-6 strings). For Fast Reader add "
+            "challenge; for Average Reader use balanced checkpoints; "
+            "for Slow Reader use short simple points."
         ),
     }
+
     payload = {
-        "contents": [{"role": "user", "parts": [{"text": json.dumps(prompt)}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.4, "maxOutputTokens": 4096},
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": json.dumps(prompt)}],
+            }
+        ],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.4,
+            "maxOutputTokens": 4096,
+        },
     }
+
     try:
-        result = _loads_json_object(_gemini_text(client._generate_content(payload)))
+        result = _loads_json_object(
+            _gemini_text(
+                client._generate_content(payload)
+            )
+        )
+
     except HTTPError as error:
-        raise RuntimeError(_gemini_http_error_message(error)) from error
+        raise RuntimeError(
+            _gemini_http_error_message(error)
+        ) from error
+
     except URLError as error:
-        raise RuntimeError(f"Gemini connection failed: {error.reason}") from error
-    except (KeyError, IndexError, json.JSONDecodeError) as error:
-        raise RuntimeError("Gemini returned invalid study content.") from error
-    if not result.get("simple_notes") or not result.get("practice_questions"):
-        raise RuntimeError("Gemini returned incomplete study content.")
+        raise RuntimeError(
+            f"Gemini connection failed: {error.reason}"
+        ) from error
+
+    except (
+        KeyError,
+        IndexError,
+        json.JSONDecodeError,
+    ) as error:
+        raise RuntimeError(
+            "Gemini returned invalid study content."
+        ) from error
+
+    if not result.get("simple_notes") or not result.get(
+        "practice_questions"
+    ):
+        raise RuntimeError(
+            "Gemini returned incomplete study content."
+        )
+
     return result
 
 
 def _deepseek_http_error_message(error: HTTPError) -> str:
     try:
-        body = json.loads(error.read().decode("utf-8"))
+        body = json.loads(
+            error.read().decode("utf-8")
+        )
         message = body.get("error", {}).get("message")
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+    ):
         message = None
 
     if message:
@@ -392,9 +645,14 @@ def _deepseek_http_error_message(error: HTTPError) -> str:
 
 def _gemini_http_error_message(error: HTTPError) -> str:
     try:
-        body = json.loads(error.read().decode("utf-8"))
+        body = json.loads(
+            error.read().decode("utf-8")
+        )
         message = body.get("error", {}).get("message")
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+    ):
         message = None
 
     if message:
@@ -405,56 +663,107 @@ def _gemini_http_error_message(error: HTTPError) -> str:
 
 def _gemini_text(response: dict[str, Any]) -> str:
     parts = response["candidates"][0]["content"]["parts"]
-    return "\n".join(part.get("text", "") for part in parts).strip()
+
+    return "\n".join(
+        part.get("text", "")
+        for part in parts
+    ).strip()
 
 
-def _loads_json_object(content: str) -> dict[str, Any]:
+def _loads_json_object(
+    content: str,
+) -> dict[str, Any]:
     cleaned = content.strip()
 
     if cleaned.startswith("```"):
         cleaned = cleaned.strip("`").strip()
+
         if cleaned.lower().startswith("json"):
             cleaned = cleaned[4:].strip()
 
     try:
         parsed = json.loads(cleaned)
+
     except json.JSONDecodeError:
         start = cleaned.find("{")
         end = cleaned.rfind("}")
+
         if start == -1 or end == -1 or end <= start:
             raise
-        parsed = json.loads(cleaned[start : end + 1])
+
+        parsed = json.loads(
+            cleaned[start : end + 1]
+        )
 
     if not isinstance(parsed, dict):
-        raise json.JSONDecodeError("Expected a JSON object.", cleaned, 0)
+        raise json.JSONDecodeError(
+            "Expected a JSON object.",
+            cleaned,
+            0,
+        )
 
     return parsed
 
 
-def _list_or_default(value: Any, default: list[str]) -> list[str]:
+def _list_or_default(
+    value: Any,
+    default: list[str],
+) -> list[str]:
     if isinstance(value, list):
-        cleaned = [str(item).strip() for item in value if str(item).strip()]
+        cleaned = [
+            str(item).strip()
+            for item in value
+            if str(item).strip()
+        ]
+
         if cleaned:
             return cleaned
 
     return default
 
 
-def _focus_area(metrics: dict[str, int]) -> str:
+def _focus_area(
+    metrics: dict[str, int],
+) -> str:
     if metrics["comprehension_score"] < 60:
-        return "Build comprehension through smaller reading blocks and recap questions."
+        return (
+            "Build comprehension through smaller reading blocks "
+            "and recap questions."
+        )
+
     if metrics["quiz_score"] < 60:
-        return "Improve quiz accuracy by revising mistakes before retrying."
+        return (
+            "Improve quiz accuracy by revising mistakes before retrying."
+        )
+
     if metrics["retry_count"] >= 3:
-        return "Reduce repeated attempts with guided review after each quiz."
-    return "Maintain pace and deepen understanding with challenge practice."
+        return (
+            "Reduce repeated attempts with guided review after each quiz."
+        )
+
+    return (
+        "Maintain pace and deepen understanding with challenge practice."
+    )
 
 
 def get_learning_path_generator() -> MockLearningPathLLM:
-    configured_provider = os.getenv("AI_PROVIDER", "").strip().lower()
-    provider = configured_provider or ("gemini" if os.getenv("GEMINI_API_KEY") else "mock")
+    configured_provider = os.getenv(
+        "AI_PROVIDER",
+        "",
+    ).strip().lower()
 
-    if provider in {"gemini", "geminai", "google", "google-gemini"}:
+    provider = configured_provider or (
+        "gemini"
+        if os.getenv("GEMINI_API_KEY")
+        else "mock"
+    )
+
+    if provider in {
+        "gemini",
+        "geminai",
+        "google",
+        "google-gemini",
+    }:
         return GeminiLearningPathLLM()
 
     if provider == "deepseek":
