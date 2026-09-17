@@ -30,7 +30,6 @@ const speechLanguages = {
 };
 
 export default function AiTranslatorPage() {
-  const [sourceLanguage, setSourceLanguage] = useState("auto-detect");
   const [targetLanguage, setTargetLanguage] = useState("Hindi");
   const [text, setText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
@@ -41,12 +40,6 @@ export default function AiTranslatorPage() {
   async function handleTranslate() {
     if (!text.trim()) {
       setError("Please enter text to translate.");
-      setStatus("");
-      return;
-    }
-
-    if (sourceLanguage !== "auto-detect" && sourceLanguage === targetLanguage) {
-      setError("Source and target languages must be different.");
       setStatus("");
       return;
     }
@@ -64,7 +57,7 @@ export default function AiTranslatorPage() {
         },
         body: JSON.stringify({
           text: text.trim(),
-          source_language: sourceLanguage,
+          source_language: "auto-detect",
           target_language: targetLanguage,
         }),
       });
@@ -131,7 +124,9 @@ export default function AiTranslatorPage() {
           voice.lang.toLowerCase() === speechLanguage.toLowerCase() ||
           voice.lang
             .toLowerCase()
-            .startsWith(`${speechLanguage.split("-")[0].toLowerCase()}-`)
+            .startsWith(
+              `${speechLanguage.split("-")[0].toLowerCase()}-`
+            )
         )
     );
 
@@ -160,7 +155,9 @@ export default function AiTranslatorPage() {
 
     speech.onstart = () => {
       setError("");
-      setStatus(`Reading translated text in ${targetLanguage}...`);
+      setStatus(
+        `Reading translated text in ${targetLanguage}...`
+      );
     };
 
     speech.onend = () => {
@@ -210,25 +207,9 @@ export default function AiTranslatorPage() {
                   <label>
                     <span>Source</span>
 
-                    <select
-                      value={sourceLanguage}
-                      onChange={(e) =>
-                        setSourceLanguage(e.target.value)
-                      }
-                    >
-                      <option value="auto-detect">
-                        Auto Detect
-                      </option>
-
-                      {languages.map((language) => (
-                        <option
-                          key={language}
-                          value={language}
-                        >
-                          {language}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="auto-detect-label">
+                      Auto-detected by AI
+                    </div>
                   </label>
 
                   <label>
