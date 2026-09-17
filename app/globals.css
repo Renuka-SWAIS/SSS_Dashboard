@@ -6146,3 +6146,59 @@ button.reset:hover,
 .assignment-list-card .status-pill {
   white-space: nowrap;
 }
+/* ================================
+   Language Selector - Final UI Fix
+   ================================ */
+
+.top-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.language-select {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  min-width: 120px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+}
+
+.language-select > span {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+}
+
+.language-select select {
+  width: 120px !important;
+  height: 42px !important;
+  padding: 0 12px !important;
+  border: 1px solid #35527f !important;
+  border-radius: 10px !important;
+  background: #101d35 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: normal !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+.language-select select:focus {
+  border-color: #4d8edb !important;
+  box-shadow: 0 0 0 2px rgba(77, 142, 219, 0.2) !important;
+}
+
+.language-select select option {
+  background: #101d35 !important;
+  color: #ffffff !important;
+}
