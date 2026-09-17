@@ -10,16 +10,24 @@ const API_BASE_URL = getApiBaseUrl();
 
 function formatDate(value) {
   if (!value) return "-";
+
   return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit", month: "short", year: "numeric",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   }).format(new Date(value));
 }
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || "").split(",").pop());
-    reader.onerror = () => reject(new Error("Unable to read selected file."));
+
+    reader.onload = () =>
+      resolve(String(reader.result || "").split(",").pop());
+
+    reader.onerror = () =>
+      reject(new Error("Unable to read selected file."));
+
     reader.readAsDataURL(file);
   });
 }
@@ -39,161 +47,207 @@ export default function AssignmentsPage() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const submittedCount = assignments.filter(
-  (assignment) =>
-    (assignment.status || "").toLowerCase() === "completed" ||
-    (assignment.status || "").toLowerCase() === "submitted"
-).length;
+    (assignment) => {
+      const status = (assignment.status || "").toLowerCase();
 
-const remainingCount = Math.max(
-  assignments.length - submittedCount,
-  0
-);
+      return (
+        status === "completed" ||
+        status === "submitted"
+      );
+    }
+  ).length;
+
+  const remainingCount = Math.max(
+    assignments.length - submittedCount,
+    0
+  );
+
   useEffect(() => {
-  loadAssignments();
-}, []);
-async function loadAssignments(preferredId = null) {
-  setLoading(true);
-  setLoadError("");
+    loadAssignments();
+  }, []);
 
-  try {
-    const localBackend =
-      typeof window === "undefined"
-        ? "http://localhost:8000"
-        : `${window.location.protocol}//${window.location.hostname}:8000`;
+  async function loadAssignments(preferredId = null) {
+    setLoading(true);
+    setLoadError("");
 
-    const apiCandidates = [...new Set([API_BASE_URL, localBackend])];
+    try {
+      const localBackend =
+        typeof window === "undefined"
+          ? "http://localhost:8000"
+          : `${window.location.protocol}//${window.location.hostname}:8000`;
 
-    // Get logged-in student's email
-    const storedSession =
-  typeof window !== "undefined"
-    ? window.sessionStorage.getItem("sssUserSession") ||
-      window.localStorage.getItem("sssUserSession")
-    : null;
+      const apiCandidates = [
+        ...new Set([
+          API_BASE_URL,
+          localBackend,
+        ]),
+      ];
 
-const session = storedSession
-  ? JSON.parse(storedSession)
-  : null;
+      // Get logged-in student's email
+      const storedSession =
+        typeof window !== "undefined"
+          ? window.sessionStorage.getItem(
+              "sssUserSession"
+            ) ||
+            window.localStorage.getItem(
+              "sssUserSession"
+            )
+          : null;
 
-const storedEmail = (
-  session?.email ||
-  session?.user?.email ||
-  ""
-).trim();
+      const session = storedSession
+        ? JSON.parse(storedSession)
+        : null;
 
-if (!storedEmail) {
-  throw new Error("Student email not found. Please login again.");
-}
+      const storedEmail = (
+        session?.email ||
+        session?.user?.email ||
+        ""
+      ).trim();
 
-    let data = null;
-    let lastError = null;
-
-    for (const apiUrl of apiCandidates) {
-      try {
-        const response = await fetch(
-  `${apiUrl}/assignments/current?email=${encodeURIComponent(storedEmail)}`,
-  {
-    cache: "no-store",
-  }
-);
-
-        const responseData = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            responseData.detail ||
-            `Unable to load assignments (${response.status}).`
-          );
-        }
-
-        data = responseData;
-        break;
-      } catch (requestError) {
-        lastError = requestError;
+      if (!storedEmail) {
+        throw new Error(
+          "Student email not found. Please login again."
+        );
       }
+
+      let data = null;
+      let lastError = null;
+
+      for (const apiUrl of apiCandidates) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/assignments/current?email=${encodeURIComponent(
+              storedEmail
+            )}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          const responseData =
+            await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(
+              responseData.detail ||
+                `Unable to load assignments (${response.status}).`
+            );
+          }
+
+          data = responseData;
+          break;
+        } catch (requestError) {
+          lastError = requestError;
+        }
+      }
+
+      if (!data) {
+        throw (
+          lastError ||
+          new Error("Unable to load assignments.")
+        );
+      }
+
+      const rows = Array.isArray(data.assignments)
+        ? data.assignments
+        : [];
+
+      setAssignments(rows);
+
+      setStudentId(
+        data.student_id || null
+      );
+
+      setStudentEmail(
+        data.student_email || storedEmail
+      );
+
+      setSelectedAssignment((current) =>
+        rows.find(
+          (item) =>
+            item.assignment_id ===
+            (preferredId ||
+              current?.assignment_id)
+        ) ||
+        rows[0] ||
+        null
+      );
+    } catch (error) {
+      setAssignments([]);
+      setSelectedAssignment(null);
+
+      setLoadError(
+        error.message ||
+          "Unable to load assignments."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* -------------------------------------------------------
+     AI ALERT
+  ------------------------------------------------------- */
+
+  async function handleAskAi() {
+    if (!studentEmail) {
+      alert(
+        "Student email not found. Please login again."
+      );
+      return;
     }
 
-    if (!data) {
-      throw lastError || new Error("Unable to load assignments.");
+    if (!selectedAssignment) {
+      alert(
+        "Please select an assignment first."
+      );
+      return;
     }
 
-    const rows = Array.isArray(data.assignments)
-      ? data.assignments
-      : [];
+    try {
+      setAlertLoading(true);
+      setAlertResponse(null);
 
-    setAssignments(rows);
-    setStudentId(data.student_id || null);
-    setStudentEmail(data.student_email || storedEmail);
+      const response = await generateAlert({
+        assignment_name:
+          selectedAssignment.assignment_title ||
+          "Assignment",
 
-    setSelectedAssignment((current) =>
-      rows.find(
-        (item) =>
-          item.assignment_id ===
-          (preferredId || current?.assignment_id)
-      ) ||
-      rows[0] ||
-      null
-    );
-  } catch (error) {
-    setAssignments([]);
-    setSelectedAssignment(null);
-    setLoadError(
-      error.message || "Unable to load assignments."
-    );
-  } finally {
-    setLoading(false);
+        due_date:
+          selectedAssignment.due_date || "",
+
+        user_email: studentEmail,
+
+        client_name: "SSS",
+      });
+
+      console.log(
+        "GENERATE ALERT RESPONSE:",
+        JSON.stringify(response, null, 2)
+      );
+
+      setAlertResponse(response);
+      setShowAiSummary(true);
+    } catch (error) {
+      console.log(
+        "Generate Alert Error:",
+        error
+      );
+
+      console.log(
+        "Response:",
+        error.response?.data
+      );
+
+      alert(
+        error.response?.data?.detail ||
+          error.message ||
+          "Alert Generation Failed"
+      );
+    } finally {
+      setAlertLoading(false);
+    }
   }
-}
-/* -------------------------------------------------------
-   AI ALERT
-------------------------------------------------------- */
-
-async function handleAskAi() {
-  if (!studentEmail) {
-    alert("Student email not found. Please login again.");
-    return;
-  }
-
-  if (!selectedAssignment) {
-    alert("Please select an assignment first.");
-    return;
-  }
-
-  try {
-    setAlertLoading(true);
-    setAlertResponse(null);
-
-    const response = await generateAlert({
-      assignment_name:
-        selectedAssignment.assignment_title || "Assignment",
-      due_date:
-        selectedAssignment.due_date || "",
-      user_email: studentEmail,
-      client_name: "SSS",
-    });
-
-    console.log(
-      "GENERATE ALERT RESPONSE:",
-      JSON.stringify(response, null, 2)
-    );
-
-    setAlertResponse(response);
-    setShowAiSummary(true);
-  } catch (error) {
-    console.log("Generate Alert Error:", error);
-    console.log(
-      "Response:",
-      error.response?.data
-    );
-
-    alert(
-      error.response?.data?.detail ||
-      error.message ||
-      "Alert Generation Failed"
-    );
-  } finally {
-    setAlertLoading(false);
-  }
-}
 
   /* -------------------------------------------------------
      FILE SELECT
@@ -225,12 +279,12 @@ async function handleAskAi() {
       return;
     }
 
-    
-
     const maxSize = 10 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      alert("File size must be less than 10 MB.");
+      alert(
+        "File size must be less than 10 MB."
+      );
 
       event.target.value = "";
       setSelectedFile(null);
@@ -269,42 +323,89 @@ async function handleAskAi() {
 
   async function handleSubmitAssignment() {
     if (!selectedFile) {
-      alert("Please select a file first.");
+      alert(
+        "Please select a file first."
+      );
       return;
     }
 
     if (!selectedAssignment || !studentId) {
-      alert("Please select an assignment first.");
+      alert(
+        "Please select an assignment first."
+      );
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/assignment-submissions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          assignment_id: selectedAssignment.assignment_id,
-          assignment_title: selectedAssignment.assignment_title,
-          file_name: selectedFile.name,
-          file_type: selectedFile.type,
-          file_size: selectedFile.size,
-          file_content_base64: await fileToBase64(selectedFile),
-        }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || "Unable to submit assignment.");
-      alert(`${selectedFile.name} submitted successfully.`);
+      const response = await fetch(
+        `${API_BASE_URL}/assignment-submissions`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            student_id: studentId,
+
+            assignment_id:
+              selectedAssignment.assignment_id,
+
+            assignment_title:
+              selectedAssignment.assignment_title,
+
+            file_name:
+              selectedFile.name,
+
+            file_type:
+              selectedFile.type,
+
+            file_size:
+              selectedFile.size,
+
+            file_content_base64:
+              await fileToBase64(
+                selectedFile
+              ),
+          }),
+        }
+      );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            "Unable to submit assignment."
+        );
+      }
+
+      alert(
+        `${selectedFile.name} submitted successfully.`
+      );
+
       setSelectedFile(null);
-      await loadAssignments(selectedAssignment.assignment_id);
+
+      await loadAssignments(
+        selectedAssignment.assignment_id
+      );
     } catch (error) {
-      alert(error.message || "Assignment submission failed.");
+      alert(
+        error.message ||
+          "Assignment submission failed."
+      );
     }
   }
 
   return (
     <DashboardShell>
       <section className="module-page">
+
         <StudyTabs />
 
         <div className="module-content-area">
@@ -314,163 +415,267 @@ async function handleAskAi() {
           ------------------------------------------------------- */}
 
           <div className="assignment-layout">
-<article className="module-card assignment-list-card">
 
+            <article className="module-card assignment-list-card">
 
-  <div className="card-title-row">
+              <div className="card-title-row">
 
-    <h2>
-      Your Assignments
-    </h2>
+                <h2>
+                  Your Assignments
+                </h2>
 
-    <div className="assignment-summary">
-      <span>
-        Submitted: <strong>{submittedCount}</strong>
-      </span>
+                <div className="assignment-summary">
 
-      <span>
-        Remaining: <strong>{remainingCount}</strong>
-      </span>
-    </div>
+                  <span>
+                    Submitted:{" "}
+                    <strong>
+                      {submittedCount}
+                    </strong>
+                  </span>
 
-    <button
-      className="soft-button"
-      type="button"
-      onClick={() => loadAssignments()}
-      disabled={loading}
-    >
-      {loading ? "Loading..." : "Refresh"}
-    </button>
+                  <span>
+                    Remaining:{" "}
+                    <strong>
+                      {remainingCount}
+                    </strong>
+                  </span>
 
-  </div>
+                </div>
 
-              <table className="data-table">
+                <button
+                  className="soft-button"
+                  type="button"
+                  onClick={() =>
+                    loadAssignments()
+                  }
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Loading..."
+                    : "Refresh"}
+                </button>
 
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>
-                      Assignment Title
-                    </th>
-                    <th>
-                      Due Date
-                    </th>
-                    <th>
-                      Status
-                    </th>
-                    <th>
-                      Action
-                    </th>
-                  </tr>
-                </thead>
+              </div>
 
-                <tbody>
+              {/* -------------------------------------------------------
+                  SCROLLABLE ASSIGNMENT TABLE
+              ------------------------------------------------------- */}
 
-                  {assignments.map((assignment) => (
+              <div className="assignment-table-scroll">
 
-                      <tr
-                        className={selectedAssignment?.assignment_id === assignment.assignment_id ? "highlight-row" : ""}
-                        key={assignment.assignment_id}
-                      >
+                <table className="data-table">
 
-                        <td>
-                          {assignment.number}
-                        </td>
+                  <thead>
+                    <tr>
 
-                        <td>
-                          {assignment.assignment_title}
-                        </td>
+                      <th>
+                        #
+                      </th>
 
-                        <td>
-                          {formatDate(assignment.due_date)}
-                        </td>
+                      <th>
+                        Assignment Title
+                      </th>
 
-                        <td>
+                      <th>
+                        Due Date
+                      </th>
 
-                          <span
-                            className={`status-pill ${(assignment.status || "Not Started")
-                              .toLowerCase()
-                              .replaceAll(
-                                " ",
-                                "-"
-                              )}`}
-                          >
-                            {assignment.status || "Not Started"}
-                          </span>
+                      <th>
+                        Status
+                      </th>
 
-                        </td>
+                      <th>
+                        Action
+                      </th>
 
-                        <td>
+                    </tr>
+                  </thead>
 
-                          <button
-  className="table-action"
-  type="button"
- onClick={async () => {
-  setSelectedAssignment(assignment);
-  setSelectedFile(null);
-  setShowAiSummary(false);
+                  <tbody>
 
-  // Open submitted assignment
-  if (assignment.action === "View") {
-    if (!studentId) {
-      alert("Student information is not available.");
-      return;
-    }
+                    {assignments.map(
+                      (assignment) => (
 
-    const fileUrl =
-      `${API_BASE_URL}/assignment-submissions/file` +
-      `?student_id=${studentId}` +
-      `&assignment_id=${assignment.assignment_id}`;
+                        <tr
+                          className={
+                            selectedAssignment?.assignment_id ===
+                            assignment.assignment_id
+                              ? "highlight-row"
+                              : ""
+                          }
+                          key={
+                            assignment.assignment_id
+                          }
+                        >
 
-    window.open(fileUrl, "_blank", "noopener,noreferrer");
-    return;
-  }
+                          <td>
+                            {assignment.number}
+                          </td>
 
-  // Start assignment
-  if (assignment.action !== "Start" || !studentId) {
-    return;
-  }
+                          <td>
+                            {
+                              assignment.assignment_title
+                            }
+                          </td>
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
-      {
-        method: "POST",
-      }
-    );
+                          <td>
+                            {formatDate(
+                              assignment.due_date
+                            )}
+                          </td>
 
-    const data = await response.json().catch(() => ({}));
+                          <td>
 
-    if (!response.ok) {
-      throw new Error(
-        data.detail || "Unable to start assignment."
-      );
-    }
+                            <span
+                              className={`status-pill ${(
+                                assignment.status ||
+                                "Not Started"
+                              )
+                                .toLowerCase()
+                                .replaceAll(
+                                  " ",
+                                  "-"
+                                )}`}
+                            >
+                              {assignment.status ||
+                                "Not Started"}
+                            </span>
 
-    await loadAssignments(assignment.assignment_id);
-  } catch (error) {
-    console.error("Start Assignment Error:", error);
-    alert(error.message || "Unable to start assignment.");
-  }
-}}
->
-  {assignment.action || "Start"}
-</button>
+                          </td>
 
-                        </td>
+                          <td>
 
-                      </tr>
+                            <button
+                              className="table-action"
+                              type="button"
+                              onClick={async () => {
 
-                    )
-                  )}
+                                setSelectedAssignment(
+                                  assignment
+                                );
 
-                  {!loading && assignments.length === 0 && (
-                    <tr><td colSpan="5">{loadError || "No assignments available."}</td></tr>
-                  )}
+                                setSelectedFile(
+                                  null
+                                );
 
-                </tbody>
+                                setShowAiSummary(
+                                  false
+                                );
 
-              </table>
+                                // Open submitted assignment
+                                if (
+                                  assignment.action ===
+                                  "View"
+                                ) {
+
+                                  if (!studentId) {
+                                    alert(
+                                      "Student information is not available."
+                                    );
+                                    return;
+                                  }
+
+                                  const fileUrl =
+                                    `${API_BASE_URL}/assignment-submissions/file` +
+                                    `?student_id=${studentId}` +
+                                    `&assignment_id=${assignment.assignment_id}`;
+
+                                  window.open(
+                                    fileUrl,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  );
+
+                                  return;
+                                }
+
+                                // Start assignment
+                                if (
+                                  assignment.action !==
+                                    "Start" ||
+                                  !studentId
+                                ) {
+                                  return;
+                                }
+
+                                try {
+
+                                  const response =
+                                    await fetch(
+                                      `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
+                                      {
+                                        method:
+                                          "POST",
+                                      }
+                                    );
+
+                                  const data =
+                                    await response
+                                      .json()
+                                      .catch(
+                                        () => ({})
+                                      );
+
+                                  if (
+                                    !response.ok
+                                  ) {
+                                    throw new Error(
+                                      data.detail ||
+                                        "Unable to start assignment."
+                                    );
+                                  }
+
+                                  await loadAssignments(
+                                    assignment.assignment_id
+                                  );
+
+                                } catch (error) {
+
+                                  console.error(
+                                    "Start Assignment Error:",
+                                    error
+                                  );
+
+                                  alert(
+                                    error.message ||
+                                      "Unable to start assignment."
+                                  );
+                                }
+                              }}
+                            >
+                              {assignment.action ||
+                                "Start"}
+                            </button>
+
+                          </td>
+
+                        </tr>
+                      )
+                    )}
+
+                    {!loading &&
+                      assignments.length ===
+                        0 && (
+
+                        <tr>
+
+                          <td colSpan="5">
+                            {loadError ||
+                              "No assignments available."}
+                          </td>
+
+                        </tr>
+                      )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+              {/* -------------------------------------------------------
+                  TIP
+              ------------------------------------------------------- */}
 
               <div className="tip-box">
                 Tip: Submit your assignments on time
@@ -489,11 +694,23 @@ async function handleAskAi() {
               <div className="card-title-row">
 
                 <h2>
-                  {selectedAssignment?.assignment_title || "Select an assignment"}
+                  {selectedAssignment?.assignment_title ||
+                    "Select an assignment"}
                 </h2>
 
-                <span className={`status-pill ${(selectedAssignment?.status || "not-started").toLowerCase().replaceAll(" ", "-")}`}>
-                  {selectedAssignment?.status || "Not Started"}
+                <span
+                  className={`status-pill ${(
+                    selectedAssignment?.status ||
+                    "not-started"
+                  )
+                    .toLowerCase()
+                    .replaceAll(
+                      " ",
+                      "-"
+                    )}`}
+                >
+                  {selectedAssignment?.status ||
+                    "Not Started"}
                 </span>
 
               </div>
@@ -501,19 +718,24 @@ async function handleAskAi() {
               <div className="meta-row">
 
                 <span>
-                  Due Date: {formatDate(selectedAssignment?.due_date)}
+                  Due Date:{" "}
+                  {formatDate(
+                    selectedAssignment?.due_date
+                  )}
                 </span>
 
                 <span>
-                  {selectedAssignment?.subject_name || selectedAssignment?.chapter_name || "Assignment"}
+                  {selectedAssignment?.subject_name ||
+                    selectedAssignment?.chapter_name ||
+                    "Assignment"}
                 </span>
 
               </div>
 
               <p>
-                {selectedAssignment?.assignment_text || "Select an assignment to view its instructions."}
+                {selectedAssignment?.assignment_text ||
+                  "Select an assignment to view its instructions."}
               </p>
-
 
               {showAiSummary && (
 
@@ -524,7 +746,8 @@ async function handleAskAi() {
                   </strong>
 
                   <p>
-                    {selectedAssignment?.assignment_text || "Read the assignment instructions carefully and submit before the due date."}
+                    {selectedAssignment?.assignment_text ||
+                      "Read the assignment instructions carefully and submit before the due date."}
                   </p>
 
                   {alertResponse && (
@@ -570,29 +793,36 @@ async function handleAskAi() {
                   or
                 </span>
 
-                {/* Hidden File Input */}
-
-                  <input
-                    id="assignment-file"
-                    type="file"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
-                    disabled={!selectedAssignment}
+                <input
+                  id="assignment-file"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={
+                    handleFileChange
+                  }
+                  disabled={
+                    !selectedAssignment
+                  }
                   style={{
                     display: "none",
                   }}
                 />
-
-                {/* Browse Button */}
 
                 <label
                   htmlFor="assignment-file"
                   className="soft-button"
                   style={{
                     cursor: "pointer",
-                    display: "inline-block",
-                    opacity: selectedAssignment ? 1 : 0.55,
-                    pointerEvents: selectedAssignment ? "auto" : "none",
+                    display:
+                      "inline-block",
+                    opacity:
+                      selectedAssignment
+                        ? 1
+                        : 0.55,
+                    pointerEvents:
+                      selectedAssignment
+                        ? "auto"
+                        : "none",
                   }}
                 >
                   Browse Files
@@ -603,10 +833,6 @@ async function handleAskAi() {
                   PDF, DOC, DOCX, JPG, PNG
                   (Max 10 MB)
                 </small>
-
-                {/* -------------------------------------------------------
-                    SELECTED FILE
-                ------------------------------------------------------- */}
 
                 {selectedFile && (
 
@@ -630,7 +856,8 @@ async function handleAskAi() {
                         1024 /
                         1024
                       ).toFixed(2)}
-                      {" "}MB
+                      {" "}
+                      MB
                     </p>
 
                     <button
@@ -661,8 +888,7 @@ async function handleAskAi() {
 
                     <>
                       <p>
-                        File ready:
-                        {" "}
+                        File ready:{" "}
                         {selectedFile.name}
                       </p>
 
@@ -677,9 +903,10 @@ async function handleAskAi() {
                       <p>
                         No file uploaded yet
                       </p>
-<p>
-  Select a file to submit
-</p>
+
+                      <p>
+                        Select a file to submit
+                      </p>
                     </>
 
                   )}
@@ -692,7 +919,11 @@ async function handleAskAi() {
                   onClick={
                     handleSubmitAssignment
                   }
-                  disabled={!selectedFile || !selectedAssignment || !studentId}
+                  disabled={
+                    !selectedFile ||
+                    !selectedAssignment ||
+                    !studentId
+                  }
                 >
                   Submit Assignment
                 </button>
@@ -760,6 +991,7 @@ async function handleAskAi() {
           </article>
 
         </div>
+
       </section>
     </DashboardShell>
   );

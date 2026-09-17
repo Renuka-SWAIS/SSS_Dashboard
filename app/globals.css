@@ -6202,3 +6202,65 @@ button.reset:hover,
   background: #101d35 !important;
   color: #ffffff !important;
 }
+
+.assignment-table-scroll {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.assignment-table-scroll .data-table {
+  width: 100%;
+  min-width: 700px;
+}
+
+.assignment-table-scroll .data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+
+.assignment-table-scroll {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.assignment-table-scroll .data-table {
+  width: 100%;
+  min-width: 700px;
+}
+
+.assignment-table-scroll .data-table th {
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.assignment-table-scroll .data-table td {
+  font-size: 13px;
+  padding: 10px 12px;
+  line-height: 1.35;
+}
+
+.assignment-table-scroll .data-table td:first-child {
+  font-size: 12px;
+}
+
+.assignment-table-scroll .data-table button {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.assignment-table-scroll .data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.assignment-table-scroll .data-table .status-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+}
