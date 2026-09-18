@@ -6273,6 +6273,12 @@ button.reset:hover,
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  max-height: 650px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 10px;
 }
 
 .mock-question-review h3 {
@@ -6281,101 +6287,22 @@ button.reset:hover,
   font-weight: 700;
 }
 
-.mock-result-question {
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #333);
-  background: var(--card-background, #171717);
+.mock-question-review::-webkit-scrollbar {
+  width: 8px;
 }
 
-.mock-result-question-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+.mock-question-review::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
 }
 
-.mock-result-question-header strong {
-  font-size: 15px;
+.mock-question-review::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
 }
 
-.mock-result-question-header span {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.mock-result-question-text {
-  margin: 0 0 14px;
-  line-height: 1.6;
-}
-
-.mock-answer-review {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.mock-answer-review > div {
-  padding: 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.mock-answer-review span {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.mock-answer-review strong {
-  display: block;
-  line-height: 1.5;
-}
-
-/* Correct */
-
-.mock-result-question.result-correct {
-  border-left: 4px solid #22c55e;
-}
-
-.mock-result-question.result-correct
-  .mock-result-question-header span {
-  color: #22c55e;
-}
-
-/* Wrong */
-
-.mock-result-question.result-wrong {
-  border-left: 4px solid #ef4444;
-}
-
-.mock-result-question.result-wrong
-  .mock-result-question-header span {
-  color: #ef4444;
-}
-
-/* Unanswered */
-
-.mock-result-question.result-unanswered {
-  border-left: 4px solid #f59e0b;
-}
-
-.mock-result-question.result-unanswered
-  .mock-result-question-header span {
-  color: #f59e0b;
-}
-
-@media (max-width: 700px) {
-  .mock-answer-review {
-    grid-template-columns: 1fr;
-  }
-
-  .mock-result-question-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.mock-question-review::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 /* =========================================================
    MOCK TEST ANSWER EXPLANATION
@@ -6400,4 +6327,89 @@ button.reset:hover,
 .mock-answer-explanation p {
   margin: 0;
   line-height: 1.6;
+}
+/* =========================================================
+   MOCK TEST RESULTS - RIGHT CARD COMPACT
+========================================================= */
+
+.quiz-layout.assessment-layout {
+  align-items: start;
+}
+
+.quiz-layout.assessment-layout .latest-result-card {
+  align-self: start;
+  height: fit-content;
+  min-height: 0;
+}
+/* =========================================================
+   MOCK TEST RESULTS - TEXT VISIBILITY FIX
+========================================================= */
+
+/* Chapter / difficulty / question meta text */
+.purple-module .meta-row {
+  color: #ffffff !important;
+}
+
+.purple-module .meta-row span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   QUESTION-WISE RESULTS HEADING
+========================================================= */
+
+.quiz-score-card .mock-question-review h3 {
+  color: #0b6130 !important;
+  opacity: 1 !important;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   QUESTION-WISE RESULT CARDS
+========================================================= */
+
+.quiz-score-card .mock-result-question {
+  background: #171717 !important;
+  color: #ffffff !important;
+}
+
+.quiz-score-card .mock-result-question-text {
+  color: #ffffff !important;
+}
+
+.quiz-score-card .mock-result-question-header strong {
+  color: #ffffff !important;
+}
+
+
+/* Your Answer / Correct Answer labels */
+.quiz-score-card .mock-answer-review span {
+  color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
+
+/* Answers */
+.quiz-score-card .mock-answer-review strong {
+  color: #ffffff !important;
+}
+
+
+/* Why? section */
+.quiz-score-card .mock-answer-explanation {
+  background: #222222 !important;
+  border-color: #444444 !important;
+}
+
+.quiz-score-card .mock-answer-explanation > span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.quiz-score-card .mock-answer-explanation p {
+  color: #e5e7eb !important;
 }
