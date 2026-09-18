@@ -200,7 +200,12 @@ function AssessmentsContent() {
   const [mockResult, setMockResult] =
     useState(null);
 
- 
+  const [mockDifficulty, setMockDifficulty] =
+    useState("easy");
+
+  const [mockQuestionCount, setMockQuestionCount] =
+    useState(5);
+
   /* =======================================================
      SGS-STYLE MOCK TEST STATE
   ======================================================= */
@@ -573,11 +578,11 @@ function AssessmentsContent() {
         `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
 const payload = {
   topic,
+  difficulty: "easy",
   num_questions: 5,
   user_email: studentEmail,
   client_name: "SSS",
 };
-
       console.log(
         "🔥 MOCK TEST REQUEST:",
         JSON.stringify(
@@ -1265,106 +1270,105 @@ const payload = {
                     SUBJECT + CHAPTER + DIFFICULTY + QUESTIONS
                 ================================================= */}
 
-                {mockPhase ===
-                  "setup" && (
+               {mockPhase ===
+  "setup" && (
 
-                  <div className="mock-selection-grid">
+  <div className="mock-selection-grid">
 
-                    <label className="assignment-field">
+    <label className="assignment-field">
 
-                      <span>
-                        Subject
-                      </span>
+      <span>
+        Subject
+      </span>
 
-                      <select
-                        value={
-                          selectedSubject
-                        }
-                        onChange={
-                          handleSubjectChange
-                        }
-                        disabled={
-                          mockLoading
-                        }
-                      >
+      <select
+        value={
+          selectedSubject
+        }
+        onChange={
+          handleSubjectChange
+        }
+        disabled={
+          mockLoading
+        }
+      >
 
-                        <option value="">
-                          Select Subject
-                        </option>
+        <option value="">
+          Select Subject
+        </option>
 
-                        {subjects.map(
-                          (
-                            subject
-                          ) => (
-                            <option
-                              key={
-                                subject
-                              }
-                              value={
-                                subject
-                              }
-                            >
-                              {
-                                subject
-                              }
-                            </option>
-                          )
-                        )}
+        {subjects.map(
+          (
+            subject
+          ) => (
+            <option
+              key={
+                subject
+              }
+              value={
+                subject
+              }
+            >
+              {
+                subject
+              }
+            </option>
+          )
+        )}
 
-                      </select>
+      </select>
 
-                    </label>
+    </label>
 
-                    <label className="assignment-field">
+    <label className="assignment-field">
 
-                      <span>
-                        Chapter
-                      </span>
+      <span>
+        Chapter
+      </span>
 
-                      <select
-                        value={
-                          selectedMockChapter
-                        }
-                        onChange={
-                          handleChapterChange
-                        }
-                        disabled={
-                          mockLoading ||
-                          !selectedSubject
-                        }
-                      >
+      <select
+        value={
+          selectedMockChapter
+        }
+        onChange={
+          handleChapterChange
+        }
+        disabled={
+          mockLoading ||
+          !selectedSubject
+        }
+      >
 
-                        <option value="">
-                          Select Chapter
-                        </option>
+        <option value="">
+          Select Chapter
+        </option>
 
-                        {subjectChapters.map(
-                          (
-                            chapter
-                          ) => (
-                            <option
-                              key={
-                                chapter.chapter_id
-                              }
-                              value={
-                                chapter.chapter_id
-                              }
-                            >
-                              {
-                                chapter.chapter_title
-                              }
-                            </option>
-                          )
-                        )}
+        {subjectChapters.map(
+          (
+            chapter
+          ) => (
+            <option
+              key={
+                chapter.chapter_id
+              }
+              value={
+                chapter.chapter_id
+              }
+            >
+              {
+                chapter.chapter_title
+              }
+            </option>
+          )
+        )}
 
-                      </select>
+      </select>
 
-                    </label>
+    </label>
 
+  </div>
 
-                  </div>
-
-                )}
+)}
 
                 {/* =================================================
                     CHAPTER META
@@ -1386,19 +1390,9 @@ const payload = {
                       }
                     </span>
 
-                    <span>
+<span>
   Questions: 5
 </span>
-
-                    <span>
-                      Questions:{" "}
-                      {
-                        mockQuestions.length >
-                        0
-                          ? mockQuestions.length
-                          : mockQuestionCount
-                      }
-                    </span>
 
                   </div>
 
