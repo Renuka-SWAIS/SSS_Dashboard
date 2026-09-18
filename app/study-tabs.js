@@ -37,11 +37,15 @@ const studyTabs = [
     title: "Study C: Assessment",
     href: "/assessments",
     rows: [
-      ["1) Unit Test", "/assessments?tab=unit-test"],
-      ["2) Mock Test", "/assessments?tab=mock-test"],
-      
-      ["3) Student Analysis", "/assessments?tab=student-analysis"],
-      ["4) Teacher Remark", "/assessments?tab=teacher-remark"],
+      ["1) Mock Test", "/assessments?tab=mock-test"],
+      [
+        "2) Student Analysis",
+        "/assessments?tab=student-analysis",
+      ],
+      [
+        "3) Teacher Remark",
+        "/assessments?tab=teacher-remark",
+      ],
     ],
   },
 ];
@@ -49,9 +53,13 @@ const studyTabs = [
 function PanelIcon({ name }) {
   if (name === "book-open") {
     return (
-      <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+      <svg
+        className="panel-svg"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+      >
         <path d="M4.5 7.4c4.1-.9 7.7-.2 10.8 2.1v16.1c-3.1-2.3-6.7-3-10.8-2.1z" />
-        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c3.1-2.3-6.7-3-10.8-2.1z" />
+        <path d="M27.5 7.4c-4.1-.9-7.7-.2-10.8 2.1v16.1c-3.1-2.3-6.7-3-10.8-2.1z" />
         <path d="M8.2 11.3c1.9-.2 3.6.2 5.1 1.1M8.2 15.1c1.9-.2 3.6.2 5.1 1.1M8.2 18.9c1.9-.2 3.6.2 5.1 1.1M23.8 11.3c-1.9-.2-3.6.2-5.1 1.1M23.8 15.1c-1.9-.2-3.6.2-5.1 1.1M23.8 18.9c-1.9-.2-3.6.2-5.1 1.1" />
       </svg>
     );
@@ -59,7 +67,11 @@ function PanelIcon({ name }) {
 
   if (name === "clipboard") {
     return (
-      <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+      <svg
+        className="panel-svg"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+      >
         <path d="M10.2 6.8H8.5a2.3 2.3 0 0 0-2.3 2.3v17.1a2.3 2.3 0 0 0 2.3 2.3h15a2.3 2.3 0 0 0 2.3-2.3V9.1a2.3 2.3 0 0 0-2.3-2.3h-1.7" />
         <path d="M12.1 8.8h7.8V5.9h-2.1a2 2 0 0 0-3.6 0h-2.1z" />
         <path d="m11.1 14.2 1.7 1.7 3.1-3.2M18.5 15h4.2M11.1 20.2l1.7 1.7 3.1-3.2M18.5 21h4.2" />
@@ -68,7 +80,11 @@ function PanelIcon({ name }) {
   }
 
   return (
-    <svg className="panel-svg" viewBox="0 0 32 32" aria-hidden="true">
+    <svg
+      className="panel-svg"
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+    >
       <circle cx="14.3" cy="17.7" r="9.8" />
       <circle cx="14.3" cy="17.7" r="5.2" />
       <circle cx="14.3" cy="17.7" r="1.8" />
@@ -107,10 +123,14 @@ export default function StudyTabs() {
           <button
             className="panel-head"
             type="button"
-            aria-expanded={openPanel === index}
+            aria-expanded={
+              openPanel === index
+            }
             onClick={() =>
               setOpenPanel((current) =>
-                current === index ? null : index
+                current === index
+                  ? null
+                  : index
               )
             }
           >
@@ -129,15 +149,19 @@ export default function StudyTabs() {
           <div className="accent-line" />
 
           <div className="panel-body">
-            {tab.rows.map(([label, href]) => (
-              <Link
-                className="study-row"
-                href={href}
-                key={label}
-              >
-                <span>{label}</span>
-              </Link>
-            ))}
+            {tab.rows.map(
+              ([label, href]) => (
+                <Link
+                  className="study-row"
+                  href={href}
+                  key={label}
+                >
+                  <span>
+                    {label}
+                  </span>
+                </Link>
+              )
+            )}
           </div>
         </article>
       ))}

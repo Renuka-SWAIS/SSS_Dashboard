@@ -40,16 +40,15 @@ const panels = [
     ],
   },
   {
-    tone: "purple",
-    icon: "target",
-    title: "Study C: Assessment",
-    rows: [
-      ["checklist", "1) Unit Test"],
-      ["monitor", "2) Mock Test"],
-      ["chart", "3) Student Analysis"],
-      ["note", "4) Teacher Remark"],
-    ],
-  },
+  tone: "purple",
+  icon: "target",
+  title: "Study C: Assessment",
+  rows: [
+    ["monitor", "1) Mock Test"],
+    ["chart", "2) Student Analysis"],
+    ["note", "3) Teacher Remark"],
+  ],
+},
 ];
 
 function Icon({ name, className = "" }) {

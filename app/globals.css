@@ -6596,4 +6596,16 @@ button.reset:hover,
   .quiz-score-card .mock-answer-review {
     grid-template-columns: 1fr !important;
   }
+}/* Study C - use full available width for 3 assessment options */
+.study-tab-strip .study-panel.purple .panel-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.study-tab-strip .study-panel.purple .study-row {
+  width: 100%;
+  box-sizing: border-box;
 }
