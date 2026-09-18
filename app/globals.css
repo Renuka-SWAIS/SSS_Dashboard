@@ -6377,3 +6377,27 @@ button.reset:hover,
     flex-direction: column;
   }
 }
+/* =========================================================
+   MOCK TEST ANSWER EXPLANATION
+========================================================= */
+
+.mock-answer-explanation {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, #333);
+}
+
+.mock-answer-explanation > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.mock-answer-explanation p {
+  margin: 0;
+  line-height: 1.6;
+}

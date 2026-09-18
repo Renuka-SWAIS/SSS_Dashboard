@@ -1937,7 +1937,129 @@ function AssessmentsContent() {
                             mockEvaluationText
                           }
                         </p>
+
+                        {/* =================================================
+    QUESTION-WISE RESULT REVIEW
+================================================= */}
+
+<div className="mock-question-review">
+
+  <h3>
+    Question-wise Results
+  </h3>
+
+  {mockQuestions.map((question, index) => {
+
+    const selectedIndex =
+      mockAnswers[index];
+
+    const selectedAnswer =
+      selectedIndex !== undefined
+        ? question.options?.[selectedIndex] || ""
+        : "";
+
+    const correctAnswer =
+      question.correct_answer ||
+      question.answer ||
+      "";
+
+    const explanation =
+      question.explanation ||
+      "Explanation is not available for this question.";
+
+    const isAnswered =
+      selectedIndex !== undefined;
+
+    const isCorrect =
+      isAnswered &&
+      selectedAnswer === correctAnswer;
+
+    return (
+      <div
+        key={`result-${index}`}
+        className={`mock-result-question ${
+          isCorrect
+            ? "result-correct"
+            : isAnswered
+              ? "result-wrong"
+              : "result-unanswered"
+        }`}
+      >
+
+        {/* Question + Status */}
+
+        <div className="mock-result-question-header">
+
+          <strong>
+            Question {index + 1}
+          </strong>
+
+          <span>
+            {isCorrect
+              ? "Correct"
+              : isAnswered
+                ? "Wrong"
+                : "Unanswered"}
+          </span>
+
+        </div>
+
+        {/* Question */}
+
+        <p className="mock-result-question-text">
+          {question.question}
+        </p>
+
+        {/* Answers */}
+
+        <div className="mock-answer-review">
+
+          <div>
+            <span>
+              Your Answer
+            </span>
+
+            <strong>
+              {selectedAnswer ||
+                "Not answered"}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Correct Answer
+            </span>
+
+            <strong>
+              {correctAnswer ||
+                "Not available"}
+            </strong>
+          </div>
+
+        </div>
+
+        {/* Explanation */}
+
+        <div className="mock-answer-explanation">
+
+          <span>
+            Why?
+          </span>
+
+          <p>
+            {explanation}
+          </p>
+
+        </div>
+
+      </div>
+    );
+  })}
+
+</div>
+
                       </>
+
 
                     )}
 
@@ -2193,97 +2315,7 @@ function AssessmentsContent() {
 
 
 
-{/* =================================================
-    QUESTION-WISE RESULT REVIEW
-================================================= */}
 
-<div className="mock-question-review">
-
-  <h3>
-    Question-wise Results
-  </h3>
-
-  {mockQuestions.map((question, index) => {
-
-    const selectedIndex =
-      mockAnswers[index];
-
-    const selectedAnswer =
-      selectedIndex !== undefined
-        ? question.options?.[selectedIndex] || ""
-        : "";
-
-    const correctAnswer =
-      question.correct_answer || "";
-
-    const isAnswered =
-      selectedIndex !== undefined;
-
-    const isCorrect =
-      isAnswered &&
-      selectedAnswer === correctAnswer;
-
-    return (
-      <div
-        key={`result-${index}`}
-        className={`mock-result-question ${
-          isCorrect
-            ? "result-correct"
-            : isAnswered
-              ? "result-wrong"
-              : "result-unanswered"
-        }`}
-      >
-
-        <div className="mock-result-question-header">
-
-          <strong>
-            Question {index + 1}
-          </strong>
-
-          <span>
-            {isCorrect
-              ? "Correct"
-              : isAnswered
-                ? "Wrong"
-                : "Unanswered"}
-          </span>
-
-        </div>
-
-        <p className="mock-result-question-text">
-          {question.question}
-        </p>
-
-        <div className="mock-answer-review">
-
-          <div>
-            <span>
-              Your Answer
-            </span>
-
-            <strong>
-              {selectedAnswer || "Not answered"}
-            </strong>
-          </div>
-
-          <div>
-            <span>
-              Correct Answer
-            </span>
-
-            <strong>
-              {correctAnswer || "Not available"}
-            </strong>
-          </div>
-
-        </div>
-
-      </div>
-    );
-  })}
-
-</div>
           {/* =================================================
               STUDENT ANALYSIS
           ================================================= */}
