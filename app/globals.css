@@ -6596,16 +6596,37 @@ button.reset:hover,
   .quiz-score-card .mock-answer-review {
     grid-template-columns: 1fr !important;
   }
-}/* Study C - use full available width for 3 assessment options */
-.study-tab-strip .study-panel.purple .panel-body {
+}
+/* =========================================================
+   ASSESSMENT TABS - FULL WIDTH
+   Mock Test / Student Analysis / Teacher Remark
+   ========================================================= */
+
+.assessment-option-grid {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  width: 100%;
+  gap: 18px;
   box-sizing: border-box;
 }
 
-.study-tab-strip .study-panel.purple .study-row {
+.assessment-option-grid .module-action {
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+}
+
+
+/* Keep the assessment tabs responsive */
+@media (max-width: 900px) {
+  .assessment-option-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .assessment-option-grid {
+    grid-template-columns: 1fr;
+  }
 }
