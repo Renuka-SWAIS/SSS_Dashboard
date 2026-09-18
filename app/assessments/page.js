@@ -200,12 +200,7 @@ function AssessmentsContent() {
   const [mockResult, setMockResult] =
     useState(null);
 
-  const [mockDifficulty, setMockDifficulty] =
-    useState("easy");
-
-  const [mockQuestionCount, setMockQuestionCount] =
-    useState(5);
-
+ 
   /* =======================================================
      SGS-STYLE MOCK TEST STATE
   ======================================================= */
@@ -576,20 +571,12 @@ function AssessmentsContent() {
     try {
       const topic =
         `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
-
-      const payload = {
-        topic,
-        difficulty:
-          mockDifficulty,
-        num_questions:
-          Number(
-            mockQuestionCount
-          ),
-        user_email:
-          studentEmail,
-        client_name:
-          "SSS",
-      };
+const payload = {
+  topic,
+  num_questions: 5,
+  user_email: studentEmail,
+  client_name: "SSS",
+};
 
       console.log(
         "🔥 MOCK TEST REQUEST:",
@@ -1374,91 +1361,6 @@ function AssessmentsContent() {
 
                     </label>
 
-                    <label className="assignment-field">
-
-                      <span>
-                        Difficulty
-                      </span>
-
-                      <select
-                        value={
-                          mockDifficulty
-                        }
-                        onChange={(
-                          event
-                        ) =>
-                          setMockDifficulty(
-                            event
-                              .target
-                              .value
-                          )
-                        }
-                        disabled={
-                          mockLoading
-                        }
-                      >
-
-                        <option value="easy">
-                          Easy
-                        </option>
-
-                        <option value="medium">
-                          Medium
-                        </option>
-
-                        <option value="hard">
-                          Hard
-                        </option>
-
-                      </select>
-
-                    </label>
-
-                    <label className="assignment-field">
-
-                      <span>
-                        Questions
-                      </span>
-
-                      <select
-                        value={
-                          mockQuestionCount
-                        }
-                        onChange={(
-                          event
-                        ) =>
-                          setMockQuestionCount(
-                            Number(
-                              event
-                                .target
-                                .value
-                            )
-                          )
-                        }
-                        disabled={
-                          mockLoading
-                        }
-                      >
-
-                        <option value={5}>
-                          5
-                        </option>
-
-                        <option value={10}>
-                          10
-                        </option>
-
-                        <option value={15}>
-                          15
-                        </option>
-
-                        <option value={20}>
-                          20
-                        </option>
-
-                      </select>
-
-                    </label>
 
                   </div>
 
@@ -1485,11 +1387,8 @@ function AssessmentsContent() {
                     </span>
 
                     <span>
-                      Difficulty:{" "}
-                      {
-                        mockDifficulty
-                      }
-                    </span>
+  Questions: 5
+</span>
 
                     <span>
                       Questions:{" "}
