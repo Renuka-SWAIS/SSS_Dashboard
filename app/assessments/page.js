@@ -1401,33 +1401,36 @@ const payload = {
                 {/* =================================================
                     GENERATE
                 ================================================= */}
+{mockPhase === "setup" && (
+  <div className="quiz-submit-row">
+    <button
+      className="primary-button"
+      type="button"
+      onPointerDown={(event) => {
+        event.preventDefault();
 
-                {mockPhase ===
-                  "setup" && (
+        if (
+          mockLoading ||
+          !currentMockChapter ||
+          !studentEmail
+        ) {
+          return;
+        }
 
-                  <div className="quiz-submit-row">
-
-                    <button
-                      className="primary-button"
-                      type="button"
-                      onClick={
-                        handleMockTest
-                      }
-                      disabled={
-                        mockLoading ||
-                        !currentMockChapter ||
-                        !studentEmail
-                      }
-                    >
-                      {mockLoading
-                        ? "Generating..."
-                        : "Generate Mock Test"}
-                    </button>
-
-                  </div>
-
-                )}
-
+        handleMockTest();
+      }}
+      disabled={
+        mockLoading ||
+        !currentMockChapter ||
+        !studentEmail
+      }
+    >
+      {mockLoading
+        ? "Generating..."
+        : "Generate Mock Test"}
+    </button>
+  </div>
+)}
                 {/* =================================================
                     TIMER
                 ================================================= */}
