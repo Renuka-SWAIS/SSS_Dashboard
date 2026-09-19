@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 from urllib.parse import quote
@@ -431,12 +432,22 @@ def translate_text_with_gemini(
 
     return translated
 
+
+
 def generate_quiz_with_gemini(
     chapter_title: str,
     chapter_text: str,
     difficulty: str,
     question_count: int,
+    pdf_bytes: bytes | None = None,
 ) -> list[dict[str, Any]]:
+    """
+    Generate quiz questions from the actual textbook study material.
+
+    The PDF is treated as the primary source when supplied.
+    Chapter text is used as an additional source when available.
+    """
+
     client = GeminiLearningPathLLM()
 
     if not client.api_key:
@@ -444,43 +455,89 @@ def generate_quiz_with_gemini(
             "GEMINI_API_KEY is not configured."
         )
 
+    source_parts: list[dict[str, Any]] = []
+
+    # -------------------------------------------------------
+    # TEXTBOOK PDF
+    # -------------------------------------------------------
+    if pdf_bytes:
+        source_parts.append(
+            {
+                "inline_data": {
+                    "mime_type": "application/pdf",
+                    "data": base64.b64encode(
+                        pdf_bytes
+                    ).decode("ascii"),
+                }
+            }
+        )
+
+    # -------------------------------------------------------
+    # PROMPT
+    # -------------------------------------------------------
     prompt = {
-        "task": "Generate a school quiz from textbook content",
+        "task": (
+            "Generate a school-level multiple-choice quiz "
+            "from the supplied textbook study material."
+        ),
         "chapter_title": chapter_title,
         "difficulty": difficulty,
         "question_count": question_count,
         "chapter_text": chapter_text[:18000],
+        "source_priority": (
+            "The attached textbook PDF is the primary and authoritative "
+            "source. Chapter text is supplementary source material."
+        ),
         "instructions": (
-            "Generate questions ONLY from the supplied textbook chapter "
-            "content. Do not use outside knowledge. Do not create questions "
-            "that are unrelated to the supplied chapter text. Every question "
-            "and answer must be directly supported by the chapter content. "
-            "Return JSON only with key quiz. quiz must contain exactly "
-            "question_count multiple-choice questions. Each item must have "
-            "question, options (exactly 4 unique strings), answer "
-            "(exact text from options), and explanation."
+            "Generate questions ONLY from the supplied textbook study "
+            "material. "
+            "Do NOT use outside knowledge. "
+            "Do NOT invent facts. "
+            "Do NOT create questions merely from the chapter title. "
+            "Every question must be answerable from the supplied textbook "
+            "material. "
+            "Every option must be relevant to the chapter. "
+            "The correct answer must be directly supported by the textbook. "
+            "The explanation must also be supported by the textbook. "
+            "Avoid duplicate questions. "
+            "Cover different concepts from the chapter. "
+            "Return JSON only with the key 'quiz'. "
+            "The quiz must contain exactly question_count questions. "
+            "Each question must contain exactly 4 unique options. "
+            "The answer must exactly match one of the options. "
+            "Each question must contain a short explanation."
         ),
     }
+
+    parts = [
+        *source_parts,
+        {
+            "text": json.dumps(prompt)
+        },
+    ]
 
     payload = {
         "contents": [
             {
                 "role": "user",
-                "parts": [{"text": json.dumps(prompt)}],
+                "parts": parts,
             }
         ],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "temperature": 0.3,
+            "temperature": 0.25,
             "maxOutputTokens": 4096,
         },
     }
 
+    # -------------------------------------------------------
+    # GEMINI REQUEST
+    # -------------------------------------------------------
     try:
+        response = client._generate_content(payload)
+
         data = _loads_json_object(
-            _gemini_text(
-                client._generate_content(payload)
-            )
+            _gemini_text(response)
         )
 
     except HTTPError as error:
@@ -502,9 +559,19 @@ def generate_quiz_with_gemini(
             "Gemini returned an invalid quiz response."
         ) from error
 
-    normalized = []
+    # -------------------------------------------------------
+    # NORMALIZE QUESTIONS
+    # -------------------------------------------------------
+    normalized: list[dict[str, Any]] = []
 
     for item in data.get("quiz", []):
+        if not isinstance(item, dict):
+            continue
+
+        question = str(
+            item.get("question") or ""
+        ).strip()
+
         options = [
             str(value).strip()
             for value in item.get("options", [])
@@ -517,33 +584,48 @@ def generate_quiz_with_gemini(
             or ""
         ).strip()
 
-        question = str(
-            item.get("question")
-            or ""
+        explanation = str(
+            item.get("explanation") or ""
         ).strip()
 
-        if question and len(options) == 4 and answer in options:
-            normalized.append(
-                {
-                    "question": question,
-                    "options": options,
-                    "answer": answer,
-                    "correct_answer": answer,
-                    "explanation": str(
-                        item.get("explanation") or ""
-                    ).strip(),
-                }
-            )
+        # Exactly 4 unique options
+        if len(options) != 4:
+            continue
 
+        if len(set(options)) != 4:
+            continue
+
+        # Question and answer must exist
+        if not question:
+            continue
+
+        if not answer:
+            continue
+
+        # Correct answer must exactly match an option
+        if answer not in options:
+            continue
+
+        normalized.append(
+            {
+                "question": question,
+                "options": options,
+                "answer": answer,
+                "correct_answer": answer,
+                "explanation": explanation,
+            }
+        )
+
+    # -------------------------------------------------------
+    # VALIDATION
+    # -------------------------------------------------------
     if len(normalized) < question_count:
         raise RuntimeError(
-            "Gemini did not return enough valid quiz questions. "
-            "Please generate again."
+            "Gemini did not return enough valid textbook-based "
+            "quiz questions. Please generate again."
         )
 
     return normalized[:question_count]
-
-
 
 def generate_study_content_with_gemini(
     chapter_title: str,

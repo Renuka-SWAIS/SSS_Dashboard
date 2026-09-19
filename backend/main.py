@@ -313,7 +313,6 @@ def generate_study_content(payload: StudyContentGenerationInput):
             "chapter_title": chapter["content_title"], "classification": payload.classification,
             "generated_content": content}
 
-
 @app.post("/quiz/generate")
 def generate_quiz(payload: QuizGenerationInput):
     query = """
@@ -321,10 +320,14 @@ def generate_quiz(payload: QuizGenerationInput):
             chapter_id,
             content_title AS chapter_title,
             subject,
-            full_text_content
+            COALESCE(full_text_content, '') AS full_text_content,
+            pdf_url
         FROM sss_chapter_content
         WHERE chapter_id = %s
-          AND NULLIF(BTRIM(full_text_content), '') IS NOT NULL
+          AND (
+              NULLIF(BTRIM(full_text_content), '') IS NOT NULL
+              OR NULLIF(BTRIM(pdf_url), '') IS NOT NULL
+          )
         LIMIT 1;
     """
 
@@ -343,15 +346,41 @@ def generate_quiz(payload: QuizGenerationInput):
     if not chapter:
         raise HTTPException(
             status_code=404,
-            detail="Chapter content not found.",
+            detail="Chapter content or PDF not found.",
         )
 
-    chapter_text = (chapter["full_text_content"] or "").strip()
+    chapter_text = (
+        chapter["full_text_content"] or ""
+    ).strip()
 
-    if not chapter_text:
+    # -------------------------------------------------------
+    # FETCH CHAPTER PDF FROM S3
+    # -------------------------------------------------------
+    pdf_bytes = None
+
+    if chapter.get("pdf_url"):
+        try:
+            bucket, object_key = parse_s3_url(
+                chapter["pdf_url"]
+            )
+
+            response = get_s3_client().get_object(
+                Bucket=bucket,
+                Key=object_key,
+            )
+
+            pdf_bytes = response["Body"].read()
+
+        except Exception as error:
+            raise HTTPException(
+                status_code=500,
+                detail="Unable to fetch chapter PDF from S3.",
+            ) from error
+
+    if not chapter_text and not pdf_bytes:
         raise HTTPException(
             status_code=404,
-            detail="No textbook content is available for this chapter.",
+            detail="No textbook content or PDF is available for this chapter.",
         )
 
     try:
@@ -360,6 +389,7 @@ def generate_quiz(payload: QuizGenerationInput):
             chapter_text,
             payload.difficulty,
             payload.num_questions,
+            pdf_bytes=pdf_bytes,
         )
 
     except RuntimeError as error:
@@ -376,23 +406,39 @@ def generate_quiz(payload: QuizGenerationInput):
     }
 
 
+
 @app.get("/quiz-chapters")
 def get_quiz_chapters():
     query = """
-        SELECT content.chapter_id, content.content_title AS chapter_title,
-               content.subject, content.full_text_content
+        SELECT
+            content.chapter_id,
+            content.content_title AS chapter_title,
+            content.subject,
+            content.full_text_content,
+            content.pdf_url
         FROM sss_chapter_content content
-        WHERE NULLIF(BTRIM(content.full_text_content), '') IS NOT NULL
-        ORDER BY content.subject, content.content_title, content.chapter_id;
+        WHERE
+            NULLIF(BTRIM(content.full_text_content), '') IS NOT NULL
+            OR NULLIF(BTRIM(content.pdf_url), '') IS NOT NULL
+        ORDER BY
+            content.subject,
+            content.content_title,
+            content.chapter_id;
     """
+
     try:
         with get_connection() as connection:
-            with connection.cursor(row_factory=dict_row) as cursor:
+            with connection.cursor(
+                row_factory=dict_row
+            ) as cursor:
                 cursor.execute(query)
-                return {"chapters": cursor.fetchall()}
-    except psycopg.Error as error:
-        raise HTTPException(status_code=500, detail="Unable to fetch quiz chapters.") from error
+                return cursor.fetchall()
 
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch quiz chapters.",
+        ) from error
 
 @app.post("/quiz/evaluate")
 def evaluate_quiz(payload: QuizEvaluationInput):
