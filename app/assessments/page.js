@@ -578,19 +578,30 @@ function AssessmentsContent() {
         `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
 const payload = {
   topic,
+  chapter_id: currentMockChapter.chapter_id,
   difficulty: "easy",
   num_questions: 5,
   user_email: studentEmail,
   client_name: "SSS",
 };
       console.log(
-        "🔥 MOCK TEST REQUEST:",
-        JSON.stringify(
-          payload,
-          null,
-          2
-        )
-      );
+  "🔥 SELECTED MOCK CHAPTER:",
+  currentMockChapter
+);
+
+console.log(
+  "🔥 CHAPTER ID:",
+  currentMockChapter?.chapter_id
+);
+
+console.log(
+  "🔥 MOCK TEST REQUEST:",
+  JSON.stringify(
+    payload,
+    null,
+    2
+  )
+);
 
       const response =
         await generateQuiz(

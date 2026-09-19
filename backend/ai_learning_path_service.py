@@ -431,9 +431,9 @@ def translate_text_with_gemini(
 
     return translated
 
-
 def generate_quiz_with_gemini(
-    topic: str,
+    chapter_title: str,
+    chapter_text: str,
     difficulty: str,
     question_count: int,
 ) -> list[dict[str, Any]]:
@@ -445,11 +445,16 @@ def generate_quiz_with_gemini(
         )
 
     prompt = {
-        "task": "Generate a school quiz",
-        "topic": topic,
+        "task": "Generate a school quiz from textbook content",
+        "chapter_title": chapter_title,
         "difficulty": difficulty,
         "question_count": question_count,
+        "chapter_text": chapter_text[:18000],
         "instructions": (
+            "Generate questions ONLY from the supplied textbook chapter "
+            "content. Do not use outside knowledge. Do not create questions "
+            "that are unrelated to the supplied chapter text. Every question "
+            "and answer must be directly supported by the chapter content. "
             "Return JSON only with key quiz. quiz must contain exactly "
             "question_count multiple-choice questions. Each item must have "
             "question, options (exactly 4 unique strings), answer "
@@ -466,7 +471,7 @@ def generate_quiz_with_gemini(
         ],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "temperature": 0.5,
+            "temperature": 0.3,
             "maxOutputTokens": 4096,
         },
     }
@@ -537,6 +542,7 @@ def generate_quiz_with_gemini(
         )
 
     return normalized[:question_count]
+
 
 
 def generate_study_content_with_gemini(

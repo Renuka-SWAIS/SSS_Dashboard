@@ -93,6 +93,7 @@ class TextTranslationInput(BaseModel):
 
 class QuizGenerationInput(BaseModel):
     topic: str = Field(..., min_length=1, max_length=300)
+    chapter_id: int = Field(..., ge=1)
     difficulty: str = Field(default="easy", max_length=40)
     num_questions: int = Field(default=5, ge=1, le=10)
     user_email: str | None = Field(default=None, max_length=150)
@@ -315,11 +316,64 @@ def generate_study_content(payload: StudyContentGenerationInput):
 
 @app.post("/quiz/generate")
 def generate_quiz(payload: QuizGenerationInput):
+    query = """
+        SELECT
+            chapter_id,
+            content_title AS chapter_title,
+            subject,
+            full_text_content
+        FROM sss_chapter_content
+        WHERE chapter_id = %s
+          AND NULLIF(BTRIM(full_text_content), '') IS NOT NULL
+        LIMIT 1;
+    """
+
     try:
-        questions = generate_quiz_with_gemini(payload.topic.strip(), payload.difficulty, payload.num_questions)
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(query, (payload.chapter_id,))
+                chapter = cursor.fetchone()
+
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch chapter content for quiz generation.",
+        ) from error
+
+    if not chapter:
+        raise HTTPException(
+            status_code=404,
+            detail="Chapter content not found.",
+        )
+
+    chapter_text = (chapter["full_text_content"] or "").strip()
+
+    if not chapter_text:
+        raise HTTPException(
+            status_code=404,
+            detail="No textbook content is available for this chapter.",
+        )
+
+    try:
+        questions = generate_quiz_with_gemini(
+            chapter["chapter_title"],
+            chapter_text,
+            payload.difficulty,
+            payload.num_questions,
+        )
+
     except RuntimeError as error:
-        raise HTTPException(status_code=502, detail=str(error)) from error
-    return {"status": "success", "topic": payload.topic, "quiz_data": questions}
+        raise HTTPException(
+            status_code=502,
+            detail=str(error),
+        ) from error
+
+    return {
+        "status": "success",
+        "topic": chapter["chapter_title"],
+        "chapter_id": chapter["chapter_id"],
+        "quiz_data": questions,
+    }
 
 
 @app.get("/quiz-chapters")
