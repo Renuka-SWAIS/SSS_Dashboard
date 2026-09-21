@@ -172,46 +172,50 @@ function AssessmentsContent() {
   /* =======================================================
      MOCK TEST
   ======================================================= */
-
-  const [quizChapters, setQuizChapters] =
-    useState([]);
-
-    const [selectedClass, setSelectedClass] =
-  useState("");
-
-  const [classes, setClasses] =
+const [quizChapters, setQuizChapters] =
   useState([]);
 
-  const [selectedSubject, setSelectedSubject] =
-    useState("");
+const [selectedClass, setSelectedClass] =
+  useState("");
 
-  const [selectedMockChapter, setSelectedMockChapter] =
-    useState("");
+const [classes, setClasses] =
+  useState([]);
 
-  const [mockQuestions, setMockQuestions] =
-    useState([]);
+const [subjects, setSubjects] =
+  useState([]);
 
-  const [mockAnswers, setMockAnswers] =
-    useState({});
+const [subjectChapters, setSubjectChapters] =
+  useState([]);
 
-  const [mockSubmitted, setMockSubmitted] =
-    useState(false);
+const [selectedSubject, setSelectedSubject] =
+  useState("");
 
-  const [mockLoading, setMockLoading] =
-    useState(false);
+const [selectedMockChapter, setSelectedMockChapter] =
+  useState("");
 
-  const [mockEvaluation, setMockEvaluation] =
-    useState(null);
+const [mockQuestions, setMockQuestions] =
+  useState([]);
 
-  const [mockResult, setMockResult] =
-    useState(null);
+const [mockAnswers, setMockAnswers] =
+  useState({});
 
-  const [mockDifficulty, setMockDifficulty] =
-    useState("easy");
+const [mockSubmitted, setMockSubmitted] =
+  useState(false);
 
-  const [mockQuestionCount, setMockQuestionCount] =
-    useState(5);
+const [mockLoading, setMockLoading] =
+  useState(false);
 
+const [mockEvaluation, setMockEvaluation] =
+  useState(null);
+
+const [mockResult, setMockResult] =
+  useState(null);
+
+const [mockDifficulty, setMockDifficulty] =
+  useState("easy");
+
+const [mockQuestionCount, setMockQuestionCount] =
+  useState(5);
   /* =======================================================
      SGS-STYLE MOCK TEST STATE
   ======================================================= */
@@ -390,59 +394,87 @@ useEffect(() => {
   loadClasses();
 }, []);
   /* =======================================================
-     UNIQUE SUBJECTS
-  ======================================================= */
+   LOAD SUBJECTS FOR SELECTED CLASS
+======================================================= */
 
-  const subjects = useMemo(() => {
-    const subjectList =
-      quizChapters
-        .map(
-          (item) =>
-            item?.subject
-        )
-        .filter(Boolean);
+useEffect(() => {
+  async function loadSubjects() {
+    if (!selectedClass) {
+      setSubjects([]);
+      setSubjectChapters([]);
+      return;
+    }
 
-    return [
-      ...new Set(subjectList),
-    ];
-  }, [quizChapters]);
-
-  /* =======================================================
-     CHAPTERS FOR SUBJECT
-  ======================================================= */
-
-  const subjectChapters =
-    useMemo(() => {
-      return quizChapters.filter(
-        (item) =>
-          item?.subject ===
-          selectedSubject
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/subjects?class_id=${encodeURIComponent(
+          selectedClass
+        )}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          cache: "no-store",
+        }
       );
-    }, [
-      quizChapters,
-      selectedSubject,
-    ]);
 
+      const data = await response
+        .json()
+        .catch(() => []);
+
+      if (!response.ok) {
+        throw new Error(
+          `Subjects API failed: ${response.status}`
+        );
+      }
+
+      const rows = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.subjects)
+          ? data.subjects
+          : [];
+
+      console.log(
+        "🔥 MOCK TEST SUBJECTS:",
+        rows
+      );
+
+      setSubjects(rows);
+      setSubjectChapters([]);
+    } catch (error) {
+      console.error(
+        "MOCK TEST SUBJECTS LOAD ERROR:",
+        error
+      );
+
+      setSubjects([]);
+      setSubjectChapters([]);
+    }
+  }
+
+  loadSubjects();
+}, [selectedClass]);
   /* =======================================================
      CURRENT CHAPTER
   ======================================================= */
 
-  const currentMockChapter =
-    useMemo(() => {
-      return quizChapters.find(
-        (item) =>
-          String(
-            item?.chapter_id
-          ) ===
-          String(
-            selectedMockChapter
-          )
-      );
-    }, [
-      quizChapters,
-      selectedMockChapter,
-    ]);
 
+const currentMockChapter =
+  useMemo(() => {
+    return subjectChapters.find(
+      (item) =>
+        String(
+          item?.chapter_id
+        ) ===
+        String(
+          selectedMockChapter
+        )
+    );
+  }, [
+    subjectChapters,
+    selectedMockChapter,
+  ]);
   /* =======================================================
      ANSWERED COUNT
   ======================================================= */
@@ -462,43 +494,56 @@ useEffect(() => {
   /* =======================================================
      CHANGE SUBJECT
   ======================================================= */
+async function handleSubjectChange(event) {
+  const subjectId = event.target.value;
 
-  function handleSubjectChange(
-    event
-  ) {
-    const subject =
-      event.target.value;
+  setSelectedSubject(subjectId);
+  setSelectedMockChapter("");
+  setSubjectChapters([]);
 
-    setSelectedSubject(
-      subject
+  if (!subjectId) {
+    resetMockTest();
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/chapters?subject_id=${encodeURIComponent(subjectId)}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
     );
 
-    const chaptersForSubject =
-      quizChapters.filter(
-        (item) =>
-          item?.subject ===
-          subject
-      );
+    const data = await response.json().catch(() => []);
 
-    if (
-      chaptersForSubject.length >
-      0
-    ) {
-      setSelectedMockChapter(
-        String(
-          chaptersForSubject[0]
-            .chapter_id
-        )
-      );
-    } else {
-      setSelectedMockChapter(
-        ""
+    if (!response.ok) {
+      throw new Error(
+        `Chapters API failed: ${response.status}`
       );
     }
 
-    resetMockTest();
+    const rows = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.chapters)
+        ? data.chapters
+        : [];
+
+    setSubjectChapters(rows);
+  } catch (error) {
+    console.error(
+      "MOCK TEST CHAPTERS LOAD ERROR:",
+      error
+    );
+
+    setSubjectChapters([]);
   }
 
+  resetMockTest();
+}
   /* =======================================================
      CHANGE CHAPTER
   ======================================================= */
@@ -552,8 +597,17 @@ useEffect(() => {
     setShowSubmitConfirmation(false);
 
     try {
-      const topic =
-        `${currentMockChapter.subject}: ${currentMockChapter.chapter_title}`;
+      const selectedSubjectObject =
+  subjects.find(
+    (subject) =>
+      String(subject.subject_id) ===
+      String(selectedSubject)
+  );
+
+const topic =
+  `${selectedSubjectObject?.subject_name || ""}: ${
+    currentMockChapter.chapter_name || ""
+  }`;
 const payload = {
   topic,
   chapter_id: currentMockChapter.chapter_id,
@@ -1312,15 +1366,15 @@ console.log(
         </option>
 
         {subjects.map(
-          (subject) => (
-            <option
-              key={subject}
-              value={subject}
-            >
-              {subject}
-            </option>
-          )
-        )}
+  (subject) => (
+    <option
+      key={subject.subject_id}
+      value={subject.subject_id}
+    >
+      {subject.subject_name}
+    </option>
+  )
+)}
 
       </select>
 
@@ -1353,7 +1407,7 @@ console.log(
               key={chapter.chapter_id}
               value={chapter.chapter_id}
             >
-              {chapter.chapter_title}
+              {chapter.chapter_name}
             </option>
           )
         )}
@@ -1370,30 +1424,27 @@ console.log(
                     CHAPTER META
                 ================================================= */}
 
-                {currentMockChapter && (
+              {currentMockChapter && (
+  <div className="meta-row">
 
-                  <div className="meta-row">
+    <span>
+      {subjects.find(
+        (subject) =>
+          String(subject.subject_id) ===
+          String(selectedSubject)
+      )?.subject_name || "-"}
+    </span>
 
-                    <span>
-                      {
-                        currentMockChapter.subject
-                      }
-                    </span>
+    <span>
+      {currentMockChapter.chapter_name || "-"}
+    </span>
 
-                    <span>
-                      {
-                        currentMockChapter.chapter_title
-                      }
-                    </span>
+    <span>
+      Questions: 5
+    </span>
 
-<span>
-  Questions: 5
-</span>
-
-                  </div>
-
-                )}
-
+  </div>
+)}
                 {/* =================================================
                     GENERATE
                 ================================================= */}
