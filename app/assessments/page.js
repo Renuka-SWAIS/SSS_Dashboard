@@ -176,6 +176,12 @@ function AssessmentsContent() {
   const [quizChapters, setQuizChapters] =
     useState([]);
 
+    const [selectedClass, setSelectedClass] =
+  useState("");
+
+  const [classes, setClasses] =
+  useState([]);
+
   const [selectedSubject, setSelectedSubject] =
     useState("");
 
@@ -340,76 +346,49 @@ function AssessmentsContent() {
   /* =======================================================
      LOAD QUIZ CHAPTERS
   ======================================================= */
-
-  useEffect(() => {
-    async function loadQuizChapters() {
-      try {
-        const response =
-          await fetch(
-            `${API_BASE_URL}/quiz-chapters`,
-            {
-              method: "GET",
-              headers: {
-                Accept:
-                  "application/json",
-              },
-              cache: "no-store",
-            }
-          );
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            `Quiz chapters API failed: ${response.status}`
-          );
+useEffect(() => {
+  async function loadClasses() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/classes`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          cache: "no-store",
         }
+      );
 
-       const rows = Array.isArray(data)
-  ? data
-  : Array.isArray(data?.chapters)
-    ? data.chapters
-    : [];
+      const data = await response
+        .json()
+        .catch(() => ({}));
 
-        setQuizChapters(rows);
-
-        if (rows.length > 0) {
-          const firstSubject =
-            rows[0]?.subject || "";
-
-          const firstChapter =
-            rows[0]?.chapter_id;
-
-          setSelectedSubject(
-            firstSubject
-          );
-
-          setSelectedMockChapter(
-            firstChapter !==
-              undefined &&
-            firstChapter !== null
-              ? String(
-                  firstChapter
-                )
-              : ""
-          );
-        }
-      } catch (error) {
-        console.error(
-          "QUIZ CHAPTER LOAD ERROR:",
-          error
+      if (!response.ok) {
+        throw new Error(
+          `Classes API failed: ${response.status}`
         );
-
-        setQuizChapters([]);
       }
+
+      const rows = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.classes)
+          ? data.classes
+          : [];
+
+      setClasses(rows);
+    } catch (error) {
+      console.error(
+        "CLASSES LOAD ERROR:",
+        error
+      );
+
+      setClasses([]);
     }
+  }
 
-    loadQuizChapters();
-  }, []);
-
+  loadClasses();
+}, []);
   /* =======================================================
      UNIQUE SUBJECTS
   ======================================================= */
@@ -1279,12 +1258,43 @@ console.log(
                 {/* =================================================
                     SUBJECT + CHAPTER + DIFFICULTY + QUESTIONS
                 ================================================= */}
-
-               {mockPhase ===
-  "setup" && (
+{mockPhase === "setup" && (
 
   <div className="mock-selection-grid">
 
+    {/* CLASS */}
+    <label className="assignment-field">
+
+      <span>
+        Class
+      </span>
+<select
+  value={selectedClass}
+  onChange={(event) => {
+    setSelectedClass(event.target.value);
+    setSelectedSubject("");
+    setSelectedMockChapter("");
+  }}
+  disabled={mockLoading}
+>
+  <option value="">
+    Select Class
+  </option>
+
+  {classes.map((item) => (
+    <option
+      key={item.class_id}
+      value={item.class_id}
+    >
+      {item.class_name}
+    </option>
+  ))}
+</select>
+
+    </label>
+
+
+    {/* SUBJECT */}
     <label className="assignment-field">
 
       <span>
@@ -1292,15 +1302,9 @@ console.log(
       </span>
 
       <select
-        value={
-          selectedSubject
-        }
-        onChange={
-          handleSubjectChange
-        }
-        disabled={
-          mockLoading
-        }
+        value={selectedSubject}
+        onChange={handleSubjectChange}
+        disabled={mockLoading}
       >
 
         <option value="">
@@ -1308,20 +1312,12 @@ console.log(
         </option>
 
         {subjects.map(
-          (
-            subject
-          ) => (
+          (subject) => (
             <option
-              key={
-                subject
-              }
-              value={
-                subject
-              }
+              key={subject}
+              value={subject}
             >
-              {
-                subject
-              }
+              {subject}
             </option>
           )
         )}
@@ -1330,6 +1326,8 @@ console.log(
 
     </label>
 
+
+    {/* CHAPTER */}
     <label className="assignment-field">
 
       <span>
@@ -1337,12 +1335,8 @@ console.log(
       </span>
 
       <select
-        value={
-          selectedMockChapter
-        }
-        onChange={
-          handleChapterChange
-        }
+        value={selectedMockChapter}
+        onChange={handleChapterChange}
         disabled={
           mockLoading ||
           !selectedSubject
@@ -1354,20 +1348,12 @@ console.log(
         </option>
 
         {subjectChapters.map(
-          (
-            chapter
-          ) => (
+          (chapter) => (
             <option
-              key={
-                chapter.chapter_id
-              }
-              value={
-                chapter.chapter_id
-              }
+              key={chapter.chapter_id}
+              value={chapter.chapter_id}
             >
-              {
-                chapter.chapter_title
-              }
+              {chapter.chapter_title}
             </option>
           )
         )}
