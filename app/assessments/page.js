@@ -368,12 +368,11 @@ function AssessmentsContent() {
           );
         }
 
-        const rows =
-          Array.isArray(
-            data?.chapters
-          )
-            ? data.chapters
-            : [];
+       const rows = Array.isArray(data)
+  ? data
+  : Array.isArray(data?.chapters)
+    ? data.chapters
+    : [];
 
         setQuizChapters(rows);
 
