@@ -697,125 +697,16 @@ export default function ChapterSelector({
           {!loading &&
             chapterContent && (
               <article className="chapter-content-card">
+{/* HEADER */}
 
-                {/* HEADER */}
-
-                <div className="chapter-content-header">
-
-                  <div>
-                    <h2>
-                      {
-                        chapterContent.content_title ||
-                        selectedLesson
-                      }
-                    </h2>
-                  </div>
-
-                  <div
-                    className="chapter-audio-controls"
-                    aria-label="Chapter controls"
-                  >
-
-                    {/* LANGUAGE */}
-
-                    <select
-                      value={
-                        selectedLanguage
-                      }
-                      onChange={
-                        handleLanguageChange
-                      }
-                      disabled={
-                        translationLoading
-                      }
-                      aria-label="Select language"
-                    >
-                      {languages.map(
-                        (language) => (
-                          <option
-                            key={language}
-                            value={language}
-                          >
-                            {language}
-                          </option>
-                        )
-                      )}
-                    </select>
-
-                    {/* READ ALOUD */}
-
-                    <button
-                      type="button"
-                      onClick={
-                        handleReadAloud
-                      }
-                      disabled={
-                        !speechSupported ||
-                        translationLoading ||
-                        !displayText
-                      }
-                    >
-                      {isReading
-                        ? "Restart Audio"
-                        : "Read Aloud"}
-                    </button>
-
-                    {/* PAUSE / RESUME */}
-
-                    <button
-                      type="button"
-                      onClick={
-                        handlePauseResume
-                      }
-                      disabled={
-                        !speechSupported ||
-                        !isReading
-                      }
-                    >
-                      {isPaused
-                        ? "Resume"
-                        : "Pause"}
-                    </button>
-
-                    {/* STOP */}
-
-                    <button
-                      type="button"
-                      onClick={
-                        handleStopReading
-                      }
-                      disabled={
-                        !speechSupported ||
-                        !isReading
-                      }
-                    >
-                      Stop
-                    </button>
-
-                  </div>
-                </div>
-
-                {/* TRANSLATION STATUS */}
-
-                {translationLoading && (
-                  <p className="chapter-audio-note">
-                    Translating chapter...
-                  </p>
-                )}
-
-                {translationError && (
-                  <p className="chapter-audio-note">
-                    {translationError}
-                  </p>
-                )}
-
-                {!speechSupported && (
-                  <p className="chapter-audio-note">
-                    Audio reading is not supported
-                    in this browser.
-                  </p>
-                )}
-
+<div className="chapter-content-header">
+  <div>
+    <h2>
+      {chapterContent.content_title ||
+        selectedLesson}
+    </h2>
+  </div>
+</div>
                 {/* CONTENT */}
 
                 {chapterContent.pdf_url && (

@@ -480,14 +480,11 @@ export default function QuizzesPage() {
      RESET
   ========================================================= */
 
-  function handleReset() {
-    setQuestions([]);
-    setAnswers({});
-    setSubmitted(false);
-    setQuizRequested(false);
-    setEvaluation(null);
-  }
-
+ function handleReset() {
+  setAnswers({});
+  setSubmitted(false);
+  setEvaluation(null);
+}
   /* =========================================================
      CLASS CHANGE
   ========================================================= */
@@ -541,8 +538,10 @@ export default function QuizzesPage() {
 
         <div className="module-content-area">
 
-          <div className="quiz-layout">
-
+         <div
+  className="quiz-layout"
+  style={{ alignItems: "start" }}
+>
             {/* =================================================
                 LEFT QUIZ CARD
             ================================================= */}
@@ -906,16 +905,26 @@ export default function QuizzesPage() {
                                         loading
                                       }
                                       onChange={() =>
-                                        setAnswers(
-                                          (
-                                            previous
-                                          ) => ({
-                                            ...previous,
-                                            [questionIndex]:
-                                              optionIndex,
-                                          })
-                                        )
-                                      }
+  setAnswers((previous) => {
+    const currentAnswer =
+      previous[questionIndex];
+
+    if (currentAnswer === optionIndex) {
+      const updatedAnswers = {
+        ...previous,
+      };
+
+      delete updatedAnswers[questionIndex];
+
+      return updatedAnswers;
+    }
+
+    return {
+      ...previous,
+      [questionIndex]: optionIndex,
+    };
+  })
+}
                                     />
 
                                     <span>
