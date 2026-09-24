@@ -15,17 +15,70 @@ import {
 const API_BASE_URL = getApiBaseUrl();
 
 const MOCK_TEST_DURATION_SECONDS = 15 * 60;
-
 /* =========================================================
    STUDENT ANALYSIS
 ========================================================= */
+function StudentAnalysisView({
+  analysis,
+  loading,
+  error,
+}) {
+  if (loading) {
+    return (
+      <div className="assessment-analysis-grid">
+        <article className="module-card">
+          <div className="card-title-row">
+            <h2>Student Analysis</h2>
+            <span className="status-pill in-progress">
+              Loading
+            </span>
+          </div>
 
-function StudentAnalysisView() {
+          <p>Loading student performance...</p>
+        </article>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="assessment-analysis-grid">
+        <article className="module-card">
+          <div className="card-title-row">
+            <h2>Student Analysis</h2>
+            <span className="status-pill">
+              Error
+            </span>
+          </div>
+
+          <p>{error}</p>
+        </article>
+      </div>
+    );
+  }
+
+  const subjectPerformance = Array.isArray(
+    analysis?.subject_performance
+  )
+    ? analysis.subject_performance
+    : [];
+
   return (
     <div className="assessment-analysis-grid">
-      <article className="module-card">
+
+      {/* =================================================
+          OVERALL PERFORMANCE
+      ================================================= */}
+
+      <article className="module-card purple-module">
+
         <div className="card-title-row">
-          <h2>Student Analysis</h2>
+          <div>
+            <h2>Student Analysis</h2>
+            <p className="module-subtitle">
+              Overall academic performance
+            </p>
+          </div>
 
           <span className="status-pill completed">
             Performance
@@ -33,54 +86,99 @@ function StudentAnalysisView() {
         </div>
 
         <div className="result-grid quiz-result-grid">
+
           <div>
             <span>Student</span>
-            <strong>Aarav</strong>
+            <strong>
+              {analysis?.student_name || "-"}
+            </strong>
           </div>
 
           <div>
             <span>Class</span>
-            <strong>Class 9 - A</strong>
+            <strong>
+              {analysis?.class_name || "-"}
+            </strong>
           </div>
 
           <div>
             <span>Overall Score</span>
             <strong className="score-text">
-              88%
+              {analysis?.overall_score !== null &&
+              analysis?.overall_score !== undefined
+                ? `${analysis.overall_score}%`
+                : "-"}
             </strong>
           </div>
+
         </div>
+
       </article>
+
+      {/* =================================================
+          SUBJECT PERFORMANCE
+      ================================================= */}
 
       <article className="module-card">
-        <h2>Subject Performance</h2>
 
-        <div className="analysis-list">
-          <div className="analysis-row">
-            <span>Mathematics</span>
-            <strong>97%</strong>
-          </div>
-
-          <div className="analysis-row">
-            <span>Science</span>
-            <strong>80%</strong>
-          </div>
-
-          <div className="analysis-row">
-            <span>English</span>
-            <strong>78%</strong>
-          </div>
-
-          <div className="analysis-row">
-            <span>Social Studies</span>
-            <strong>88%</strong>
+        <div className="card-title-row">
+          <div>
+            <h2>Subject Performance</h2>
+            <p className="module-subtitle">
+              Performance by subject
+            </p>
           </div>
         </div>
+
+        <div className="analysis-list">
+
+          {subjectPerformance.length > 0 ? (
+
+            subjectPerformance.map(
+              (subject, index) => (
+                <div
+                  className="analysis-row"
+                  key={
+                    subject.subject_id ??
+                    subject.subject_name ??
+                    index
+                  }
+                >
+
+                  <span>
+                    {subject.subject_name || "-"}
+                  </span>
+
+                  <strong>
+                    {subject.score !== null &&
+                    subject.score !== undefined
+                      ? `${subject.score}%`
+                      : "-"}
+                  </strong>
+
+                </div>
+              )
+            )
+
+          ) : (
+
+            <div className="analysis-row">
+              <span>
+                No performance data available
+              </span>
+
+              <strong>-</strong>
+            </div>
+
+          )}
+
+        </div>
+
       </article>
+
     </div>
   );
 }
-
 /* =========================================================
    TEACHER REMARK
 ========================================================= */
@@ -150,8 +248,17 @@ function AssessmentsContent() {
      STUDENT EMAIL
   ======================================================= */
 
-  const [studentEmail, setStudentEmail] =
-    useState("");
+ const [studentEmail, setStudentEmail] =
+  useState("");
+
+const [studentAnalysis, setStudentAnalysis] =
+  useState(null);
+
+const [studentAnalysisLoading, setStudentAnalysisLoading] =
+  useState(false);
+
+const [studentAnalysisError, setStudentAnalysisError] =
+  useState("");
 
   /* =======================================================
      MAIN TAB
@@ -346,6 +453,105 @@ const [mockQuestionCount, setMockQuestionCount] =
 
     loadStudentEmail();
   }, []);
+
+
+
+
+
+
+  useEffect(() => {
+  async function loadStudentAnalysis() {
+    if (!studentEmail) {
+      return;
+    }
+
+    try {
+      setStudentAnalysisLoading(true);
+      setStudentAnalysisError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/students/current?email=${encodeURIComponent(
+          studentEmail
+        )}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          cache: "no-store",
+        }
+      );
+
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+            `Student API failed: ${response.status}`
+        );
+      }
+
+      const student =
+        data?.student || null;
+
+      if (!student?.student_id) {
+        throw new Error(
+          "Student details not found."
+        );
+      }
+
+      const analysisResponse =
+        await fetch(
+          `${API_BASE_URL}/student-analysis?student_id=${encodeURIComponent(
+            student.student_id
+          )}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          }
+        );
+
+      const analysisData =
+        await analysisResponse
+          .json()
+          .catch(() => ({}));
+
+      if (!analysisResponse.ok) {
+        throw new Error(
+          analysisData?.detail ||
+            `Student analysis API failed: ${analysisResponse.status}`
+        );
+      }
+
+      setStudentAnalysis(
+        analysisData
+      );
+    } catch (error) {
+      console.error(
+        "STUDENT ANALYSIS LOAD ERROR:",
+        error
+      );
+
+      setStudentAnalysis(null);
+
+      setStudentAnalysisError(
+        error?.message ||
+          "Unable to load student analysis."
+      );
+    } finally {
+      setStudentAnalysisLoading(false);
+    }
+  }
+
+  loadStudentAnalysis();
+}, [studentEmail]);
+
+
 
   /* =======================================================
      LOAD QUIZ CHAPTERS
@@ -2263,11 +2469,15 @@ console.log(
               STUDENT ANALYSIS
           ================================================= */}
 
-          {activeOption ===
-            "student-analysis" && (
-            <StudentAnalysisView />
-          )}
+         {activeOption ===
+  "student-analysis" && (
 
+  <StudentAnalysisView
+  analysis={studentAnalysis}
+  loading={studentAnalysisLoading}
+  error={studentAnalysisError}
+/> 
+)}
           {/* =================================================
               TEACHER REMARK
           ================================================= */}

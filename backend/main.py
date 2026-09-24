@@ -1439,3 +1439,124 @@ def get_student_learning_profile(
         raise HTTPException(status_code=404, detail="No learning profile found for this student and chapter.")
 
     return {"profile": profile}
+
+
+@app.get("/student-analysis")
+def get_student_analysis(student_id: int = Query(..., ge=1)):
+    student_query = """
+        SELECT
+            student_id,
+            name,
+            COALESCE(
+                NULLIF(class_name, ''),
+                class_id::text,
+                '-'
+            ) AS class_name,
+            COALESCE(NULLIF(section, ''), '') AS section
+        FROM sss_student_master
+        WHERE student_id = %s
+        LIMIT 1;
+    """
+
+    performance_query = """
+        SELECT
+            chapter.subject_id,
+            subject.subject_name,
+            profile.quiz_score,
+            profile.comprehension_score
+        FROM sss_student_learning_profiles profile
+        JOIN sss_chapter_master chapter
+            ON chapter.chapter_id = profile.chapter_id
+        LEFT JOIN sss_subject_master subject
+            ON subject.subject_id = chapter.subject_id
+        WHERE profile.student_id = %s
+        ORDER BY chapter.subject_id, profile.chapter_id;
+    """
+
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+
+                cursor.execute(student_query, (student_id,))
+                student = cursor.fetchone()
+
+                if student is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Student not found."
+                    )
+
+                cursor.execute(performance_query, (student_id,))
+                rows = cursor.fetchall()
+
+    except HTTPException:
+        raise
+    except psycopg.Error as error:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to fetch student analysis."
+        ) from error
+
+    subject_data = {}
+
+    for row in rows:
+        subject_id = row["subject_id"]
+
+        if subject_id not in subject_data:
+            subject_data[subject_id] = {
+                "subject_id": subject_id,
+                "subject_name": row["subject_name"] or "-",
+                "scores": [],
+            }
+
+        for value in (
+            row["quiz_score"],
+            row["comprehension_score"],
+        ):
+            if isinstance(value, (int, float)):
+                subject_data[subject_id]["scores"].append(
+                    float(value)
+                )
+
+    subject_performance = []
+
+    for data in subject_data.values():
+        scores = data["scores"]
+
+        subject_score = (
+            round(sum(scores) / len(scores), 2)
+            if scores
+            else None
+        )
+
+        subject_performance.append({
+            "subject_id": data["subject_id"],
+            "subject_name": data["subject_name"],
+            "score": subject_score,
+        })
+
+    all_scores = [
+        score
+        for data in subject_data.values()
+        for score in data["scores"]
+    ]
+
+    overall_score = (
+        round(sum(all_scores) / len(all_scores), 2)
+        if all_scores
+        else None
+    )
+
+    class_name = student["class_name"] or "-"
+    section = student["section"]
+
+    if section:
+        class_name = f"{class_name} - {section}"
+
+    return {
+        "student_id": student["student_id"],
+        "student_name": student["name"] or "-",
+        "class_name": class_name,
+        "overall_score": overall_score,
+        "subject_performance": subject_performance,
+    }
