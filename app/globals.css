@@ -6636,3 +6636,464 @@ button.reset:hover,
   pointer-events: auto;
   cursor: pointer;
 }
+
+/* =========================================================
+   STUDENT ANALYSIS - 2 x 2 DASHBOARD
+========================================================= */
+
+.student-analysis-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.student-analysis-box {
+  min-width: 0;
+  min-height: 360px;
+  overflow: hidden;
+  position: relative;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.student-analysis-box:hover {
+  transform: translateY(-4px);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.student-analysis-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.student-analysis-header h2 {
+  margin: 0;
+}
+
+/* =========================================================
+   STUDENT SUMMARY
+========================================================= */
+
+.student-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.student-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #2563eb
+  );
+  color: #ffffff;
+  box-shadow:
+    0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.student-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-summary-info strong {
+  font-size: 17px;
+}
+
+.student-summary-info span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* =========================================================
+   OVERALL PERFORMANCE
+========================================================= */
+
+.overall-score-section {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+}
+
+.overall-score-circle {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background:
+    conic-gradient(
+      #7c3aed 0deg,
+      #7c3aed 70%,
+      rgba(124, 58, 237, 0.12) 70%,
+      rgba(124, 58, 237, 0.12) 100%
+    );
+  box-shadow:
+    0 10px 28px rgba(124, 58, 237, 0.18);
+}
+
+.overall-score-circle::after {
+  content: "";
+  position: absolute;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: inherit;
+  background-color: #ffffff;
+  z-index: 0;
+}
+
+.overall-score-circle > div {
+  position: relative;
+  z-index: 1;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.overall-score-circle strong {
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.overall-score-circle span {
+  margin-top: 7px;
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+/* =========================================================
+   SUBJECT PERFORMANCE
+========================================================= */
+
+.subject-performance-list {
+  min-width: 0;
+}
+
+.subject-performance-list h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.analysis-description {
+  margin: 5px 0 16px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.subject-score-row {
+  margin-bottom: 13px;
+}
+
+.subject-score-row:last-child {
+  margin-bottom: 0;
+}
+
+.subject-score-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.subject-score-header span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.subject-score-header strong {
+  flex-shrink: 0;
+}
+
+.subject-score-bar {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.subject-score-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #7c3aed,
+    #2563eb
+  );
+  transition: width 0.5s ease;
+}
+
+/* =========================================================
+   TEST RESULT TIMELINE
+========================================================= */
+
+.test-timeline-placeholder {
+  position: relative;
+  margin-top: 20px;
+  padding-left: 10px;
+}
+
+.test-timeline-placeholder::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  background: rgba(124, 58, 237, 0.18);
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-height: 58px;
+}
+
+.timeline-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  background: #e5e7eb;
+  border: 4px solid #ffffff;
+  box-shadow: 0 0 0 2px #d1d5db;
+}
+
+.timeline-item.active .timeline-dot {
+  background: #7c3aed;
+  box-shadow:
+    0 0 0 2px rgba(124, 58, 237, 0.25),
+    0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.timeline-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.timeline-item strong {
+  font-size: 14px;
+}
+
+.timeline-item span:not(.timeline-dot) {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.analysis-coming-note {
+  margin-top: 18px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+/* =========================================================
+   DETAILED TEST PERFORMANCE
+========================================================= */
+
+.test-performance-chart {
+  margin-top: 22px;
+}
+
+.detail-performance-row {
+  margin-bottom: 19px;
+}
+
+.detail-performance-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-performance-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+
+.detail-performance-track {
+  width: 100%;
+  height: 11px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(37, 99, 235, 0.10);
+}
+
+.detail-performance-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #7c3aed
+  );
+  transition: width 0.5s ease;
+}
+
+/* =========================================================
+   FOCUS AREA IMPROVEMENTS
+========================================================= */
+
+.focus-area-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 20px;
+}
+
+.focus-area-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 15px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.055);
+  border: 1px solid rgba(124, 58, 237, 0.10);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.focus-area-row:hover {
+  transform: translateX(3px);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.focus-area-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.focus-area-row > div strong {
+  font-size: 13px;
+}
+
+.focus-area-row > div span {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.focus-score {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.analysis-empty {
+  margin: 20px 0 0;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.65;
+  background: rgba(0, 0, 0, 0.035);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+  .student-analysis-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .student-analysis-box {
+    min-height: auto;
+  }
+
+  .overall-score-section {
+    grid-template-columns: 1fr;
+  }
+
+  .overall-score-circle {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .student-analysis-header {
+    flex-direction: column;
+  }
+
+  .student-analysis-header .status-pill {
+    align-self: flex-start;
+  }
+
+  .student-summary {
+    margin-bottom: 18px;
+  }
+
+  .overall-score-circle {
+    width: 125px;
+    height: 125px;
+  }
+
+  .overall-score-circle > div {
+    width: 92px;
+    height: 92px;
+  }
+
+  .overall-score-circle::after {
+    width: 92px;
+    height: 92px;
+  }
+
+  .overall-score-circle strong {
+    font-size: 23px;
+  }
+}
