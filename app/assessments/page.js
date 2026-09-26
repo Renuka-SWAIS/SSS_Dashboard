@@ -18,6 +18,7 @@ const MOCK_TEST_DURATION_SECONDS = 15 * 60;
 /* =========================================================
    STUDENT ANALYSIS
 ========================================================= */
+
 function StudentAnalysisView({
   analysis,
   loading,
@@ -25,8 +26,8 @@ function StudentAnalysisView({
 }) {
   if (loading) {
     return (
-      <div className="assessment-analysis-grid">
-        <article className="module-card">
+      <div className="assessment-analysis-grid student-analysis-dashboard">
+        <article className="module-card student-analysis-box">
           <div className="card-title-row">
             <h2>Student Analysis</h2>
             <span className="status-pill in-progress">
@@ -42,8 +43,8 @@ function StudentAnalysisView({
 
   if (error) {
     return (
-      <div className="assessment-analysis-grid">
-        <article className="module-card">
+      <div className="assessment-analysis-grid student-analysis-dashboard">
+        <article className="module-card student-analysis-box">
           <div className="card-title-row">
             <h2>Student Analysis</h2>
             <span className="status-pill">
@@ -63,20 +64,29 @@ function StudentAnalysisView({
     ? analysis.subject_performance
     : [];
 
+  const overallScore =
+    analysis?.overall_score !== null &&
+    analysis?.overall_score !== undefined
+      ? Number(analysis.overall_score)
+      : null;
+
   return (
-    <div className="assessment-analysis-grid">
+    <div className="assessment-analysis-grid student-analysis-dashboard">
 
       {/* =================================================
-          OVERALL PERFORMANCE
+          BOX 1 — OVERALL PERFORMANCE
       ================================================= */}
 
-      <article className="module-card purple-module">
+      <article className="module-card student-analysis-box analysis-overall-box">
 
-        <div className="card-title-row">
+        <div className="student-analysis-header">
           <div>
-            <h2>Student Analysis</h2>
+            <h2>
+              {analysis?.student_name || "Student"} - Student Analysis
+            </h2>
+
             <p className="module-subtitle">
-              Overall academic performance
+              Academic performance overview
             </p>
           </div>
 
@@ -85,91 +95,361 @@ function StudentAnalysisView({
           </span>
         </div>
 
-        <div className="result-grid quiz-result-grid">
+        <div className="student-summary">
 
-          <div>
-            <span>Student</span>
+          <div className="student-avatar">
+            {(analysis?.student_name || "S")
+              .split(" ")
+              .map((name) => name.charAt(0))
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </div>
+
+          <div className="student-summary-info">
             <strong>
               {analysis?.student_name || "-"}
             </strong>
-          </div>
 
-          <div>
-            <span>Class</span>
-            <strong>
+            <span>
               {analysis?.class_name || "-"}
-            </strong>
+            </span>
           </div>
 
-          <div>
-            <span>Overall Score</span>
-            <strong className="score-text">
-              {analysis?.overall_score !== null &&
-              analysis?.overall_score !== undefined
-                ? `${analysis.overall_score}%`
-                : "-"}
-            </strong>
+        </div>
+
+        <div className="overall-score-section">
+
+          <div
+  className="overall-score-circle"
+  style={{
+    background: `conic-gradient(
+      #7c3aed 0% ${overallScore ?? 0}%,
+      rgba(124, 58, 237, 0.12) ${overallScore ?? 0}% 100%
+    )`,
+  }}
+>
+            <div>
+              <strong>
+                {overallScore !== null
+                  ? `${overallScore}%`
+                  : "-"}
+              </strong>
+
+              <span>
+                Overall Average
+              </span>
+            </div>
+          </div>
+
+          <div className="subject-performance-list">
+
+            <h3>
+              Final Subject Performance
+            </h3>
+
+            <p className="analysis-description">
+              Average performance by subject
+            </p>
+
+            {subjectPerformance.length > 0 ? (
+              subjectPerformance.map(
+                (subject, index) => {
+
+                  const score =
+                    subject.score !== null &&
+                    subject.score !== undefined
+                      ? Number(subject.score)
+                      : 0;
+
+                  return (
+                    <div
+                      className="subject-score-row"
+                      key={
+                        subject.subject_id ??
+                        subject.subject_name ??
+                        index
+                      }
+                    >
+
+                      <div className="subject-score-header">
+                        <span>
+                          {subject.subject_name || "-"}
+                        </span>
+
+                        <strong>
+                          {subject.score !== null &&
+                          subject.score !== undefined
+                            ? `${subject.score}%`
+                            : "-"}
+                        </strong>
+                      </div>
+
+                      <div className="subject-score-bar">
+                        <div
+                          className="subject-score-fill"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(0, score)
+                            )}%`,
+                          }}
+                        />
+                      </div>
+
+                    </div>
+                  );
+                }
+              )
+            ) : (
+              <p className="analysis-empty">
+                No subject performance data available.
+              </p>
+            )}
+
           </div>
 
         </div>
 
       </article>
 
+
       {/* =================================================
-          SUBJECT PERFORMANCE
+          BOX 2 — TEST RESULT TIMELINE
       ================================================= */}
 
-      <article className="module-card">
+      <article className="module-card student-analysis-box">
 
         <div className="card-title-row">
           <div>
-            <h2>Subject Performance</h2>
+            <h2>
+              Test Result Timeline
+            </h2>
+
             <p className="module-subtitle">
-              Performance by subject
+              Student test result timeline
             </p>
           </div>
         </div>
 
-        <div className="analysis-list">
+        <div className="test-timeline-placeholder">
+
+          <div className="timeline-item active">
+            <span className="timeline-dot" />
+
+            <div>
+              <strong>
+                Unit Test
+              </strong>
+
+              <span>
+                Test performance
+              </span>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <span className="timeline-dot" />
+
+            <div>
+              <strong>
+                Monthly Test
+              </strong>
+
+              <span>
+                Test performance
+              </span>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <span className="timeline-dot" />
+
+            <div>
+              <strong>
+                Quarterly Exam
+              </strong>
+
+              <span>
+                Test performance
+              </span>
+            </div>
+          </div>
+
+          <div className="timeline-item">
+            <span className="timeline-dot" />
+
+            <div>
+              <strong>
+                Half Yearly Exam
+              </strong>
+
+              <span>
+                Test performance
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="analysis-coming-note">
+          Test-wise performance will appear here
+          when assessment history is available.
+        </div>
+
+      </article>
+
+
+      {/* =================================================
+          BOX 3 — DETAILED TEST PERFORMANCE
+      ================================================= */}
+
+      <article className="module-card student-analysis-box">
+
+        <div className="card-title-row">
+          <div>
+            <h2>
+              Detailed Test Performance
+            </h2>
+
+            <p className="module-subtitle">
+              Subject-wise assessment performance
+            </p>
+          </div>
+        </div>
+
+        <div className="test-performance-chart">
 
           {subjectPerformance.length > 0 ? (
-
             subjectPerformance.map(
-              (subject, index) => (
-                <div
-                  className="analysis-row"
-                  key={
-                    subject.subject_id ??
-                    subject.subject_name ??
-                    index
-                  }
-                >
+              (subject, index) => {
 
-                  <span>
-                    {subject.subject_name || "-"}
-                  </span>
+                const score =
+                  subject.score !== null &&
+                  subject.score !== undefined
+                    ? Number(subject.score)
+                    : 0;
 
-                  <strong>
-                    {subject.score !== null &&
-                    subject.score !== undefined
-                      ? `${subject.score}%`
-                      : "-"}
-                  </strong>
+                return (
+                  <div
+                    className="detail-performance-row"
+                    key={
+                      subject.subject_id ??
+                      subject.subject_name ??
+                      index
+                    }
+                  >
 
-                </div>
-              )
+                    <div className="detail-performance-label">
+                      <span>
+                        {subject.subject_name || "-"}
+                      </span>
+
+                      <strong>
+                        {subject.score !== null &&
+                        subject.score !== undefined
+                          ? `${subject.score}%`
+                          : "-"}
+                      </strong>
+                    </div>
+
+                    <div className="detail-performance-track">
+                      <div
+                        className="detail-performance-fill"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            Math.max(0, score)
+                          )}%`,
+                        }}
+                      />
+                    </div>
+
+                  </div>
+                );
+              }
             )
-
           ) : (
+            <p className="analysis-empty">
+              No test performance data available.
+            </p>
+          )}
 
-            <div className="analysis-row">
-              <span>
-                No performance data available
-              </span>
+        </div>
 
-              <strong>-</strong>
-            </div>
+      </article>
 
+
+      {/* =================================================
+          BOX 4 — FOCUS AREA IMPROVEMENTS
+      ================================================= */}
+
+      <article className="module-card student-analysis-box">
+
+        <div className="card-title-row">
+          <div>
+            <h2>
+              Focus Area Improvements
+            </h2>
+
+            <p className="module-subtitle">
+              Areas requiring attention
+            </p>
+          </div>
+        </div>
+
+        <div className="focus-area-list">
+
+          {subjectPerformance.length > 0 ? (
+            subjectPerformance.map(
+              (subject, index) => {
+
+                const score =
+                  subject.score !== null &&
+                  subject.score !== undefined
+                    ? Number(subject.score)
+                    : null;
+
+                let status = "Maintain";
+
+                if (score !== null && score < 75) {
+                  status = "Medium";
+                }
+
+                return (
+                  <div
+                    className="focus-area-row"
+                    key={
+                      subject.subject_id ??
+                      subject.subject_name ??
+                      index
+                    }
+                  >
+
+                    <div>
+                      <strong>
+                        {subject.subject_name || "-"}
+                      </strong>
+
+                      <span>
+                        {status}
+                      </span>
+                    </div>
+
+                    <strong className="focus-score">
+                      {score !== null
+                        ? `${score}%`
+                        : "-"}
+                    </strong>
+
+                  </div>
+                );
+              }
+            )
+          ) : (
+            <p className="analysis-empty">
+              No focus area data available.
+            </p>
           )}
 
         </div>
