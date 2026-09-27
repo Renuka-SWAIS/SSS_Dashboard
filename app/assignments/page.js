@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardShell from "../dashboard-shell";
 import StudyTabs from "../study-tabs";
 import { generateAlert } from "../../services/studentApi";
@@ -11,11 +16,17 @@ const API_BASE_URL = getApiBaseUrl();
 function formatDate(value) {
   if (!value) return "-";
 
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function fileToBase64(file) {
@@ -23,39 +34,79 @@ function fileToBase64(file) {
     const reader = new FileReader();
 
     reader.onload = () =>
-      resolve(String(reader.result || "").split(",").pop());
+      resolve(
+        String(reader.result || "")
+          .split(",")
+          .pop()
+      );
 
     reader.onerror = () =>
-      reject(new Error("Unable to read selected file."));
+      reject(
+        new Error("Unable to read selected file.")
+      );
 
     reader.readAsDataURL(file);
   });
 }
 
-export default function AssignmentsPage() {
-  const [assignments, setAssignments] = useState([]);
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [studentId, setStudentId] = useState(null);
-  const [studentEmail, setStudentEmail] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [showAiSummary, setShowAiSummary] = useState(false);
+function getStatusClass(status) {
+  return String(status || "Not Started")
+    .toLowerCase()
+    .replaceAll(" ", "-");
+}
 
-  const [alertLoading, setAlertLoading] = useState(false);
-  const [alertResponse, setAlertResponse] = useState(null);
+function AssignmentsContent() {
+  const searchParams = useSearchParams();
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  const activeTab =
+    searchParams.get("tab") ||
+    "my-assignments";
 
-  const submittedCount = assignments.filter(
-    (assignment) => {
-      const status = (assignment.status || "").toLowerCase();
+  const [assignments, setAssignments] =
+    useState([]);
+
+  const [selectedAssignment, setSelectedAssignment] =
+    useState(null);
+
+  const [studentId, setStudentId] =
+    useState(null);
+
+  const [studentEmail, setStudentEmail] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [loadError, setLoadError] =
+    useState("");
+
+  const [showAiSummary, setShowAiSummary] =
+    useState(false);
+
+  const [alertLoading, setAlertLoading] =
+    useState(false);
+
+  const [alertResponse, setAlertResponse] =
+    useState(null);
+
+  const [selectedFile, setSelectedFile] =
+    useState(null);
+
+  const submittedAssignments =
+    assignments.filter((assignment) => {
+      const status = String(
+        assignment.status || ""
+      ).toLowerCase();
 
       return (
         status === "completed" ||
-        status === "submitted"
+        status === "submitted" ||
+        status === "reviewed"
       );
-    }
-  ).length;
+    });
+
+  const submittedCount =
+    submittedAssignments.length;
 
   const remainingCount = Math.max(
     assignments.length - submittedCount,
@@ -66,7 +117,9 @@ export default function AssignmentsPage() {
     loadAssignments();
   }, []);
 
-  async function loadAssignments(preferredId = null) {
+  async function loadAssignments(
+    preferredId = null
+  ) {
     setLoading(true);
     setLoadError("");
 
@@ -83,7 +136,6 @@ export default function AssignmentsPage() {
         ]),
       ];
 
-      // Get logged-in student's email
       const storedSession =
         typeof window !== "undefined"
           ? window.sessionStorage.getItem(
@@ -125,7 +177,9 @@ export default function AssignmentsPage() {
           );
 
           const responseData =
-            await response.json().catch(() => ({}));
+            await response
+              .json()
+              .catch(() => ({}));
 
           if (!response.ok) {
             throw new Error(
@@ -144,11 +198,15 @@ export default function AssignmentsPage() {
       if (!data) {
         throw (
           lastError ||
-          new Error("Unable to load assignments.")
+          new Error(
+            "Unable to load assignments."
+          )
         );
       }
 
-      const rows = Array.isArray(data.assignments)
+      const rows = Array.isArray(
+        data.assignments
+      )
         ? data.assignments
         : [];
 
@@ -159,7 +217,8 @@ export default function AssignmentsPage() {
       );
 
       setStudentEmail(
-        data.student_email || storedEmail
+        data.student_email ||
+          storedEmail
       );
 
       setSelectedAssignment((current) =>
@@ -185,10 +244,6 @@ export default function AssignmentsPage() {
     }
   }
 
-  /* -------------------------------------------------------
-     AI ALERT
-  ------------------------------------------------------- */
-
   async function handleAskAi() {
     if (!studentEmail) {
       alert(
@@ -208,37 +263,25 @@ export default function AssignmentsPage() {
       setAlertLoading(true);
       setAlertResponse(null);
 
-      const response = await generateAlert({
-        assignment_name:
-          selectedAssignment.assignment_title ||
-          "Assignment",
+      const response =
+        await generateAlert({
+          assignment_name:
+            selectedAssignment.assignment_title ||
+            "Assignment",
 
-        due_date:
-          selectedAssignment.due_date || "",
+          due_date:
+            selectedAssignment.due_date ||
+            "",
 
-        user_email: studentEmail,
+          user_email:
+            studentEmail,
 
-        client_name: "SSS",
-      });
-
-      console.log(
-        "GENERATE ALERT RESPONSE:",
-        JSON.stringify(response, null, 2)
-      );
+          client_name: "SSS",
+        });
 
       setAlertResponse(response);
       setShowAiSummary(true);
     } catch (error) {
-      console.log(
-        "Generate Alert Error:",
-        error
-      );
-
-      console.log(
-        "Response:",
-        error.response?.data
-      );
-
       alert(
         error.response?.data?.detail ||
           error.message ||
@@ -249,12 +292,9 @@ export default function AssignmentsPage() {
     }
   }
 
-  /* -------------------------------------------------------
-     FILE SELECT
-  ------------------------------------------------------- */
-
   function handleFileChange(event) {
-    const file = event.target.files?.[0];
+    const file =
+      event.target.files?.[0];
 
     if (!file) {
       return;
@@ -268,7 +308,11 @@ export default function AssignmentsPage() {
       "image/png",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (
+      !allowedTypes.includes(
+        file.type
+      )
+    ) {
       alert(
         "Only PDF, DOC, DOCX, JPG and PNG files are allowed."
       );
@@ -279,7 +323,8 @@ export default function AssignmentsPage() {
       return;
     }
 
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize =
+      10 * 1024 * 1024;
 
     if (file.size > maxSize) {
       alert(
@@ -292,17 +337,8 @@ export default function AssignmentsPage() {
       return;
     }
 
-    console.log(
-      "Selected File:",
-      file
-    );
-
     setSelectedFile(file);
   }
-
-  /* -------------------------------------------------------
-     REMOVE FILE
-  ------------------------------------------------------- */
 
   function handleRemoveFile() {
     setSelectedFile(null);
@@ -317,10 +353,6 @@ export default function AssignmentsPage() {
     }
   }
 
-  /* -------------------------------------------------------
-     SUBMIT ASSIGNMENT
-  ------------------------------------------------------- */
-
   async function handleSubmitAssignment() {
     if (!selectedFile) {
       alert(
@@ -329,7 +361,10 @@ export default function AssignmentsPage() {
       return;
     }
 
-    if (!selectedAssignment || !studentId) {
+    if (
+      !selectedAssignment ||
+      !studentId
+    ) {
       alert(
         "Please select an assignment first."
       );
@@ -337,41 +372,43 @@ export default function AssignmentsPage() {
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/assignment-submissions`,
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          `${API_BASE_URL}/assignment-submissions`,
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body: JSON.stringify({
-            student_id: studentId,
+            body: JSON.stringify({
+              student_id:
+                studentId,
 
-            assignment_id:
-              selectedAssignment.assignment_id,
+              assignment_id:
+                selectedAssignment.assignment_id,
 
-            assignment_title:
-              selectedAssignment.assignment_title,
+              assignment_title:
+                selectedAssignment.assignment_title,
 
-            file_name:
-              selectedFile.name,
+              file_name:
+                selectedFile.name,
 
-            file_type:
-              selectedFile.type,
+              file_type:
+                selectedFile.type,
 
-            file_size:
-              selectedFile.size,
+              file_size:
+                selectedFile.size,
 
-            file_content_base64:
-              await fileToBase64(
-                selectedFile
-              ),
-          }),
-        }
-      );
+              file_content_base64:
+                await fileToBase64(
+                  selectedFile
+                ),
+            }),
+          }
+        );
 
       const data =
         await response
@@ -402,597 +439,710 @@ export default function AssignmentsPage() {
     }
   }
 
+  async function handleAssignmentAction(
+    assignment
+  ) {
+    setSelectedAssignment(
+      assignment
+    );
+
+    setSelectedFile(null);
+    setShowAiSummary(false);
+    setAlertResponse(null);
+
+    if (
+      assignment.action === "View"
+    ) {
+      if (!studentId) {
+        alert(
+          "Student information is not available."
+        );
+        return;
+      }
+
+      const fileUrl =
+        `${API_BASE_URL}/assignment-submissions/file` +
+        `?student_id=${studentId}` +
+        `&assignment_id=${assignment.assignment_id}`;
+
+      window.open(
+        fileUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      return;
+    }
+
+    if (
+      assignment.action !==
+        "Start" ||
+      !studentId
+    ) {
+      return;
+    }
+
+    try {
+      const response =
+        await fetch(
+          `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
+          {
+            method: "POST",
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            "Unable to start assignment."
+        );
+      }
+
+      await loadAssignments(
+        assignment.assignment_id
+      );
+    } catch (error) {
+      console.error(
+        "Start Assignment Error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Unable to start assignment."
+      );
+    }
+  }
+
+  function renderAssignmentTable({
+    showAction = true,
+  } = {}) {
+    return (
+      <div className="assignment-table-scroll">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+
+              <th>
+                Assignment Title
+              </th>
+
+              <th>
+                Due Date
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              {showAction && (
+                <th>
+                  Action
+                </th>
+              )}
+            </tr>
+          </thead>
+
+          <tbody>
+            {assignments.map(
+              (assignment) => (
+                <tr
+                  className={
+                    selectedAssignment?.assignment_id ===
+                    assignment.assignment_id
+                      ? "highlight-row"
+                      : ""
+                  }
+                  key={
+                    assignment.assignment_id
+                  }
+                >
+                  <td>
+                    {assignment.number}
+                  </td>
+
+                  <td>
+                    {
+                      assignment.assignment_title
+                    }
+                  </td>
+
+                  <td>
+                    {formatDate(
+                      assignment.due_date
+                    )}
+                  </td>
+
+                  <td>
+                    <span
+                      className={`status-pill ${getStatusClass(
+                        assignment.status
+                      )}`}
+                    >
+                      {assignment.status ||
+                        "Not Started"}
+                    </span>
+                  </td>
+
+                  {showAction && (
+                    <td>
+                      <button
+                        className="table-action"
+                        type="button"
+                        onClick={() =>
+                          handleAssignmentAction(
+                            assignment
+                          )
+                        }
+                      >
+                        {assignment.action ||
+                          "Start"}
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              )
+            )}
+
+            {!loading &&
+              assignments.length ===
+                0 && (
+                <tr>
+                  <td
+                    colSpan={
+                      showAction
+                        ? "5"
+                        : "4"
+                    }
+                  >
+                    {loadError ||
+                      "No assignments available."}
+                  </td>
+                </tr>
+              )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  function renderAssignmentDetails() {
+    return (
+      <article className="module-card assignment-upload-card">
+        <div className="card-title-row">
+          <h2>
+            {selectedAssignment?.assignment_title ||
+              "Select an assignment"}
+          </h2>
+
+          <span
+            className={`status-pill ${getStatusClass(
+              selectedAssignment?.status ||
+                "Not Started"
+            )}`}
+          >
+            {selectedAssignment?.status ||
+              "Not Started"}
+          </span>
+        </div>
+
+        <div className="meta-row">
+          <span>
+            Due Date:{" "}
+            {formatDate(
+              selectedAssignment?.due_date
+            )}
+          </span>
+
+          <span>
+            {selectedAssignment?.subject_name ||
+              selectedAssignment?.chapter_name ||
+              "Assignment"}
+          </span>
+        </div>
+
+        <p>
+          {selectedAssignment?.assignment_text ||
+            "Select an assignment to view its instructions."}
+        </p>
+
+        {showAiSummary && (
+          <div className="assignment-ai-summary">
+            <strong>
+              AI Summary
+            </strong>
+
+            <p>
+              {selectedAssignment?.assignment_text ||
+                "Read the assignment instructions carefully and submit before the due date."}
+            </p>
+
+            {alertResponse && (
+              <div>
+                <strong>
+                  Alert Response
+                </strong>
+
+                <p>
+                  {typeof alertResponse ===
+                  "string"
+                    ? alertResponse
+                    : alertResponse.message ||
+                      alertResponse.alert ||
+                      "Alert generated successfully."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="upload-zone">
+          <div className="upload-icon">
+            Upload
+          </div>
+
+          <strong>
+            Drag & drop your file here
+          </strong>
+
+          <span>or</span>
+
+          <input
+            id="assignment-file"
+            type="file"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            onChange={
+              handleFileChange
+            }
+            disabled={
+              !selectedAssignment
+            }
+            style={{
+              display: "none",
+            }}
+          />
+
+          <label
+            htmlFor="assignment-file"
+            className="soft-button"
+            style={{
+              cursor: "pointer",
+              display: "inline-block",
+              opacity:
+                selectedAssignment
+                  ? 1
+                  : 0.55,
+              pointerEvents:
+                selectedAssignment
+                  ? "auto"
+                  : "none",
+            }}
+          >
+            Browse Files
+          </label>
+
+          <small>
+            Supported formats:
+            PDF, DOC, DOCX, JPG,
+            PNG (Max 10 MB)
+          </small>
+
+          {selectedFile && (
+            <div
+              style={{
+                marginTop: "16px",
+              }}
+            >
+              <p>
+                <strong>
+                  Selected File:
+                </strong>{" "}
+                {selectedFile.name}
+              </p>
+
+              <p>
+                Size:{" "}
+                {(
+                  selectedFile.size /
+                  1024 /
+                  1024
+                ).toFixed(2)}{" "}
+                MB
+              </p>
+
+              <button
+                type="button"
+                className="soft-button"
+                onClick={
+                  handleRemoveFile
+                }
+              >
+                Remove File
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="submit-row">
+          <div>
+            {selectedFile ? (
+              <>
+                <p>
+                  File ready:{" "}
+                  {selectedFile.name}
+                </p>
+
+                <p>
+                  Ready to submit
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  No file uploaded yet
+                </p>
+
+                <p>
+                  Select a file to submit
+                </p>
+              </>
+            )}
+          </div>
+
+          <button
+            className="primary-button"
+            type="button"
+            onClick={
+              handleSubmitAssignment
+            }
+            disabled={
+              !selectedFile ||
+              !selectedAssignment ||
+              !studentId
+            }
+          >
+            Submit Assignment
+          </button>
+        </div>
+      </article>
+    );
+  }
+
+  function renderFeedbackMarks() {
+    const submittedAssignments =
+      assignments.filter((assignment) => {
+        const status = String(
+          assignment.status ||
+            assignment.submission_status ||
+            ""
+        ).toLowerCase();
+
+        return (
+          status === "completed" ||
+          status === "submitted" ||
+          status === "reviewed"
+        );
+      });
+
+    return (
+      <article className="module-card">
+        <div className="card-title-row">
+          <div>
+            <h2>Feedback & Marks</h2>
+
+            <p className="module-subtitle">
+              Assignment submission details,
+              marks and feedback
+            </p>
+          </div>
+
+          <button
+            className="soft-button"
+            type="button"
+            onClick={() =>
+              loadAssignments()
+            }
+            disabled={loading}
+          >
+            {loading
+              ? "Loading..."
+              : "Refresh"}
+          </button>
+        </div>
+
+        {submittedAssignments.length > 0 ? (
+          <div className="assignment-table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Assignment</th>
+                  <th>Submission</th>
+                  <th>Submitted Date</th>
+                  <th>Marks</th>
+                  <th>Feedback</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {submittedAssignments.map(
+                  (assignment) => {
+                    const marks =
+                      assignment.marks ??
+                      null;
+
+                    const totalMarks =
+                      assignment.total_marks ??
+                      null;
+
+                    const feedback =
+                      assignment.feedback ??
+                      assignment.teacher_feedback ??
+                      null;
+
+                    return (
+                      <tr
+                        key={
+                          assignment.assignment_id
+                        }
+                      >
+                        <td>
+                          {assignment.number}
+                        </td>
+
+                        <td>
+                          {
+                            assignment.assignment_title
+                          }
+                        </td>
+
+                        <td>
+                          <span
+                            className={`status-pill ${getStatusClass(
+                              assignment.status ||
+                                assignment.submission_status
+                            )}`}
+                          >
+                            {assignment.status ||
+                              assignment.submission_status ||
+                              "Submitted"}
+                          </span>
+                        </td>
+
+                        <td>
+                          {formatDate(
+                            assignment.submitted_at
+                          )}
+                        </td>
+
+                        <td>
+                          {marks !== null
+                            ? totalMarks
+                              ? `${marks}/${totalMarks}`
+                              : marks
+                            : "—"}
+                        </td>
+
+                        <td>
+                          {feedback || "—"}
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="tip-box">
+            —
+          </div>
+        )}
+      </article>
+    );
+  }
+
   return (
     <DashboardShell>
       <section className="module-page">
-
         <StudyTabs />
 
         <div className="module-content-area">
 
-          {/* -------------------------------------------------------
-              ASSIGNMENT LIST
-          ------------------------------------------------------- */}
-
-          <div className="assignment-layout">
-
-            <article className="module-card assignment-list-card">
-
-              <div className="card-title-row">
-
-                <h2>
-                  Your Assignments
-                </h2>
-
-                <div className="assignment-summary">
-
-                  <span>
-                    Submitted:{" "}
-                    <strong>
-                      {submittedCount}
-                    </strong>
-                  </span>
-
-                  <span>
-                    Remaining:{" "}
-                    <strong>
-                      {remainingCount}
-                    </strong>
-                  </span>
-
-                </div>
-
-                <button
-                  className="soft-button"
-                  type="button"
-                  onClick={() =>
-                    loadAssignments()
-                  }
-                  disabled={loading}
-                >
-                  {loading
-                    ? "Loading..."
-                    : "Refresh"}
-                </button>
-
-              </div>
-
-              {/* -------------------------------------------------------
-                  SCROLLABLE ASSIGNMENT TABLE
-              ------------------------------------------------------- */}
-
-              <div className="assignment-table-scroll">
-
-                <table className="data-table">
-
-                  <thead>
-                    <tr>
-
-                      <th>
-                        #
-                      </th>
-
-                      <th>
-                        Assignment Title
-                      </th>
-
-                      <th>
-                        Due Date
-                      </th>
-
-                      <th>
-                        Status
-                      </th>
-
-                      <th>
-                        Action
-                      </th>
-
-                    </tr>
-                  </thead>
-
-                  <tbody>
-
-                    {assignments.map(
-                      (assignment) => (
-
-                        <tr
-                          className={
-                            selectedAssignment?.assignment_id ===
-                            assignment.assignment_id
-                              ? "highlight-row"
-                              : ""
-                          }
-                          key={
-                            assignment.assignment_id
-                          }
-                        >
-
-                          <td>
-                            {assignment.number}
-                          </td>
-
-                          <td>
-                            {
-                              assignment.assignment_title
-                            }
-                          </td>
-
-                          <td>
-                            {formatDate(
-                              assignment.due_date
-                            )}
-                          </td>
-
-                          <td>
-
-                            <span
-                              className={`status-pill ${(
-                                assignment.status ||
-                                "Not Started"
-                              )
-                                .toLowerCase()
-                                .replaceAll(
-                                  " ",
-                                  "-"
-                                )}`}
-                            >
-                              {assignment.status ||
-                                "Not Started"}
-                            </span>
-
-                          </td>
-
-                          <td>
-
-                            <button
-                              className="table-action"
-                              type="button"
-                              onClick={async () => {
-
-                                setSelectedAssignment(
-                                  assignment
-                                );
-
-                                setSelectedFile(
-                                  null
-                                );
-
-                                setShowAiSummary(
-                                  false
-                                );
-
-                                // Open submitted assignment
-                                if (
-                                  assignment.action ===
-                                  "View"
-                                ) {
-
-                                  if (!studentId) {
-                                    alert(
-                                      "Student information is not available."
-                                    );
-                                    return;
-                                  }
-
-                                  const fileUrl =
-                                    `${API_BASE_URL}/assignment-submissions/file` +
-                                    `?student_id=${studentId}` +
-                                    `&assignment_id=${assignment.assignment_id}`;
-
-                                  window.open(
-                                    fileUrl,
-                                    "_blank",
-                                    "noopener,noreferrer"
-                                  );
-
-                                  return;
-                                }
-
-                                // Start assignment
-                                if (
-                                  assignment.action !==
-                                    "Start" ||
-                                  !studentId
-                                ) {
-                                  return;
-                                }
-
-                                try {
-
-                                  const response =
-                                    await fetch(
-                                      `${API_BASE_URL}/assignments/start?student_id=${studentId}&assignment_id=${assignment.assignment_id}`,
-                                      {
-                                        method:
-                                          "POST",
-                                      }
-                                    );
-
-                                  const data =
-                                    await response
-                                      .json()
-                                      .catch(
-                                        () => ({})
-                                      );
-
-                                  if (
-                                    !response.ok
-                                  ) {
-                                    throw new Error(
-                                      data.detail ||
-                                        "Unable to start assignment."
-                                    );
-                                  }
-
-                                  await loadAssignments(
-                                    assignment.assignment_id
-                                  );
-
-                                } catch (error) {
-
-                                  console.error(
-                                    "Start Assignment Error:",
-                                    error
-                                  );
-
-                                  alert(
-                                    error.message ||
-                                      "Unable to start assignment."
-                                  );
-                                }
-                              }}
-                            >
-                              {assignment.action ||
-                                "Start"}
-                            </button>
-
-                          </td>
-
-                        </tr>
-                      )
-                    )}
-
-                    {!loading &&
-                      assignments.length ===
-                        0 && (
-
-                        <tr>
-
-                          <td colSpan="5">
-                            {loadError ||
-                              "No assignments available."}
-                          </td>
-
-                        </tr>
-                      )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
-
-              {/* -------------------------------------------------------
-                  TIP
-              ------------------------------------------------------- */}
-
-              <div className="tip-box">
-                Tip: Submit your assignments on time
-                to get early feedback and improve
-                your score!
-              </div>
-
-            </article>
-
-            {/* -------------------------------------------------------
-                ASSIGNMENT DETAILS
-            ------------------------------------------------------- */}
-
-            <article className="module-card assignment-upload-card">
-
-              <div className="card-title-row">
-
-                <h2>
-                  {selectedAssignment?.assignment_title ||
-                    "Select an assignment"}
-                </h2>
-
-                <span
-                  className={`status-pill ${(
-                    selectedAssignment?.status ||
-                    "not-started"
-                  )
-                    .toLowerCase()
-                    .replaceAll(
-                      " ",
-                      "-"
-                    )}`}
-                >
-                  {selectedAssignment?.status ||
-                    "Not Started"}
-                </span>
-
-              </div>
-
-              <div className="meta-row">
-
-                <span>
-                  Due Date:{" "}
-                  {formatDate(
-                    selectedAssignment?.due_date
-                  )}
-                </span>
-
-                <span>
-                  {selectedAssignment?.subject_name ||
-                    selectedAssignment?.chapter_name ||
-                    "Assignment"}
-                </span>
-
-              </div>
-
-              <p>
-                {selectedAssignment?.assignment_text ||
-                  "Select an assignment to view its instructions."}
-              </p>
-
-              {showAiSummary && (
-
-                <div className="assignment-ai-summary">
-
-                  <strong>
-                    AI Summary
-                  </strong>
-
-                  <p>
-                    {selectedAssignment?.assignment_text ||
-                      "Read the assignment instructions carefully and submit before the due date."}
-                  </p>
-
-                  {alertResponse && (
-
-                    <div>
-
+          {/* 1. MY ASSIGNMENTS */}
+
+          {activeTab ===
+            "my-assignments" && (
+            <>
+              <article className="module-card assignment-list-card">
+                <div className="card-title-row">
+                  <h2>
+                    Your Assignments
+                  </h2>
+
+                  <div className="assignment-summary">
+                    <span>
+                      Submitted:{" "}
                       <strong>
-                        Alert Response
+                        {submittedCount}
                       </strong>
+                    </span>
 
-                      <p>
-                        {typeof alertResponse ===
-                        "string"
-                          ? alertResponse
-                          : alertResponse.message ||
-                            alertResponse.alert ||
-                            "Alert generated successfully."}
-                      </p>
-
-                    </div>
-
-                  )}
-
-                </div>
-
-              )}
-
-              {/* -------------------------------------------------------
-                  FILE UPLOAD
-              ------------------------------------------------------- */}
-
-              <div className="upload-zone">
-
-                <div className="upload-icon">
-                  Upload
-                </div>
-
-                <strong>
-                  Drag & drop your file here
-                </strong>
-
-                <span>
-                  or
-                </span>
-
-                <input
-                  id="assignment-file"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={
-                    handleFileChange
-                  }
-                  disabled={
-                    !selectedAssignment
-                  }
-                  style={{
-                    display: "none",
-                  }}
-                />
-
-                <label
-                  htmlFor="assignment-file"
-                  className="soft-button"
-                  style={{
-                    cursor: "pointer",
-                    display:
-                      "inline-block",
-                    opacity:
-                      selectedAssignment
-                        ? 1
-                        : 0.55,
-                    pointerEvents:
-                      selectedAssignment
-                        ? "auto"
-                        : "none",
-                  }}
-                >
-                  Browse Files
-                </label>
-
-                <small>
-                  Supported formats:
-                  PDF, DOC, DOCX, JPG, PNG
-                  (Max 10 MB)
-                </small>
-
-                {selectedFile && (
-
-                  <div
-                    style={{
-                      marginTop: "16px",
-                    }}
-                  >
-
-                    <p>
+                    <span>
+                      Remaining:{" "}
                       <strong>
-                        Selected File:
-                      </strong>{" "}
-                      {selectedFile.name}
-                    </p>
-
-                    <p>
-                      Size:{" "}
-                      {(
-                        selectedFile.size /
-                        1024 /
-                        1024
-                      ).toFixed(2)}
-                      {" "}
-                      MB
-                    </p>
-
-                    <button
-                      type="button"
-                      className="soft-button"
-                      onClick={
-                        handleRemoveFile
-                      }
-                    >
-                      Remove File
-                    </button>
-
+                        {remainingCount}
+                      </strong>
+                    </span>
                   </div>
 
-                )}
-
-              </div>
-
-              {/* -------------------------------------------------------
-                  SUBMIT ASSIGNMENT
-              ------------------------------------------------------- */}
-
-              <div className="submit-row">
-
-                <div>
-
-                  {selectedFile ? (
-
-                    <>
-                      <p>
-                        File ready:{" "}
-                        {selectedFile.name}
-                      </p>
-
-                      <p>
-                        Ready to submit
-                      </p>
-                    </>
-
-                  ) : (
-
-                    <>
-                      <p>
-                        No file uploaded yet
-                      </p>
-
-                      <p>
-                        Select a file to submit
-                      </p>
-                    </>
-
-                  )}
-
+                  <button
+                    className="soft-button"
+                    type="button"
+                    onClick={() =>
+                      loadAssignments()
+                    }
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "Loading..."
+                      : "Refresh"}
+                  </button>
                 </div>
 
-                <button
-                  className="primary-button"
-                  type="button"
-                  onClick={
-                    handleSubmitAssignment
-                  }
-                  disabled={
-                    !selectedFile ||
-                    !selectedAssignment ||
-                    !studentId
-                  }
-                >
-                  Submit Assignment
-                </button>
+                {renderAssignmentTable()}
+              </article>
 
+              <div className="tip-box">
+                Tip: Submit your assignments
+                on time to get early feedback
+                and improve your score!
+              </div>
+            </>
+          )}
+
+          {/* 2. SUBMIT ASSIGNMENT */}
+
+          {activeTab ===
+            "submit-assignment" && (
+            <>
+              <article className="module-card assignment-list-card">
+                <div className="card-title-row">
+                  <div>
+                    <h2>
+                      Select Assignment
+                    </h2>
+
+                    <p className="module-subtitle">
+                      Select an assignment
+                      below to submit your
+                      work.
+                    </p>
+                  </div>
+
+                  <button
+                    className="soft-button"
+                    type="button"
+                    onClick={() =>
+                      loadAssignments()
+                    }
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "Loading..."
+                      : "Refresh"}
+                  </button>
+                </div>
+
+                {renderAssignmentTable({
+                  showAction: false,
+                })}
+              </article>
+
+              <div className="assignment-layout">
+                {renderAssignmentDetails()}
               </div>
 
-            </article>
+              <article className="module-card workflow-card">
+                <h2>
+                  Assignment Submission
+                  Workflow
+                </h2>
 
-          </div>
+                <div className="workflow-steps">
+                  <div>
+                    <span>1</span>
+                    <p>
+                      Upload / Type
+                      Assignment
+                    </p>
+                  </div>
 
-          {/* -------------------------------------------------------
-              WORKFLOW
-          ------------------------------------------------------- */}
+                  <div>
+                    <span>2</span>
+                    <p>
+                      Teacher Review &
+                      Feedback
+                    </p>
+                  </div>
 
-          <article className="module-card workflow-card">
+                  <div>
+                    <span>3</span>
+                    <p>
+                      Revise (If Needed)
+                    </p>
+                  </div>
 
-            <h2>
-              Assignment Submission & Feedback
-            </h2>
+                  <div>
+                    <span>4</span>
+                    <p>
+                      Final Submission Done
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </>
+          )}
 
-            <div className="workflow-steps">
+          {/* 3. FEEDBACK & MARKS */}
 
-              <div>
-                <span>
-                  1
-                </span>
-
-                <p>
-                  Upload / Type Assignment
-                </p>
-              </div>
-
-              <div>
-                <span>
-                  2
-                </span>
-
-                <p>
-                  Teacher Review & Feedback
-                </p>
-              </div>
-
-              <div>
-                <span>
-                  3
-                </span>
-
-                <p>
-                  Revise (If Needed)
-                </p>
-              </div>
-
-              <div>
-                <span>
-                  4
-                </span>
-
-                <p>
-                  Final Submission Done
-                </p>
-              </div>
-
-            </div>
-
-          </article>
+          {activeTab ===
+            "feedback-marks" && (
+            <>
+              {renderFeedbackMarks()}
+            </>
+          )}
 
         </div>
-
       </section>
     </DashboardShell>
+  );
+}
+
+export default function AssignmentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardShell>
+          <section className="module-page">
+            <StudyTabs />
+
+            <div className="module-content-area">
+              <article className="module-card">
+                Loading assignments...
+              </article>
+            </div>
+          </section>
+        </DashboardShell>
+      }
+    >
+      <AssignmentsContent />
+    </Suspense>
   );
 }
