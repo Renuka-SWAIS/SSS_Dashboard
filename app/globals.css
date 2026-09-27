@@ -6780,17 +6780,18 @@ button.reset:hover,
   justify-content: center;
   text-align: center;
 }
-
 .overall-score-circle strong {
   font-size: 27px;
   font-weight: 800;
   line-height: 1;
+  color: #111827;
 }
 
 .overall-score-circle span {
   margin-top: 7px;
   font-size: 11px;
-  opacity: 0.65;
+  opacity: 1;
+  color: #4b5563;
 }
 
 /* =========================================================
