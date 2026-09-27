@@ -467,11 +467,35 @@ function StudentAnalysisView({
   );
 }
 
-/* =========================================================
+{/* =========================================================
    TEACHER REMARK
-========================================================= */
+========================================================= */}
+function TeacherRemarkView({ analysis }) {
+  const score =
+    analysis?.overall_score !== null &&
+    analysis?.overall_score !== undefined
+      ? Number(analysis.overall_score)
+      : null;
 
-function TeacherRemarkView() {
+  let remark =
+    "No assessment performance data is available yet.";
+
+  if (score !== null) {
+    if (score >= 90) {
+      remark =
+        "Excellent performance. Keep up the good work and continue challenging yourself.";
+    } else if (score >= 75) {
+      remark =
+        "Good progress. Continue practising concepts and improve your answer explanations.";
+    } else if (score >= 50) {
+      remark =
+        "Satisfactory progress. Focus on strengthening concepts and practise more questions.";
+    } else {
+      remark =
+        "Needs more practice. Focus on understanding the key concepts and review incorrect answers.";
+    }
+  }
+
   return (
     <article className="module-card">
       <div className="card-title-row">
@@ -486,15 +510,12 @@ function TeacherRemarkView() {
         <span>Teacher Remark</span>
 
         <p>
-          Good progress. Continue practising concepts
-          and try to provide more detailed explanations
-          in long-answer questions.
+          {remark}
         </p>
       </div>
     </article>
   );
 }
-
 /* =========================================================
    MOCK TIMER FORMAT
 ========================================================= */
@@ -2773,14 +2794,15 @@ const submission = {
 /> 
 )}
          
-/* =========================================================
-   TEACHER REMARK
-========================================================= */
-
-          {activeOption ===
-            "teacher-remark" && (
-            <TeacherRemarkView />
-          )}
+{/* =========================================================
+    TEACHER REMARK
+========================================================= */}
+{activeOption ===
+  "teacher-remark" && (
+  <TeacherRemarkView
+    analysis={studentAnalysis}
+  />
+)}
 
         </div>
       </section>
