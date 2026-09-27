@@ -1550,7 +1550,25 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
         LEFT JOIN sss_subject_master subject
             ON subject.subject_id = chapter.subject_id
         WHERE profile.student_id = %s
-        ORDER BY chapter.subject_id, profile.chapter_id;
+
+        UNION ALL
+
+        SELECT
+            chapter.subject_id,
+            subject.subject_name,
+            response.score AS quiz_score,
+            NULL::numeric AS comprehension_score
+        FROM sss_quiz_response response
+        JOIN sss_quiz_master quiz
+            ON quiz.quiz_id = response.quiz_id
+        JOIN sss_chapter_master chapter
+            ON chapter.chapter_id = quiz.chapter_id
+        LEFT JOIN sss_subject_master subject
+            ON subject.subject_id = chapter.subject_id
+        WHERE response.student_id = %s
+          AND COALESCE(response.completed_flag, false) = true
+          AND LOWER(COALESCE(response.record_status, 'Active')) = 'active'
+        ORDER BY subject_id;
     """
 
     try:
@@ -1566,7 +1584,7 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
                         detail="Student not found."
                     )
 
-                cursor.execute(performance_query, (student_id,))
+                cursor.execute(performance_query, (student_id, student_id))
                 rows = cursor.fetchall()
 
     except HTTPException:
@@ -1588,15 +1606,17 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
                 "subject_name": row["subject_name"] or "-",
                 "scores": [],
             }
-
         for value in (
             row["quiz_score"],
             row["comprehension_score"],
         ):
-            if isinstance(value, (int, float)):
-                subject_data[subject_id]["scores"].append(
-                    float(value)
-                )
+            if value is not None:
+                try:
+                    subject_data[subject_id]["scores"].append(
+                        float(value)
+                    )
+                except (TypeError, ValueError):
+                    pass
 
     subject_performance = []
 
