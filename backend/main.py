@@ -101,6 +101,7 @@ class QuizGenerationInput(BaseModel):
 
 class QuizEvaluationInput(BaseModel):
     submission_data: dict
+    quiz_id: int | None = Field(default=None, ge=1)
     user_email: str | None = None
 
 
@@ -382,7 +383,6 @@ def generate_quiz(payload: QuizGenerationInput):
             status_code=404,
             detail="No textbook content or PDF is available for this chapter.",
         )
-
     try:
         questions = generate_quiz_with_gemini(
             chapter["chapter_title"],
@@ -394,14 +394,50 @@ def generate_quiz(payload: QuizGenerationInput):
 
     except RuntimeError as error:
         raise HTTPException(
-            status_code=502,
+            status_code=500,
             detail=str(error),
         ) from error
+    
+    try:
+        with get_connection() as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO sss_quiz_master (
+                        chapter_id,
+                        quiz_title,
+                        total_marks,
+                        duration_minutes,
+                        record_status,
+                        version_no
+                    )
+                    VALUES (%s, %s, %s, %s, 'Active', 1)
+                    RETURNING quiz_id;
+                    """,
+                    (
+                        chapter["chapter_id"],
+                        f"Mock Test: {chapter['chapter_title']}",
+                        payload.num_questions,
+                        15,
+                    ),
+                )
+                quiz_row = cursor.fetchone()
+                connection.commit()
+
+    except psycopg.Error as error:
+        print(f"QUIZ MASTER INSERT ERROR: {error}")
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to create quiz record.",
+        ) from error
+
+    quiz_id = quiz_row["quiz_id"]
 
     return {
         "status": "success",
         "topic": chapter["chapter_title"],
         "chapter_id": chapter["chapter_id"],
+        "quiz_id": quiz_id,
         "quiz_data": questions,
     }
 
@@ -452,9 +488,53 @@ def evaluate_quiz(payload: QuizEvaluationInput):
     percentage = round((correct / total) * 100, 2) if total else 0
     report = {"correct_answers": correct, "total_questions": total, "score": correct,
               "percentage": percentage, "feedback": "Excellent work!" if percentage >= 80 else "Review the chapter and try again."}
+    if payload.quiz_id and payload.user_email:
+       
+        try:
+            with get_connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT student_id
+                        FROM sss_student_master
+                        WHERE LOWER(BTRIM(student_email)) = LOWER(BTRIM(%s))
+                        LIMIT 1;
+                        """,
+                        (payload.user_email,),
+                    )
+                    student_row = cursor.fetchone()
+
+                    if student_row:
+                        cursor.execute(
+                            """
+                            INSERT INTO sss_quiz_response (
+                                quiz_id,
+                                student_id,
+                                score,
+                                completed_flag,
+                                record_status,
+                                version_no
+                            )
+                            VALUES (%s, %s, %s, TRUE, 'Active', 1);
+                            """,
+                            (
+                                payload.quiz_id,
+                                student_row[0],
+                                percentage,
+                            ),
+                        )
+                        connection.commit()
+
+        except psycopg.Error as error:
+            print(f"QUIZ RESPONSE INSERT ERROR: {error}")
+            raise HTTPException(
+                status_code=500,
+                detail="Unable to save quiz result.",
+            ) from error
+    
     return {"status": "success", "evaluation_report": report, **report}
 
-# 👇 ADD THIS ENTIRE BLOCK HERE
+
 
 @app.post("/assess/self")
 def self_assessment(payload: SelfAssessmentInput):

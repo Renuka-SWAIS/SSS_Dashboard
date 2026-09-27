@@ -603,6 +603,8 @@ const [mockDifficulty, setMockDifficulty] =
 
 const [mockQuestionCount, setMockQuestionCount] =
   useState(5);
+
+  const [quizId, setQuizId] = useState(null);
   /* =======================================================
      SGS-STYLE MOCK TEST STATE
   ======================================================= */
@@ -1126,6 +1128,7 @@ console.log(
           payload
         );
 
+     setQuizId(response?.quiz_id ?? null);   
       console.log(
         "🔥 MOCK TEST RESPONSE:",
         JSON.stringify(
@@ -1278,15 +1281,17 @@ console.log(
             };
           }
         );
+const submission = {
+  user_email:
+    studentEmail,
 
-      const submission = {
-        user_email:
-          studentEmail,
+  quiz_id:
+    quizId,
 
-        submission_data: {
-          answers,
-        },
-      };
+  submission_data: {
+    answers,
+  },
+};
 
       console.log(
         "🔥 MOCK EVALUATION REQUEST:",
@@ -1536,6 +1541,7 @@ console.log(
 
   function resetMockTest() {
     setMockQuestions([]);
+        setQuizId(null);
 
     setMockAnswers({});
 
