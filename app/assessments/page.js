@@ -86,8 +86,8 @@ function StudentAnalysisView({
             </h2>
 
             <p className="module-subtitle">
-              Academic performance overview
-            </p>
+  Performance insights based on recent results
+</p>
           </div>
 
           <span className="status-pill completed">
@@ -397,68 +397,69 @@ function StudentAnalysisView({
             </p>
           </div>
         </div>
+<div className="focus-area-list">
 
-        <div className="focus-area-list">
+  {subjectPerformance.filter(
+    (subject) =>
+      subject.score !== null &&
+      Number(subject.score) < 75
+  ).length > 0 ? (
 
-          {subjectPerformance.length > 0 ? (
-            subjectPerformance.map(
-              (subject, index) => {
+    subjectPerformance
+      .filter(
+        (subject) =>
+          subject.score !== null &&
+          Number(subject.score) < 75
+      )
+      .map(
+        (subject, index) => {
 
-                const score =
-                  subject.score !== null &&
-                  subject.score !== undefined
-                    ? Number(subject.score)
-                    : null;
+          const score = Number(subject.score);
 
-                let status = "Maintain";
+          let status = "Medium";
 
-                if (score !== null && score < 75) {
-                  status = "Medium";
-                }
+          if (score < 50) {
+            status = "High";
+          }
 
-                return (
-                  <div
-                    className="focus-area-row"
-                    key={
-                      subject.subject_id ??
-                      subject.subject_name ??
-                      index
-                    }
-                  >
-
-                    <div>
-                      <strong>
-                        {subject.subject_name || "-"}
-                      </strong>
-
-                      <span>
-                        {status}
-                      </span>
-                    </div>
-
-                    <strong className="focus-score">
-                      {score !== null
-                        ? `${score}%`
-                        : "-"}
-                    </strong>
-
-                  </div>
-                );
+          return (
+            <div
+              className="focus-area-row"
+              key={
+                subject.subject_id ??
+                subject.subject_name ??
+                index
               }
-            )
-          ) : (
-            <p className="analysis-empty">
-              No focus area data available.
-            </p>
-          )}
+            >
 
-        </div>
+              <div>
+                <strong>
+                  {subject.subject_name || "-"}
+                </strong>
 
-      </article>
+                <span>
+                  {status}
+                </span>
+              </div>
 
-    </div>
-  );
-}
+              <strong className="focus-score">
+                {score}%
+              </strong>
+
+            </div>
+          );
+        }
+      )
+
+  ) : (
+
+    <p className="analysis-empty">
+      No focus areas. Keep up the good performance!
+    </p>
+
+  )}
+
+</div>
 /* =========================================================
    TEACHER REMARK
 ========================================================= */

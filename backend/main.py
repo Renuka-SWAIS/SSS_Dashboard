@@ -1520,7 +1520,6 @@ def get_student_learning_profile(
 
     return {"profile": profile}
 
-
 @app.get("/student-analysis")
 def get_student_analysis(student_id: int = Query(..., ge=1)):
     student_query = """
@@ -1539,35 +1538,63 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
     """
 
     performance_query = """
+        WITH latest_quiz AS (
+            SELECT
+                chapter.subject_id,
+                subject.subject_name,
+                response.score AS quiz_score,
+                ROW_NUMBER() OVER (
+                    PARTITION BY chapter.subject_id
+                    ORDER BY
+                        response.created_datetime DESC NULLS LAST,
+                        response.response_id DESC
+                ) AS rn
+            FROM sss_quiz_response response
+            JOIN sss_quiz_master quiz
+                ON quiz.quiz_id = response.quiz_id
+            JOIN sss_chapter_master chapter
+                ON chapter.chapter_id = quiz.chapter_id
+            LEFT JOIN sss_subject_master subject
+                ON subject.subject_id = chapter.subject_id
+            WHERE response.student_id = %s
+              AND COALESCE(response.completed_flag, false) = true
+              AND LOWER(COALESCE(response.record_status, 'Active')) = 'active'
+        ),
+        profile_scores AS (
+            SELECT
+                chapter.subject_id,
+                subject.subject_name,
+                profile.quiz_score,
+                profile.comprehension_score
+            FROM sss_student_learning_profiles profile
+            JOIN sss_chapter_master chapter
+                ON chapter.chapter_id = profile.chapter_id
+            LEFT JOIN sss_subject_master subject
+                ON subject.subject_id = chapter.subject_id
+            WHERE profile.student_id = %s
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM latest_quiz quiz_result
+                  WHERE quiz_result.subject_id = chapter.subject_id
+              )
+        )
         SELECT
-            chapter.subject_id,
-            subject.subject_name,
-            profile.quiz_score,
-            profile.comprehension_score
-        FROM sss_student_learning_profiles profile
-        JOIN sss_chapter_master chapter
-            ON chapter.chapter_id = profile.chapter_id
-        LEFT JOIN sss_subject_master subject
-            ON subject.subject_id = chapter.subject_id
-        WHERE profile.student_id = %s
+            subject_id,
+            subject_name,
+            quiz_score,
+            NULL::numeric AS comprehension_score
+        FROM latest_quiz
+        WHERE rn = 1
 
         UNION ALL
 
         SELECT
-            chapter.subject_id,
-            subject.subject_name,
-            response.score AS quiz_score,
-            NULL::numeric AS comprehension_score
-        FROM sss_quiz_response response
-        JOIN sss_quiz_master quiz
-            ON quiz.quiz_id = response.quiz_id
-        JOIN sss_chapter_master chapter
-            ON chapter.chapter_id = quiz.chapter_id
-        LEFT JOIN sss_subject_master subject
-            ON subject.subject_id = chapter.subject_id
-        WHERE response.student_id = %s
-          AND COALESCE(response.completed_flag, false) = true
-          AND LOWER(COALESCE(response.record_status, 'Active')) = 'active'
+            subject_id,
+            subject_name,
+            quiz_score,
+            comprehension_score
+        FROM profile_scores
+
         ORDER BY subject_id;
     """
 
@@ -1584,11 +1611,15 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
                         detail="Student not found."
                     )
 
-                cursor.execute(performance_query, (student_id, student_id))
+                cursor.execute(
+                    performance_query,
+                    (student_id, student_id)
+                )
                 rows = cursor.fetchall()
 
     except HTTPException:
         raise
+
     except psycopg.Error as error:
         raise HTTPException(
             status_code=500,
@@ -1606,6 +1637,7 @@ def get_student_analysis(student_id: int = Query(..., ge=1)):
                 "subject_name": row["subject_name"] or "-",
                 "scores": [],
             }
+
         for value in (
             row["quiz_score"],
             row["comprehension_score"],
