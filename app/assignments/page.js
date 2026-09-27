@@ -1032,40 +1032,49 @@ function AssignmentsContent() {
           {activeTab ===
             "submit-assignment" && (
             <>
-              <article className="module-card assignment-list-card">
-                <div className="card-title-row">
-                  <div>
-                    <h2>
-                      Select Assignment
-                    </h2>
+              <div
+                className="assignment-layout"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "minmax(0, 1.35fr) minmax(360px, 0.65fr)",
+                  gap: "20px",
+                  alignItems: "start",
+                }}
+              >
+                <article className="module-card assignment-list-card">
+                  <div className="card-title-row">
+                    <div>
+                      <h2>
+                        Select Assignment
+                      </h2>
 
-                    <p className="module-subtitle">
-                      Select an assignment
-                      below to submit your
-                      work.
-                    </p>
+                      <p className="module-subtitle">
+                        Select an assignment
+                        below to submit your
+                        work.
+                      </p>
+                    </div>
+
+                    <button
+                      className="soft-button"
+                      type="button"
+                      onClick={() =>
+                        loadAssignments()
+                      }
+                      disabled={loading}
+                    >
+                      {loading
+                        ? "Loading..."
+                        : "Refresh"}
+                    </button>
                   </div>
 
-                  <button
-                    className="soft-button"
-                    type="button"
-                    onClick={() =>
-                      loadAssignments()
-                    }
-                    disabled={loading}
-                  >
-                    {loading
-                      ? "Loading..."
-                      : "Refresh"}
-                  </button>
-                </div>
+                  {renderAssignmentTable({
+                    showAction: true,
+                  })}
+                </article>
 
-                {renderAssignmentTable({
-                  showAction: false,
-                })}
-              </article>
-
-              <div className="assignment-layout">
                 {renderAssignmentDetails()}
               </div>
 
