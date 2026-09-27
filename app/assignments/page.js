@@ -635,37 +635,38 @@ function AssignmentsContent() {
   function renderAssignmentDetails() {
     return (
       <article className="module-card assignment-upload-card">
-        <div className="card-title-row">
-          <h2>
-            {selectedAssignment?.assignment_title ||
-              "Select an assignment"}
-          </h2>
+        <div
+  className="card-title-row"
+  style={{
+    alignItems: "flex-start",
+    gap: "12px",
+  }}
+>
+  <h2
+    style={{
+      flex: 1,
+      minWidth: 0,
+      margin: 0,
+    }}
+  >
+    {selectedAssignment.assignment_title}
+  </h2>
 
-          <span
-            className={`status-pill ${getStatusClass(
-              selectedAssignment?.status ||
-                "Not Started"
-            )}`}
-          >
-            {selectedAssignment?.status ||
-              "Not Started"}
-          </span>
-        </div>
-
-        <div className="meta-row">
-          <span>
-            Due Date:{" "}
-            {formatDate(
-              selectedAssignment?.due_date
-            )}
-          </span>
-
-          <span>
-            {selectedAssignment?.subject_name ||
-              selectedAssignment?.chapter_name ||
-              "Assignment"}
-          </span>
-        </div>
+  <span
+    className={`status-pill ${getStatusClass(
+      selectedAssignment.status ||
+        selectedAssignment.submission_status
+    )}`}
+    style={{
+      flexShrink: 0,
+      whiteSpace: "nowrap",
+    }}
+  >
+    {selectedAssignment.status ||
+      selectedAssignment.submission_status ||
+      "Not Started"}
+  </span>
+</div>
 
         <p>
           {selectedAssignment?.assignment_text ||
@@ -1039,7 +1040,7 @@ function AssignmentsContent() {
                   gridTemplateColumns:
                     "minmax(0, 1.35fr) minmax(360px, 0.65fr)",
                   gap: "20px",
-                  alignItems: "start",
+                  alignItems: "stretch",
                 }}
               >
                 <article className="module-card assignment-list-card">
