@@ -25,10 +25,10 @@ const studyTabs = [
     title: "Study B: Assignment",
     href: "/assignments",
     rows: [
-      ["1) My Assignments", "/assignments"],
-      ["2) Submit Assignment", "/assignments"],
-      ["3) Feedback & Marks", "/assignments"],
-    ],
+  ["1) My Assignments", "/assignments?tab=my-assignments"],
+  ["2) Submit Assignment", "/assignments?tab=submit-assignment"],
+  ["3) Feedback & Marks", "/assignments?tab=feedback-marks"],
+],
   },
 
   {
