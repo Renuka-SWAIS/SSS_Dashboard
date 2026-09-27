@@ -585,6 +585,16 @@ const [studentAnalysisError, setStudentAnalysisError] =
           : "mock-test"
     );
 
+
+    useEffect(() => {
+  if (requestedTab === "student-analysis") {
+    setActiveOption("student-analysis");
+  } else if (requestedTab === "teacher-remark") {
+    setActiveOption("teacher-remark");
+  } else {
+    setActiveOption("mock-test");
+  }
+}, [requestedTab]);
   /* =======================================================
      MOCK TEST
   ======================================================= */
