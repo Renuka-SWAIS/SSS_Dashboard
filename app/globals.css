@@ -7098,3 +7098,64 @@ button.reset:hover,
     font-size: 23px;
   }
 }
+
+
+
+:root {
+  --sss-school-sidebar: #11182f;
+  --sss-school-main: #1b1b4b;
+  --sss-school-card: #22224f;
+  --sss-school-card-2: #29295a;
+  --sss-school-border: #34345f;
+  --sss-school-orange: #ff4b00;
+  --sss-school-orange-light: #ff5a14;
+  --sss-school-text: #ffffff;
+  --sss-school-muted: #c7c9dc;
+}
+
+
+
+
+
+body {
+  background: #1b1b4b !important;
+  color: #ffffff !important;
+}
+
+aside {
+  background: #11182f !important;
+}
+
+main {
+  background: #1b1b4b !important;
+}
+
+.module-card,
+.dashboard-card,
+.stat-card {
+  background: #22224f !important;
+  border-color: #34345f !important;
+}
+
+
+
+
+.nav-item.active,
+.sidebar-item.active,
+.study-tab.active,
+button.primary,
+.btn-primary {
+  background: #ff4b00 !important;
+  border-color: #ff4b00 !important;
+  color: #ffffff !important;
+}
+
+.nav-item.active:hover,
+.sidebar-item.active:hover,
+.study-tab.active:hover,
+button.primary:hover,
+.btn-primary:hover {
+  background: #ff5a14 !important;
+  border-color: #ff5a14 !important;
+}
+
