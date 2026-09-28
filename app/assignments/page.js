@@ -221,16 +221,22 @@ function AssignmentsContent() {
           storedEmail
       );
 
-      setSelectedAssignment((current) =>
-        rows.find(
-          (item) =>
-            item.assignment_id ===
-            (preferredId ||
-              current?.assignment_id)
-        ) ||
-        rows[0] ||
-        null
-      );
+      setSelectedAssignment((current) => {
+        const targetId =
+          preferredId ||
+          current?.assignment_id ||
+          null;
+
+        return (
+          rows.find(
+            (item) =>
+              item.assignment_id ===
+              targetId
+          ) ||
+          rows[0] ||
+          null
+        );
+      });
     } catch (error) {
       setAssignments([]);
       setSelectedAssignment(null);
@@ -442,6 +448,10 @@ function AssignmentsContent() {
   async function handleAssignmentAction(
     assignment
   ) {
+    if (!assignment) {
+      return;
+    }
+
     setSelectedAssignment(
       assignment
     );
@@ -528,15 +538,12 @@ function AssignmentsContent() {
           <thead>
             <tr>
               <th>#</th>
-
               <th>
                 Assignment Title
               </th>
-
               <th>
                 Due Date
               </th>
-
               <th>
                 Status
               </th>
@@ -633,54 +640,60 @@ function AssignmentsContent() {
   }
 
   function renderAssignmentDetails() {
+    const assignment =
+      selectedAssignment;
+
     return (
       <article className="module-card assignment-upload-card">
         <div
-  className="card-title-row"
-  style={{
-    alignItems: "flex-start",
-    gap: "12px",
-  }}
->
-  <h2
-    style={{
-      flex: 1,
-      minWidth: 0,
-      margin: 0,
-    }}
-  >
-    {selectedAssignment.assignment_title}
-  </h2>
+          className="card-title-row"
+          style={{
+            alignItems: "flex-start",
+            gap: "12px",
+          }}
+        >
+          <h2
+            style={{
+              flex: 1,
+              minWidth: 0,
+              margin: 0,
+            }}
+          >
+            {assignment?.assignment_title ||
+              "Select an assignment"}
+          </h2>
 
-  <span
-    className={`status-pill ${getStatusClass(
-      selectedAssignment.status ||
-        selectedAssignment.submission_status
-    )}`}
-    style={{
-      flexShrink: 0,
-      whiteSpace: "nowrap",
-    }}
-  >
-    {selectedAssignment.status ||
-      selectedAssignment.submission_status ||
-      "Not Started"}
-  </span>
-</div>
+          {assignment && (
+            <span
+              className={`status-pill ${getStatusClass(
+                assignment.status ||
+                  assignment.submission_status
+              )}`}
+              style={{
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {assignment.status ||
+                assignment.submission_status ||
+                "Not Started"}
+            </span>
+          )}
+        </div>
 
         <p>
-          {selectedAssignment?.assignment_text ||
+          {assignment?.assignment_text ||
             "Select an assignment to view its instructions."}
         </p>
 
-        {showAiSummary && (
+        {showAiSummary && assignment && (
           <div className="assignment-ai-summary">
             <strong>
               AI Summary
             </strong>
 
             <p>
-              {selectedAssignment?.assignment_text ||
+              {assignment.assignment_text ||
                 "Read the assignment instructions carefully and submit before the due date."}
             </p>
 
@@ -721,9 +734,7 @@ function AssignmentsContent() {
             onChange={
               handleFileChange
             }
-            disabled={
-              !selectedAssignment
-            }
+            disabled={!assignment}
             style={{
               display: "none",
             }}
@@ -735,14 +746,12 @@ function AssignmentsContent() {
             style={{
               cursor: "pointer",
               display: "inline-block",
-              opacity:
-                selectedAssignment
-                  ? 1
-                  : 0.55,
-              pointerEvents:
-                selectedAssignment
-                  ? "auto"
-                  : "none",
+              opacity: assignment
+                ? 1
+                : 0.55,
+              pointerEvents: assignment
+                ? "auto"
+                : "none",
             }}
           >
             Browse Files
@@ -824,7 +833,7 @@ function AssignmentsContent() {
             }
             disabled={
               !selectedFile ||
-              !selectedAssignment ||
+              !assignment ||
               !studentId
             }
           >
