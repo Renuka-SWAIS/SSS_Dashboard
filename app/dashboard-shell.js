@@ -156,6 +156,16 @@ export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const student = useCurrentStudent();
 
+  useEffect(() => {
+    const storedSession =
+      window.sessionStorage.getItem('sssUserSession') ||
+      window.localStorage.getItem('sssUserSession');
+
+    if (!storedSession) {
+      window.location.href = loginServiceUrl;
+    }
+  }, []);
+
   function isActive(href) {
     if (href === '/') {
       return pathname === '/';
